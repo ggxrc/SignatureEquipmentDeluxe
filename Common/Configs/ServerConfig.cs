@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Terraria.ModLoader.Config;
 using SignatureEquipmentDeluxe.Common.Systems;
+using Newtonsoft.Json;
 
 namespace SignatureEquipmentDeluxe.Common.Configs
 {
@@ -10,63 +11,22 @@ namespace SignatureEquipmentDeluxe.Common.Configs
     {
         public override ConfigScope Mode => ConfigScope.ServerSide;
 
-        // ==================== EXPERIÊNCIA ====================
+        // ==================== EXPERIÊNCIA GERAL ====================
         
-        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.ExperienceHeader")]
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.GeneralExperienceHeader")]
         
         [BackgroundColor(50, 50, 60)]
         [DefaultValue(1f)]
-        [Range(0f, 10f)]
-        [Increment(0.1f)]
         public float GlobalExpMultiplier { get; set; }
         
         [BackgroundColor(50, 50, 60)]
-        [DefaultValue(5f)]
-        [Range(0f, 1000f)]
-        [Increment(1f)]
-        public float BaseXPPerHit { get; set; }
-        
-        [BackgroundColor(50, 50, 60)]
-        [DefaultValue(50f)]
-        [Range(0f, 10000f)]
-        [Increment(10f)]
-        public float BaseXPPerKill { get; set; }
-        
-        [BackgroundColor(50, 50, 60)]
-        [DefaultValue(0.01f)]
-        [Range(0f, 1f)]
-        [Increment(0.001f)]
-        public float XPPerDamageDealt { get; set; }
-        
-        [BackgroundColor(50, 50, 60)]
-        [DefaultValue(0.1f)]
-        [Range(0f, 1f)]
-        [Increment(0.01f)]
-        public float XPPerEnemyMaxHP { get; set; }
+        [DefaultValue(100)]
+        public int BaseExpPerLevel { get; set; }
 
         [BackgroundColor(50, 50, 60)]
-        [DefaultValue(1f)]
-        [Range(0f, 10f)]
-        [Increment(0.1f)]
-        public float WeaponExpMultiplier { get; set; }
-
-        [BackgroundColor(50, 50, 60)]
-        [DefaultValue(1f)]
-        [Range(0f, 10f)]
-        [Increment(0.1f)]
-        public float ArmorExpMultiplier { get; set; }
-
-        [BackgroundColor(50, 50, 60)]
-        [DefaultValue(1f)]
-        [Range(0f, 10f)]
-        [Increment(0.1f)]
-        public float AccessoryExpMultiplier { get; set; }
-
-        [BackgroundColor(50, 50, 60)]
-        [DefaultValue(1f)]
-        [Range(0f, 10f)]
-        [Increment(0.1f)]
-        public float BossExpMultiplier { get; set; }
+        [DefaultValue(1.1f)]
+        [Increment(0.05f)]
+        public float ExpScalingFactor { get; set; }
         
         [BackgroundColor(50, 50, 60)]
         [DefaultValue(false)]
@@ -74,36 +34,103 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         
         [BackgroundColor(50, 50, 60)]
         [DefaultValue(1f)]
-        [Range(0f, 10f)]
-        [Increment(0.1f)]
-        public float ArmorXPPerDamageReceived { get; set; }
+        public float BossExpMultiplier { get; set; }
         
-        [BackgroundColor(50, 50, 60)]
-        [DefaultValue(false)]
-        public bool ArmorXPIgnoreDefense { get; set; }
-
-        [BackgroundColor(50, 50, 60)]
-        [DefaultValue(100)]
-        [Range(1, 10000)]
-        public int BaseExpPerLevel { get; set; }
-
-        [BackgroundColor(50, 50, 60)]
-        [DefaultValue(1.1f)]
-        [Range(1f, 3f)]
-        [Increment(0.05f)]
-        public float ExpScalingFactor { get; set; }
-
-        // ==================== DAMAGE STATS ====================
+        // ==================== EXPERIÊNCIA - ARMAS ====================
         
-        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.DamageStatsHeader")]
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.WeaponExperienceHeader")]
         
         [BackgroundColor(60, 40, 40)]
-        public ItemStatInt Damage { get; set; } = new ItemStatInt
+        [DefaultValue(1f)]
+        public float WeaponExpMultiplier { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(5f)]
+        public float WeaponBaseXPPerHit { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(50f)]
+        public float WeaponBaseXPPerKill { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(0.01f)]
+        public float WeaponXPPerDamageDealt { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(0.1f)]
+        public float WeaponXPPerEnemyMaxHP { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(0)]
+        public int WeaponMaxLevel { get; set; }
+
+        // ==================== EXPERIÊNCIA - ARMADURAS ====================
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.ArmorExperienceHeader")]
+        
+        [BackgroundColor(40, 40, 60)]
+        [DefaultValue(1f)]
+        public float ArmorExpMultiplier { get; set; }
+        
+        [BackgroundColor(40, 40, 60)]
+        [DefaultValue(1f)]
+        public float ArmorXPPerDamageReceived { get; set; }
+        
+        [BackgroundColor(40, 40, 60)]
+        [DefaultValue(false)]
+        public bool ArmorXPIgnoreDefense { get; set; }
+        
+        [BackgroundColor(40, 40, 60)]
+        [DefaultValue(0.5f)]
+        public float ArmorXPPerDamageBlocked { get; set; }
+        
+        [BackgroundColor(40, 40, 60)]
+        [DefaultValue(10f)]
+        public float ArmorXPPerDodge { get; set; }
+        
+        [BackgroundColor(40, 40, 60)]
+        [DefaultValue(0)]
+        public int ArmorMaxLevel { get; set; }
+
+        // ==================== EXPERIÊNCIA - ACESSÓRIOS ====================
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.AccessoryExperienceHeader")]
+        
+        [BackgroundColor(40, 60, 40)]
+        [DefaultValue(1f)]
+        public float AccessoryExpMultiplier { get; set; }
+        
+        [BackgroundColor(40, 60, 40)]
+        [DefaultValue(0.1f)]
+        public float AccessoryXPPerSecondEquipped { get; set; }
+        
+        [BackgroundColor(40, 60, 40)]
+        [DefaultValue(2f)]
+        public float AccessoryXPPerHit { get; set; }
+        
+        [BackgroundColor(40, 60, 40)]
+        [DefaultValue(5f)]
+        public float AccessoryXPPerKill { get; set; }
+        
+        [BackgroundColor(40, 60, 40)]
+        [DefaultValue(1f)]
+        public float AccessoryXPPerDamageTaken { get; set; }
+        
+        [BackgroundColor(40, 60, 40)]
+        [DefaultValue(0)]
+        public int AccessoryMaxLevel { get; set; }
+
+        // ==================== STATS - ARMAS ====================
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.WeaponStatsHeader")]
+        
+        [BackgroundColor(60, 40, 40)]
+        public ItemStatInt WeaponDamage { get; set; } = new ItemStatInt
         {
             ScalingMode = ScalingMode.Legacy,
             PerLevel = 1,
             PerLevelMult = 1,
-            Max = 999999,
+            Max = 0,
             ScalingTiers = new List<ScalingTier>
             {
                 new ScalingTier { StartLevel = 1, PerLevel = 1f, PerLevelMult = 1 },
@@ -113,138 +140,160 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         };
 
         [BackgroundColor(60, 40, 40)]
-        public ItemStatInt CritChance { get; set; } = new ItemStatInt
+        public ItemStatInt WeaponCritChance { get; set; } = new ItemStatInt
         {
             ScalingMode = ScalingMode.Legacy,
             PerLevel = 0,
             PerLevelMult = 1,
-            Max = 100,
+            Max = 0,
+            ScalingTiers = new List<ScalingTier>()
+        };
+        
+        [BackgroundColor(60, 40, 40)]
+        public ItemStatFloat WeaponUseSpeed { get; set; } = new ItemStatFloat
+        {
+            ScalingMode = ScalingMode.Legacy,
+            PerLevel = 0f,
+            PerLevelMult = 1,
+            Max = 0,
             ScalingTiers = new List<ScalingTier>()
         };
 
         [BackgroundColor(60, 40, 40)]
-        public ItemStatInt Defense { get; set; } = new ItemStatInt
+        public ItemStatFloat WeaponMeleeSpeed { get; set; } = new ItemStatFloat
+        {
+            ScalingMode = ScalingMode.Legacy,
+            PerLevel = 0f,
+            PerLevelMult = 1,
+            Max = 0,
+            ScalingTiers = new List<ScalingTier>()
+        };
+
+        [BackgroundColor(60, 40, 40)]
+        public ItemStatFloat WeaponMeleeSize { get; set; } = new ItemStatFloat
+        {
+            ScalingMode = ScalingMode.Legacy,
+            PerLevel = 0f,
+            PerLevelMult = 1,
+            Max = 0,
+            ScalingTiers = new List<ScalingTier>()
+        };
+
+        [BackgroundColor(60, 40, 40)]
+        public ProjectileStatFloat WeaponProjectileSize { get; set; } = new ProjectileStatFloat
+        {
+            ScalingMode = ScalingMode.Legacy,
+            PerLevel = 0f,
+            PerLevelMult = 1,
+            Max = 0,
+            ScalingTiers = new List<ScalingTier>()
+        };
+
+        [BackgroundColor(60, 40, 40)]
+        public ProjectileStatFloat WeaponProjectileSpeed { get; set; } = new ProjectileStatFloat
+        {
+            ScalingMode = ScalingMode.Legacy,
+            PerLevel = 0f,
+            PerLevelMult = 1,
+            Max = 0,
+            ScalingTiers = new List<ScalingTier>()
+        };
+
+        [BackgroundColor(60, 40, 40)]
+        public ProjectileStatFloat WeaponProjectileLifeTime { get; set; } = new ProjectileStatFloat
+        {
+            ScalingMode = ScalingMode.Legacy,
+            PerLevel = 0f,
+            PerLevelMult = 1,
+            Max = 0,
+            ScalingTiers = new List<ScalingTier>()
+        };
+
+        [BackgroundColor(60, 40, 40)]
+        public ProjectileStatFloat WeaponProjectilePenetration { get; set; } = new ProjectileStatFloat
+        {
+            ScalingMode = ScalingMode.Legacy,
+            PerLevel = 0f,
+            PerLevelMult = 1,
+            Max = 0,
+            ScalingTiers = new List<ScalingTier>()
+        };
+        
+        [BackgroundColor(60, 40, 40)]
+        public ItemStatFloat WeaponManaCostReduction { get; set; } = new ItemStatFloat
+        {
+            ScalingMode = ScalingMode.Legacy,
+            PerLevel = 0f,
+            PerLevelMult = 1,
+            Max = 0,
+            ScalingTiers = new List<ScalingTier>()
+        };
+
+        [BackgroundColor(60, 40, 40)]
+        public ItemStatFloat WeaponAmmoConsumptionReduction { get; set; } = new ItemStatFloat
+        {
+            ScalingMode = ScalingMode.Legacy,
+            PerLevel = 0f,
+            PerLevelMult = 1,
+            Max = 0,
+            ScalingTiers = new List<ScalingTier>()
+        };
+
+        // ==================== STATS - ARMADURAS ====================
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.ArmorStatsHeader")]
+        
+        [BackgroundColor(40, 40, 60)]
+        public ItemStatInt ArmorDefense { get; set; } = new ItemStatInt
         {
             ScalingMode = ScalingMode.Legacy,
             PerLevel = 0,
             PerLevelMult = 1,
-            Max = 999999,
+            Max = 0,
             ScalingTiers = new List<ScalingTier>()
         };
 
-        // ==================== SPEED STATS ====================
+        // ==================== STATS - ACESSÓRIOS ====================
         
-        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.SpeedStatsHeader")]
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.AccessoryStatsHeader")]
         
         [BackgroundColor(40, 60, 40)]
-        public ItemStatFloat UseSpeed { get; set; } = new ItemStatFloat
+        public ItemStatInt AccessoryDamage { get; set; } = new ItemStatInt
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
+            PerLevel = 0,
             PerLevelMult = 1,
-            Max = 100,
+            Max = 0,
+            ScalingTiers = new List<ScalingTier>()
+        };
+        
+        [BackgroundColor(40, 60, 40)]
+        public ItemStatInt AccessoryDefense { get; set; } = new ItemStatInt
+        {
+            ScalingMode = ScalingMode.Legacy,
+            PerLevel = 0,
+            PerLevelMult = 1,
+            Max = 0,
+            ScalingTiers = new List<ScalingTier>()
+        };
+        
+        [BackgroundColor(40, 60, 40)]
+        public ItemStatInt AccessoryCritChance { get; set; } = new ItemStatInt
+        {
+            ScalingMode = ScalingMode.Legacy,
+            PerLevel = 0,
+            PerLevelMult = 1,
+            Max = 0,
             ScalingTiers = new List<ScalingTier>()
         };
 
         [BackgroundColor(40, 60, 40)]
-        public ItemStatFloat MeleeSpeed { get; set; } = new ItemStatFloat
+        public ItemStatFloat AccessoryMinionSlotReduction { get; set; } = new ItemStatFloat
         {
             ScalingMode = ScalingMode.Legacy,
             PerLevel = 0f,
             PerLevelMult = 1,
-            Max = 100,
-            ScalingTiers = new List<ScalingTier>()
-        };
-
-        // ==================== SIZE STATS ====================
-        
-        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.SizeStatsHeader")]
-        
-        [BackgroundColor(40, 40, 60)]
-        public ItemStatFloat MeleeSize { get; set; } = new ItemStatFloat
-        {
-            ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
-            PerLevelMult = 1,
-            Max = 300,
-            ScalingTiers = new List<ScalingTier>()
-        };
-
-        [BackgroundColor(40, 40, 60)]
-        public ProjectileStatFloat ProjectileSize { get; set; } = new ProjectileStatFloat
-        {
-            ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
-            PerLevelMult = 1,
-            Max = 300,
-            ScalingTiers = new List<ScalingTier>()
-        };
-
-        // ==================== PROJECTILE STATS ====================
-        
-        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.ProjectileStatsHeader")]
-        
-        [BackgroundColor(60, 40, 60)]
-        public ProjectileStatFloat ProjectileSpeed { get; set; } = new ProjectileStatFloat
-        {
-            ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
-            PerLevelMult = 1,
-            Max = 300,
-            ScalingTiers = new List<ScalingTier>()
-        };
-
-        [BackgroundColor(60, 40, 60)]
-        public ProjectileStatFloat ProjectileLifeTime { get; set; } = new ProjectileStatFloat
-        {
-            ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
-            PerLevelMult = 1,
-            Max = 500,
-            ScalingTiers = new List<ScalingTier>()
-        };
-
-        [BackgroundColor(60, 40, 60)]
-        public ProjectileStatFloat ProjectilePenetration { get; set; } = new ProjectileStatFloat
-        {
-            ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
-            PerLevelMult = 1,
-            Max = 100,
-            ScalingTiers = new List<ScalingTier>()
-        };
-
-        // ==================== UTILITY STATS ====================
-        
-        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.UtilityStatsHeader")]
-        
-        [BackgroundColor(40, 60, 60)]
-        public ItemStatFloat ManaCostReduction { get; set; } = new ItemStatFloat
-        {
-            ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
-            PerLevelMult = 1,
-            Max = 99,
-            ScalingTiers = new List<ScalingTier>()
-        };
-
-        [BackgroundColor(40, 60, 60)]
-        public ItemStatFloat AmmoConsumptionReduction { get; set; } = new ItemStatFloat
-        {
-            ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
-            PerLevelMult = 1,
-            Max = 99,
-            ScalingTiers = new List<ScalingTier>()
-        };
-
-        [BackgroundColor(40, 60, 60)]
-        public ItemStatFloat MinionSlotReduction { get; set; } = new ItemStatFloat
-        {
-            ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
-            PerLevelMult = 1,
-            Max = 95,
+            Max = 0,
             ScalingTiers = new List<ScalingTier>()
         };
 
@@ -288,16 +337,155 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         [DefaultValue(false)]
         public bool DebugMode { get; set; }
         
-        // ==================== LEVEL LIMITS ====================
+        // ==================== LEVEL LIMITS (INDIVIDUAL) ====================
         
-        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.LevelLimitsHeader")]
-        
-        [BackgroundColor(50, 60, 50)]
-        [DefaultValue(0)]
-        [Range(0, 9999)]
-        public int GlobalMaxLevel { get; set; }
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.IndividualLevelLimitsHeader")]
         
         [BackgroundColor(50, 60, 50)]
         public Dictionary<ItemDefinition, int> IndividualMaxLevel { get; set; } = new Dictionary<ItemDefinition, int>();
+        
+        // ==================== COMPATIBILIDADE (LEGACY) ====================
+        // Properties antigas mantidas apenas para compatibilidade de código
+        // [JsonIgnore] esconde da UI de configuração
+        
+        [JsonIgnore]
+        public float BaseXPPerHit
+        {
+            get => WeaponBaseXPPerHit;
+            set => WeaponBaseXPPerHit = value;
+        }
+        
+        [JsonIgnore]
+        public float BaseXPPerKill
+        {
+            get => WeaponBaseXPPerKill;
+            set => WeaponBaseXPPerKill = value;
+        }
+        
+        [JsonIgnore]
+        public float XPPerDamageDealt
+        {
+            get => WeaponXPPerDamageDealt;
+            set => WeaponXPPerDamageDealt = value;
+        }
+        
+        [JsonIgnore]
+        public float XPPerEnemyMaxHP
+        {
+            get => WeaponXPPerEnemyMaxHP;
+            set => WeaponXPPerEnemyMaxHP = value;
+        }
+        
+        [JsonIgnore]
+        public int GlobalMaxLevel
+        {
+            get
+            {
+                // Retorna o menor max level não-zero, ou 0 se todos forem 0
+                int min = int.MaxValue;
+                if (WeaponMaxLevel > 0 && WeaponMaxLevel < min) min = WeaponMaxLevel;
+                if (ArmorMaxLevel > 0 && ArmorMaxLevel < min) min = ArmorMaxLevel;
+                if (AccessoryMaxLevel > 0 && AccessoryMaxLevel < min) min = AccessoryMaxLevel;
+                return min == int.MaxValue ? 0 : min;
+            }
+            set
+            {
+                // Aplica o mesmo valor para todos
+                WeaponMaxLevel = value;
+                ArmorMaxLevel = value;
+                AccessoryMaxLevel = value;
+            }
+        }
+        
+        [JsonIgnore]
+        public ItemStatInt Damage
+        {
+            get => WeaponDamage;
+            set => WeaponDamage = value;
+        }
+        
+        [JsonIgnore]
+        public ItemStatInt CritChance
+        {
+            get => WeaponCritChance;
+            set => WeaponCritChance = value;
+        }
+        
+        [JsonIgnore]
+        public ItemStatInt Defense
+        {
+            get => ArmorDefense;
+            set => ArmorDefense = value;
+        }
+        
+        [JsonIgnore]
+        public ItemStatFloat UseSpeed
+        {
+            get => WeaponUseSpeed;
+            set => WeaponUseSpeed = value;
+        }
+        
+        [JsonIgnore]
+        public ItemStatFloat MeleeSpeed
+        {
+            get => WeaponMeleeSpeed;
+            set => WeaponMeleeSpeed = value;
+        }
+        
+        [JsonIgnore]
+        public ItemStatFloat MeleeSize
+        {
+            get => WeaponMeleeSize;
+            set => WeaponMeleeSize = value;
+        }
+        
+        [JsonIgnore]
+        public ProjectileStatFloat ProjectileSize
+        {
+            get => WeaponProjectileSize;
+            set => WeaponProjectileSize = value;
+        }
+        
+        [JsonIgnore]
+        public ProjectileStatFloat ProjectileSpeed
+        {
+            get => WeaponProjectileSpeed;
+            set => WeaponProjectileSpeed = value;
+        }
+        
+        [JsonIgnore]
+        public ProjectileStatFloat ProjectileLifeTime
+        {
+            get => WeaponProjectileLifeTime;
+            set => WeaponProjectileLifeTime = value;
+        }
+        
+        [JsonIgnore]
+        public ProjectileStatFloat ProjectilePenetration
+        {
+            get => WeaponProjectilePenetration;
+            set => WeaponProjectilePenetration = value;
+        }
+        
+        [JsonIgnore]
+        public ItemStatFloat ManaCostReduction
+        {
+            get => WeaponManaCostReduction;
+            set => WeaponManaCostReduction = value;
+        }
+        
+        [JsonIgnore]
+        public ItemStatFloat AmmoConsumptionReduction
+        {
+            get => WeaponAmmoConsumptionReduction;
+            set => WeaponAmmoConsumptionReduction = value;
+        }
+        
+        [JsonIgnore]
+        public ItemStatFloat MinionSlotReduction
+        {
+            get => AccessoryMinionSlotReduction;
+            set => AccessoryMinionSlotReduction = value;
+        }
     }
 }

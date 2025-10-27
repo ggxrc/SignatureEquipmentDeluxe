@@ -255,6 +255,14 @@ Config: {
 		}
 
 		// LevelLimitsHeader: Global Max Level Header
+		// GeneralExperienceHeader: Global Exp Multiplier Header
+		// WeaponExperienceHeader: Weapon Exp Multiplier Header
+		// ArmorExperienceHeader: Armor Exp Multiplier Header
+		// AccessoryExperienceHeader: Accessory Exp Multiplier Header
+		// WeaponStatsHeader: Weapon Damage Header
+		// ArmorStatsHeader: Armor Defense Header
+		// AccessoryStatsHeader: Accessory Damage Header
+		// IndividualLevelLimitsHeader: Individual Max Level Header
 	}
 
 	ClientConfig: {
@@ -823,6 +831,166 @@ Configs: {
 
 		IndividualMaxLevel: {
 			// Label: Individual Max Level
+			// Tooltip: ""
+		}
+
+		AllowStatueXP: {
+			// Label: Allow Statue X P
+			// Tooltip: ""
+		}
+
+		ArmorXPPerDamageReceived: {
+			// Label: Armor X P Per Damage Received
+			// Tooltip: ""
+		}
+
+		ArmorXPIgnoreDefense: {
+			// Label: Armor X P Ignore Defense
+			// Tooltip: ""
+		}
+
+		WeaponBaseXPPerHit: {
+			// Label: Weapon Base X P Per Hit
+			// Tooltip: ""
+		}
+
+		WeaponBaseXPPerKill: {
+			// Label: Weapon Base X P Per Kill
+			// Tooltip: ""
+		}
+
+		WeaponXPPerDamageDealt: {
+			// Label: Weapon X P Per Damage Dealt
+			// Tooltip: ""
+		}
+
+		WeaponXPPerEnemyMaxHP: {
+			// Label: Weapon X P Per Enemy Max H P
+			// Tooltip: ""
+		}
+
+		WeaponMaxLevel: {
+			// Label: Weapon Max Level
+			// Tooltip: ""
+		}
+
+		ArmorXPPerDamageBlocked: {
+			// Label: Armor X P Per Damage Blocked
+			// Tooltip: ""
+		}
+
+		ArmorXPPerDodge: {
+			// Label: Armor X P Per Dodge
+			// Tooltip: ""
+		}
+
+		ArmorMaxLevel: {
+			// Label: Armor Max Level
+			// Tooltip: ""
+		}
+
+		AccessoryXPPerSecondEquipped: {
+			// Label: Accessory X P Per Second Equipped
+			// Tooltip: ""
+		}
+
+		AccessoryXPPerHit: {
+			// Label: Accessory X P Per Hit
+			// Tooltip: ""
+		}
+
+		AccessoryXPPerKill: {
+			// Label: Accessory X P Per Kill
+			// Tooltip: ""
+		}
+
+		AccessoryXPPerDamageTaken: {
+			// Label: Accessory X P Per Damage Taken
+			// Tooltip: ""
+		}
+
+		AccessoryMaxLevel: {
+			// Label: Accessory Max Level
+			// Tooltip: ""
+		}
+
+		WeaponDamage: {
+			// Label: Weapon Damage
+			// Tooltip: ""
+		}
+
+		WeaponCritChance: {
+			// Label: Weapon Crit Chance
+			// Tooltip: ""
+		}
+
+		WeaponUseSpeed: {
+			// Label: Weapon Use Speed
+			// Tooltip: ""
+		}
+
+		WeaponMeleeSpeed: {
+			// Label: Weapon Melee Speed
+			// Tooltip: ""
+		}
+
+		WeaponMeleeSize: {
+			// Label: Weapon Melee Size
+			// Tooltip: ""
+		}
+
+		WeaponProjectileSize: {
+			// Label: Weapon Projectile Size
+			// Tooltip: ""
+		}
+
+		WeaponProjectileSpeed: {
+			// Label: Weapon Projectile Speed
+			// Tooltip: ""
+		}
+
+		WeaponProjectileLifeTime: {
+			// Label: Weapon Projectile Life Time
+			// Tooltip: ""
+		}
+
+		WeaponProjectilePenetration: {
+			// Label: Weapon Projectile Penetration
+			// Tooltip: ""
+		}
+
+		WeaponManaCostReduction: {
+			// Label: Weapon Mana Cost Reduction
+			// Tooltip: ""
+		}
+
+		WeaponAmmoConsumptionReduction: {
+			// Label: Weapon Ammo Consumption Reduction
+			// Tooltip: ""
+		}
+
+		ArmorDefense: {
+			// Label: Armor Defense
+			// Tooltip: ""
+		}
+
+		AccessoryDamage: {
+			// Label: Accessory Damage
+			// Tooltip: ""
+		}
+
+		AccessoryDefense: {
+			// Label: Accessory Defense
+			// Tooltip: ""
+		}
+
+		AccessoryCritChance: {
+			// Label: Accessory Crit Chance
+			// Tooltip: ""
+		}
+
+		AccessoryMinionSlotReduction: {
+			// Label: Accessory Minion Slot Reduction
 			// Tooltip: ""
 		}
 	}
