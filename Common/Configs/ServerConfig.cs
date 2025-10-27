@@ -11,53 +11,188 @@ namespace SignatureEquipmentDeluxe.Common.Configs
     {
         public override ConfigScope Mode => ConfigScope.ServerSide;
 
+        // ==================== EVENTOS (MULTIPLICADORES DE XP) ====================
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.EventPenaltyHeader")]
+        
+        [BackgroundColor(90, 40, 40)]
+        [DefaultValue(true)]
+        public bool EnableBossPenalty { get; set; } = true;
+        
+        [BackgroundColor(90, 40, 40)]
+        [DefaultValue(true)]
+        public bool EnableInvasionPenalty { get; set; } = true;
+        
+        [BackgroundColor(90, 40, 40)]
+        [DefaultValue(false)]
+        public bool EnableMoonPenalty { get; set; } = false;
+        
+        [BackgroundColor(90, 40, 40)]
+        [DefaultValue(false)]
+        public bool EnableWeatherPenalty { get; set; } = false;
+        
+        [BackgroundColor(90, 40, 40)]
+        [DefaultValue(false)]
+        public bool EnableTimePenalty { get; set; } = false;
+        
+        [BackgroundColor(90, 40, 40)]
+        [DefaultValue(false)]
+        public bool EnableSpecialPenalty { get; set; } = false;
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.BossEventsPreHardmodeHeader")]
+        
+        [BackgroundColor(80, 40, 40)]
+        public List<EventMultiplier> BossEventsPreHardmode { get; set; } = new List<EventMultiplier>
+        {
+            new EventMultiplier { EventType = GameEventType.KingSlime, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.Medium },
+            new EventMultiplier { EventType = GameEventType.EyeOfCthulhu, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.Medium },
+            new EventMultiplier { EventType = GameEventType.EaterOfWorlds, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.High },
+            new EventMultiplier { EventType = GameEventType.BrainOfCthulhu, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.High },
+            new EventMultiplier { EventType = GameEventType.QueenBee, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.High },
+            new EventMultiplier { EventType = GameEventType.Skeletron, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.High },
+            new EventMultiplier { EventType = GameEventType.Deerclops, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.High },
+            new EventMultiplier { EventType = GameEventType.WallOfFlesh, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.VeryHigh }
+        };
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.BossEventsHardmodeHeader")]
+        
+        [BackgroundColor(100, 40, 40)]
+        public List<EventMultiplier> BossEventsHardmode { get; set; } = new List<EventMultiplier>
+        {
+            new EventMultiplier { EventType = GameEventType.QueenSlime, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.High },
+            new EventMultiplier { EventType = GameEventType.TheTwins, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
+            new EventMultiplier { EventType = GameEventType.TheDestroyer, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
+            new EventMultiplier { EventType = GameEventType.SkeletronPrime, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
+            new EventMultiplier { EventType = GameEventType.Plantera, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
+            new EventMultiplier { EventType = GameEventType.Golem, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
+            new EventMultiplier { EventType = GameEventType.EmpressOfLight, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.Extreme },
+            new EventMultiplier { EventType = GameEventType.DukeFishron, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.Extreme },
+            new EventMultiplier { EventType = GameEventType.LunaticCultist, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
+            new EventMultiplier { EventType = GameEventType.MoonLord, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.Extreme }
+        };
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.MoonEventsHeader")]
+        
+        [BackgroundColor(60, 60, 80)]
+        public List<EventMultiplier> MoonEvents { get; set; } = new List<EventMultiplier>
+        {
+            new EventMultiplier { EventType = GameEventType.BloodMoon, Category = EventCategory.Moon, Enabled = true, Tier = XPMultiplierTier.Medium },
+            new EventMultiplier { EventType = GameEventType.FullMoon, Category = EventCategory.Moon, Enabled = true, Tier = XPMultiplierTier.Low },
+            new EventMultiplier { EventType = GameEventType.NewMoon, Category = EventCategory.Moon, Enabled = false, Tier = XPMultiplierTier.None }
+        };
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.InvasionEventsHeader")]
+        
+        [BackgroundColor(80, 40, 60)]
+        public List<EventMultiplier> InvasionEvents { get; set; } = new List<EventMultiplier>
+        {
+            new EventMultiplier { EventType = GameEventType.GoblinArmy, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.Medium },
+            new EventMultiplier { EventType = GameEventType.FrostLegion, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.Medium },
+            new EventMultiplier { EventType = GameEventType.PirateInvasion, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.High },
+            new EventMultiplier { EventType = GameEventType.MartianMadness, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.High },
+            new EventMultiplier { EventType = GameEventType.PumpkinMoon, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
+            new EventMultiplier { EventType = GameEventType.FrostMoon, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
+            new EventMultiplier { EventType = GameEventType.SolarEclipse, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.High },
+            new EventMultiplier { EventType = GameEventType.LunarEvent, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.Extreme }
+        };
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.TimeEventsHeader")]
+        
+        [BackgroundColor(60, 60, 60)]
+        public List<EventMultiplier> TimeEvents { get; set; } = new List<EventMultiplier>
+        {
+            new EventMultiplier { EventType = GameEventType.Day, Category = EventCategory.Time, Enabled = false, Tier = XPMultiplierTier.None },
+            new EventMultiplier { EventType = GameEventType.Night, Category = EventCategory.Time, Enabled = true, Tier = XPMultiplierTier.Low }
+        };
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.WeatherEventsHeader")]
+        
+        [BackgroundColor(40, 70, 90)]
+        public List<EventMultiplier> WeatherEvents { get; set; } = new List<EventMultiplier>
+        {
+            new EventMultiplier { EventType = GameEventType.Rain, Category = EventCategory.Weather, Enabled = true, Tier = XPMultiplierTier.Low },
+            new EventMultiplier { EventType = GameEventType.Sandstorm, Category = EventCategory.Weather, Enabled = true, Tier = XPMultiplierTier.Low },
+            new EventMultiplier { EventType = GameEventType.Blizzard, Category = EventCategory.Weather, Enabled = true, Tier = XPMultiplierTier.Low }
+        };
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.SpecialEventsHeader")]
+        
+        [BackgroundColor(70, 50, 70)]
+        public List<EventMultiplier> SpecialEvents { get; set; } = new List<EventMultiplier>
+        {
+            new EventMultiplier { EventType = GameEventType.PartyEvent, Category = EventCategory.Special, Enabled = true, Tier = XPMultiplierTier.Medium },
+            new EventMultiplier { EventType = GameEventType.LanternNight, Category = EventCategory.Special, Enabled = true, Tier = XPMultiplierTier.Medium }
+        };
+        
         // ==================== EXPERIÊNCIA GERAL ====================
         
         [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.GeneralExperienceHeader")]
         
         [BackgroundColor(50, 50, 60)]
+        [Range(0f, 2.5f)]
         [DefaultValue(1f)]
+        [Increment(0.1f)]
         public float GlobalExpMultiplier { get; set; }
         
         [BackgroundColor(50, 50, 60)]
-        [DefaultValue(100)]
-        public int BaseExpPerLevel { get; set; }
-
-        [BackgroundColor(50, 50, 60)]
-        [DefaultValue(1.1f)]
-        [Increment(0.05f)]
-        public float ExpScalingFactor { get; set; }
+        [DefaultValue(1f)]
+        [Increment(0.1f)]
+        public float GlobalExpMultiplierExtra { get; set; }
         
         [BackgroundColor(50, 50, 60)]
         [DefaultValue(false)]
         public bool AllowStatueXP { get; set; }
         
+        // ==================== PREÇOS DE LEVEL (EXP PRICE) ====================
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.ExpPriceHeader")]
+        
+        [BackgroundColor(50, 50, 60)]
+        [DefaultValue(100)]
+        public int StartPrice { get; set; }
+        
+        [BackgroundColor(50, 50, 60)]
+        [DefaultValue(0)]
+        public int AditionalPrice { get; set; }
+        
+        [BackgroundColor(50, 50, 60)]
+        [DefaultValue(0f)]
+        [Increment(0.1f)]
+        public float ExtraPrice { get; set; }
+        
         [BackgroundColor(50, 50, 60)]
         [DefaultValue(1f)]
-        public float BossExpMultiplier { get; set; }
+        [Increment(0.1f)]
+        public float MultiPrice { get; set; }
         
         // ==================== EXPERIÊNCIA - ARMAS ====================
         
         [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.WeaponExperienceHeader")]
         
         [BackgroundColor(60, 40, 40)]
+        [Range(0f, 2.5f)]
         [DefaultValue(1f)]
+        [Increment(0.1f)]
         public float WeaponExpMultiplier { get; set; }
         
         [BackgroundColor(60, 40, 40)]
         [DefaultValue(5f)]
+        [Increment(1f)]
         public float WeaponBaseXPPerHit { get; set; }
         
         [BackgroundColor(60, 40, 40)]
         [DefaultValue(50f)]
+        [Increment(10f)]
         public float WeaponBaseXPPerKill { get; set; }
         
         [BackgroundColor(60, 40, 40)]
         [DefaultValue(0.01f)]
+        [Increment(0.01f)]
         public float WeaponXPPerDamageDealt { get; set; }
         
         [BackgroundColor(60, 40, 40)]
         [DefaultValue(0.1f)]
+        [Increment(0.1f)]
         public float WeaponXPPerEnemyMaxHP { get; set; }
         
         [BackgroundColor(60, 40, 40)]
@@ -69,11 +204,14 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.ArmorExperienceHeader")]
         
         [BackgroundColor(40, 40, 60)]
+        [Range(0f, 2.5f)]
         [DefaultValue(1f)]
+        [Increment(0.1f)]
         public float ArmorExpMultiplier { get; set; }
         
         [BackgroundColor(40, 40, 60)]
         [DefaultValue(1f)]
+        [Increment(0.1f)]
         public float ArmorXPPerDamageReceived { get; set; }
         
         [BackgroundColor(40, 40, 60)]
@@ -82,45 +220,110 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         
         [BackgroundColor(40, 40, 60)]
         [DefaultValue(0.5f)]
+        [Increment(0.1f)]
         public float ArmorXPPerDamageBlocked { get; set; }
         
         [BackgroundColor(40, 40, 60)]
         [DefaultValue(10f)]
+        [Increment(1f)]
         public float ArmorXPPerDodge { get; set; }
         
         [BackgroundColor(40, 40, 60)]
         [DefaultValue(0)]
         public int ArmorMaxLevel { get; set; }
 
-        // ==================== EXPERIÊNCIA - ACESSÓRIOS ====================
-        
-        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.AccessoryExperienceHeader")]
-        
-        [BackgroundColor(40, 60, 40)]
-        [DefaultValue(1f)]
-        public float AccessoryExpMultiplier { get; set; }
-        
-        [BackgroundColor(40, 60, 40)]
-        [DefaultValue(0.1f)]
-        public float AccessoryXPPerSecondEquipped { get; set; }
-        
-        [BackgroundColor(40, 60, 40)]
-        [DefaultValue(2f)]
-        public float AccessoryXPPerHit { get; set; }
-        
-        [BackgroundColor(40, 60, 40)]
-        [DefaultValue(5f)]
-        public float AccessoryXPPerKill { get; set; }
-        
-        [BackgroundColor(40, 60, 40)]
-        [DefaultValue(1f)]
-        public float AccessoryXPPerDamageTaken { get; set; }
-        
-        [BackgroundColor(40, 60, 40)]
-        [DefaultValue(0)]
-        public int AccessoryMaxLevel { get; set; }
-
         // ==================== STATS - ARMAS ====================
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.WeaponStatsHeader")]
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(true)]
+        public bool DamageIncrement { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(true)]
+        public bool IncreaseBaseDamage { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(false)]
+        public bool IncreaseFlatDamage { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(false)]
+        public bool IncreaseMultDamage { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(true)]
+        public bool CritIncrement { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(true)]
+        public bool UseTimeIncrement { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(true)]
+        public bool UseAnimationIncrement { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(true)]
+        public bool MeleeWeaponSizeIncrement { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(true)]
+        public bool NotUseAmmoChanceIncrement { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(true)]
+        public bool ManaCostReductionIncrement { get; set; }
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.AdditionalProjectilesHeader")]
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(true)]
+        public bool AdditionalProjectileChanceIncrement { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(10)]
+        [Range(0, 360)]
+        public int AdditionalProjectileMinRad { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(150)]
+        [Range(0, 360)]
+        public int AdditionalProjectileMaxRad { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(30)]
+        [Range(0, 360)]
+        public int AdditionalProjectileMinRadMinion { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(360)]
+        [Range(0, 360)]
+        public int AdditionalProjectileMaxRadMinion { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(100)]
+        [Range(1, 1000)]
+        public int ProjectilesToMaxRad { get; set; }
+        
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.ProjectileIncrementsHeader")]
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(true)]
+        public bool ProjectileSizeIncrement { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(true)]
+        public bool ProjectileSpeedIncrement { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(true)]
+        public bool ProjectilePenetrationIncrement { get; set; }
+        
+        [BackgroundColor(60, 40, 40)]
+        [DefaultValue(true)]
+        public bool ProjectileLifeTimeIncrement { get; set; }
         
         [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.WeaponStatsHeader")]
         
@@ -150,7 +353,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         };
         
         [BackgroundColor(60, 40, 40)]
-        public ItemStatFloat WeaponUseSpeed { get; set; } = new ItemStatFloat
+        public ItemStatFloat WeaponUseTime { get; set; } = new ItemStatFloat
         {
             ScalingMode = ScalingMode.Legacy,
             PerLevel = 1f,
@@ -160,7 +363,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         };
 
         [BackgroundColor(60, 40, 40)]
-        public ItemStatFloat WeaponMeleeSpeed { get; set; } = new ItemStatFloat
+        public ItemStatFloat WeaponUseAnimation { get; set; } = new ItemStatFloat
         {
             ScalingMode = ScalingMode.Legacy,
             PerLevel = 1f,
@@ -179,6 +382,8 @@ namespace SignatureEquipmentDeluxe.Common.Configs
             ScalingTiers = new List<ScalingTier>()
         };
 
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.ProjectileStatsHeader")]
+        
         [BackgroundColor(60, 40, 40)]
         public ProjectileStatFloat WeaponProjectileSize { get; set; } = new ProjectileStatFloat
         {
@@ -220,6 +425,16 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         };
         
         [BackgroundColor(60, 40, 40)]
+        public ProjectileStatFloat WeaponAdditionalProjectileChance { get; set; } = new ProjectileStatFloat
+        {
+            ScalingMode = ScalingMode.Legacy,
+            PerLevel = 1f,
+            PerLevelMult = 2,
+            Max = 0,
+            ScalingTiers = new List<ScalingTier>()
+        };
+        
+        [BackgroundColor(60, 40, 40)]
         public ItemStatFloat WeaponManaCostReduction { get; set; } = new ItemStatFloat
         {
             ScalingMode = ScalingMode.Legacy,
@@ -244,54 +459,14 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.ArmorStatsHeader")]
         
         [BackgroundColor(40, 40, 60)]
+        [DefaultValue(true)]
+        public bool DefenceIncrement { get; set; }
+        
+        [BackgroundColor(40, 40, 60)]
         public ItemStatInt ArmorDefense { get; set; } = new ItemStatInt
         {
             ScalingMode = ScalingMode.Legacy,
             PerLevel = 1,
-            PerLevelMult = 1,
-            Max = 0,
-            ScalingTiers = new List<ScalingTier>()
-        };
-
-        // ==================== STATS - ACESSÓRIOS ====================
-        
-        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.AccessoryStatsHeader")]
-        
-        [BackgroundColor(40, 60, 40)]
-        public ItemStatInt AccessoryDamage { get; set; } = new ItemStatInt
-        {
-            ScalingMode = ScalingMode.Legacy,
-            PerLevel = 1,
-            PerLevelMult = 1,
-            Max = 0,
-            ScalingTiers = new List<ScalingTier>()
-        };
-        
-        [BackgroundColor(40, 60, 40)]
-        public ItemStatInt AccessoryDefense { get; set; } = new ItemStatInt
-        {
-            ScalingMode = ScalingMode.Legacy,
-            PerLevel = 1,
-            PerLevelMult = 1,
-            Max = 0,
-            ScalingTiers = new List<ScalingTier>()
-        };
-        
-        [BackgroundColor(40, 60, 40)]
-        public ItemStatInt AccessoryCritChance { get; set; } = new ItemStatInt
-        {
-            ScalingMode = ScalingMode.Legacy,
-            PerLevel = 1,
-            PerLevelMult = 1,
-            Max = 0,
-            ScalingTiers = new List<ScalingTier>()
-        };
-
-        [BackgroundColor(40, 60, 40)]
-        public ItemStatFloat AccessoryMinionSlotReduction { get; set; } = new ItemStatFloat
-        {
-            ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0.1f,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()
@@ -385,7 +560,6 @@ namespace SignatureEquipmentDeluxe.Common.Configs
                 int min = int.MaxValue;
                 if (WeaponMaxLevel > 0 && WeaponMaxLevel < min) min = WeaponMaxLevel;
                 if (ArmorMaxLevel > 0 && ArmorMaxLevel < min) min = ArmorMaxLevel;
-                if (AccessoryMaxLevel > 0 && AccessoryMaxLevel < min) min = AccessoryMaxLevel;
                 return min == int.MaxValue ? 0 : min;
             }
             set
@@ -393,7 +567,6 @@ namespace SignatureEquipmentDeluxe.Common.Configs
                 // Aplica o mesmo valor para todos
                 WeaponMaxLevel = value;
                 ArmorMaxLevel = value;
-                AccessoryMaxLevel = value;
             }
         }
         
@@ -421,15 +594,29 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         [JsonIgnore]
         public ItemStatFloat UseSpeed
         {
-            get => WeaponUseSpeed;
-            set => WeaponUseSpeed = value;
+            get => WeaponUseTime;
+            set => WeaponUseTime = value;
+        }
+        
+        [JsonIgnore]
+        public ItemStatFloat UseTime
+        {
+            get => WeaponUseTime;
+            set => WeaponUseTime = value;
+        }
+        
+        [JsonIgnore]
+        public ItemStatFloat UseAnimation
+        {
+            get => WeaponUseAnimation;
+            set => WeaponUseAnimation = value;
         }
         
         [JsonIgnore]
         public ItemStatFloat MeleeSpeed
         {
-            get => WeaponMeleeSpeed;
-            set => WeaponMeleeSpeed = value;
+            get => WeaponUseTime; // Agora melee também usa UseTime
+            set => WeaponUseTime = value;
         }
         
         [JsonIgnore]
@@ -479,13 +666,6 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         {
             get => WeaponAmmoConsumptionReduction;
             set => WeaponAmmoConsumptionReduction = value;
-        }
-        
-        [JsonIgnore]
-        public ItemStatFloat MinionSlotReduction
-        {
-            get => AccessoryMinionSlotReduction;
-            set => AccessoryMinionSlotReduction = value;
         }
     }
 }

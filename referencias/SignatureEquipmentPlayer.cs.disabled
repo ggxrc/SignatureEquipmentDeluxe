@@ -1,0 +1,201 @@
+﻿using SignatureEquipment.Configs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Terraria;
+using Terraria.ModLoader;
+using Terraria.ID;
+using Terraria.DataStructures;
+using Microsoft.Xna.Framework;
+using static System.Net.Mime.MediaTypeNames;
+
+namespace SignatureEquipment
+{
+    internal class SignatureEquipmentPlayer : ModPlayer
+    {
+        private SignatureEquipmentServerConfig config = ModContent.GetInstance<SignatureEquipmentServerConfig>();
+
+        /// <summary>
+        /// Проверяет, находится ли NPC в чёрном списке получения опыта
+        /// </summary>
+        /// 
+        //if (item.useStyle == ItemUseStyleID.None && item.shoot == ProjectileID.None)
+        //    return;
+
+        public bool isBlackListed(NPC npc) => config.NpcBlackList.Any(blackListNPC => blackListNPC.Type == npc.type);
+
+        public override void OnHitNPCWithItem(Item item, NPC target, NPC.HitInfo hit, int damageDone) => OnHit(item.GetGlobalItem<SignatureGlobalItem>(), item, hit.Damage, target);
+
+        public override void OnHitNPCWithProj(Projectile proj, NPC target, NPC.HitInfo hit, int damageDone)
+        {
+            var projectile = proj.GetGlobalProjectile<SignatureGlobalProjectile>();
+            OnHit(projectile.SignatureItem, projectile.ProjectileCreatorItem, hit.Damage, target);
+        }
+
+        public override void OnHitByNPC(NPC npc, Player.HurtInfo hurtInfo) => OnHited(hurtInfo);
+
+        public override void OnHitByProjectile(Projectile proj, Player.HurtInfo hurtInfo) => OnHited(hurtInfo);
+
+        private int GetDealDamageExp(int damage, bool isAcessory) => (int)((config.ExpPerHit + (config.FromDamagePercentWeapon * 0.01f * damage) + config.AdditionalExpBeforeMult)
+            * config.ExpForWeaponMult * config.ExpForWeaponMult2 * (isAcessory ? config.ExpForAccessoryWeaponMult * config.ExpForAccessoryWeaponMult2 : 1) * config.FinalMult * config.FinalMult2 + config.FlatExp);
+
+        private int GetTakeDamageExp(int damage) => (int)((config.ExpFromGettingHit + Math.Clamp(config.FromDamagePercentArmor * 0.01f * damage, 0, Player.statLife) + config.AdditionalExpBeforeMult)
+            * config.ExpForArmorMult * config.ExpForArmorMult2 * config.FinalMult * config.FinalMult2 + config.FlatExp);
+
+        public override void ModifyHitNPCWithItem(Item item, NPC target, ref NPC.HitModifiers modifiers) => OnModifyHit(item, target);
+        public override void ModifyHitNPCWithProj(Projectile proj, NPC target, ref NPC.HitModifiers modifiers) => OnModifyHit(proj.GetGlobalProjectile<SignatureGlobalProjectile>()?.ProjectileCreatorItem, target);
+
+        private void OnModifyHit(Item item, NPC target)
+        {
+            if (item == null || item.IsAir)
+                return;
+
+            if (item.GetGlobalItem<SignatureGlobalItem>().isBlackListed(item) || isBlackListed(target) || target.SpawnedFromStatue ? !config.ExpFromStatue : false)
+                return;
+
+            if (!config.WeaponRecieveExp || item.consumable ? item.createTile > -1 || item.createWall > -1 : false)
+                return;
+
+            if (item.accessory && !config.AccessoriesRecieveExpForHitOrKill)
+                return;
+
+            if (item.TryGetGlobalItem(out SignatureGlobalItem signatureItem))
+            {
+                if (!inHitDict.ContainsKey(signatureItem))
+                {
+                    inHitDict.Add(signatureItem, target);
+
+                    if (config.ExpFromKills)
+                        target.GetGlobalNPC<SignatureGlobalNPC>().SetLastSignatureItem(signatureItem, item);
+                }
+            }
+        }
+
+        Dictionary<SignatureGlobalItem, NPC> inHitDict = new Dictionary<SignatureGlobalItem, NPC>();
+
+        /// <summary>
+        /// Вызывается при нанесении урона
+        /// </summary>
+        /// <param name="item">Предмет, которым игрок это сделал</param>
+        /// <param name="damage">Урон, который нанёс игрок по существу</param>
+        /// <param name="target">Существо, которое ударил/убил игрок</param>
+        private void OnHit(SignatureGlobalItem signatureItem, Item item, int damage, NPC target)
+        {
+            if (signatureItem == null)
+                return;
+
+            if (config.EnableWhiteList && !signatureItem.isWhiteListed(item))
+                return;
+
+            if (inHitDict.ContainsKey(signatureItem))
+            {
+                //Add Weapon Exp on hit
+                signatureItem.AddExp(target.boss ? (int)(GetDealDamageExp(damage, item.accessory) * config.ExpForWeaponFromBossMult * config.ExpForWeaponFromBossMult2) : GetDealDamageExp(damage, item.accessory));
+
+                inHitDict.Remove(signatureItem);
+            }
+        }
+
+        /// <summary>
+        /// Вызывается, когда игрока ударяют
+        /// </summary>
+        private void OnHited(Player.HurtInfo info) => AddEquipmentExp(info);
+
+        /// <summary>
+        /// Добавляет опыт снаряжению, например броне и аксессуарам
+        /// </summary>
+        private void AddEquipmentExp(Player.HurtInfo info)
+        {
+            int expValue;
+
+            if (config.IgnoreDefence)
+                expValue = GetTakeDamageExp(info.SourceDamage);
+            else
+                expValue = GetTakeDamageExp(info.Damage);
+
+            if (config.ArmorRecieveExp)
+            {
+                for (int armorIndex = 0; armorIndex <= 2; armorIndex++)
+                    if (Player.armor[armorIndex].TryGetGlobalItem<SignatureGlobalItem>(out var item))
+                    {
+                        if (config.EnableWhiteList && !item.isWhiteListed(Player.armor[armorIndex]))
+                            return;
+
+                        if (config.ArmorShouldHaveDefaultDefenceToRecieveExp)
+                        {
+                            if (Player.armor[armorIndex].defense > 0)
+                                item.AddExp(expValue);
+                        }
+                        else
+                            item.AddExp(expValue);
+                    }
+            }
+
+            if (config.SocialArmorRecieveExp)
+            {
+                for (int socialArmorIndex = 10; socialArmorIndex <= 12; socialArmorIndex++)
+                    if (Player.armor[socialArmorIndex].TryGetGlobalItem<SignatureGlobalItem>(out var item))
+                    {
+                        if (config.EnableWhiteList && !item.isWhiteListed(Player.armor[socialArmorIndex]))
+                            return;
+
+                        if (config.ArmorShouldHaveDefaultDefenceToRecieveExp)
+                        {
+                            if (Player.armor[socialArmorIndex].defense > 0)
+                                item.AddExp(expValue);
+                        }
+                        else
+                            item.AddExp(expValue);
+                    }
+            }
+
+            if (config.AccessoriesRecieveExpFromGetHit)
+            {
+                for (int accessoryIndex = 3; accessoryIndex <= 9; accessoryIndex++)
+                    if (Player.armor[accessoryIndex].TryGetGlobalItem<SignatureGlobalItem>(out var item))
+                    {
+                        if (config.EnableWhiteList && !item.isWhiteListed(Player.armor[accessoryIndex]))
+                            return;
+
+                        if (config.AccessoriesShouldHaveDefenceToRecieveExpFromGetHit)
+                        {
+                            if (Player.armor[accessoryIndex].defense > 0)
+                                item.AddExp(expValue);
+                        }
+                        else
+                            item.AddExp(expValue);
+                    }
+            }
+
+            if (config.SocialAccessoriesRecieveExp)
+            {
+                for (int socialAccessoryIndex = 13; socialAccessoryIndex <= 19; socialAccessoryIndex++)
+                    if (Player.armor[socialAccessoryIndex].TryGetGlobalItem<SignatureGlobalItem>(out var item))
+                    {
+                        if (config.EnableWhiteList && !item.isWhiteListed(Player.armor[socialAccessoryIndex]))
+                            return;
+
+                        if (config.AccessoriesShouldHaveDefenceToRecieveExpFromGetHit)
+                        {
+                            if (Player.armor[socialAccessoryIndex].defense > 0)
+                                item.AddExp(expValue);
+                        }
+                        else
+                            item.AddExp(expValue);
+                    }
+            }
+        }
+
+        private float _additionalMinionSlotsCount;
+        //Если честно, я не помню что это за 2 метода ниже, скорее всего эксперименты которые выкинул как задумку но не удалил
+        public void AddMinionSlots(float count) { _additionalMinionSlotsCount += count; }
+        public void ReduceMinionSlots(float count) { _additionalMinionSlotsCount -= count; if (_additionalMinionSlotsCount < 0) _additionalMinionSlotsCount = 0; }
+
+        public override void UpdateEquips()
+        {
+            Player.maxMinions += _additionalMinionSlotsCount % 1 > 0.9f ? (int)Math.Round(_additionalMinionSlotsCount) : (int)_additionalMinionSlotsCount;
+        }
+    }
+}

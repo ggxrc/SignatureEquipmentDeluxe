@@ -1,0 +1,58 @@
+﻿using SignatureEquipment.Configs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Terraria;
+using Terraria.ModLoader;
+using static System.Net.Mime.MediaTypeNames;
+
+
+namespace SignatureEquipment
+{
+    class SignatureGlobalNPC : GlobalNPC
+    {
+        private SignatureEquipmentServerConfig config = ModContent.GetInstance<SignatureEquipmentServerConfig>();
+
+        public override bool InstancePerEntity => true;
+
+        private SignatureGlobalItem signatureItem;
+        private Item item;
+
+        public void SetLastSignatureItem(SignatureGlobalItem signatureItem, Item item)
+        {
+            this.signatureItem = signatureItem;
+            this.item = item;
+        }
+
+        /*
+        public override bool SpecialOnKill(NPC npc)
+        {
+            return base.SpecialOnKill(npc);
+        }
+        */
+
+        public override bool CheckDead(NPC npc)
+        {
+            if (signatureItem == null)
+                return true;
+
+            if (config.EnableWhiteList && !signatureItem.isWhiteListed(item))
+                return true;
+
+            signatureItem.AddExp(npc.boss ? (int)(GetKillExp(item.accessory) * config.ExpForWeaponFromBossMult * config.ExpForWeaponFromBossMult2) : GetKillExp(item.accessory));
+
+            return true;
+        }
+
+        //Work only on server side? And other *Kill
+        /*
+        public override void OnKill(NPC npc)
+        {
+
+        }*/
+
+        private int GetKillExp(bool isAcessory) => (int)((config.ExpPerKill + config.AdditionalExpBeforeMult) * config.ExpForWeaponMult * config.ExpForWeaponMult2 * (isAcessory ? config.ExpForAccessoryWeaponMult * config.ExpForAccessoryWeaponMult2 : 1) * config.FinalMult * config.FinalMult2 + config.FlatExp);
+    }
+}

@@ -47,8 +47,9 @@ Mods: {
 			NoEquipment: No signed equipment yet
 			HelpText:
 				'''
-				Right-click any weapon, armor, or accessory
+				Right-click any weapon or armor
 				to sign it as signature equipment!
+				Accessories provide XP to equipped weapons!
 				'''
 			Close: X
 			Remove: ✖
@@ -108,7 +109,7 @@ Config: {
 		DamageStatsHeader: ⚔️ Damage & Combat Stats
 		SpeedStatsHeader: ⚡ Speed & Use Time Stats
 		SizeStatsHeader: 📏 Size & Scale Stats
-		ProjectileStatsHeader: 🎯 Projectile Behavior Stats
+		ProjectileStatsHeader: Projectile Stats Header
 		UtilityStatsHeader: 🔧 Utility & Resource Stats
 		ListsHeader: 📋 Blacklists & Special Mappings
 		ImmunityHeader: 🛡️ Projectile Immunity Settings
@@ -127,11 +128,6 @@ Config: {
 		ArmorExpMultiplier: {
 			Label: Armor XP Multiplier
 			Tooltip: Additional multiplier for armor XP gains
-		}
-
-		AccessoryExpMultiplier: {
-			Label: Accessory XP Multiplier
-			Tooltip: Additional multiplier for accessory XP gains
 		}
 
 		BossExpMultiplier: {
@@ -210,8 +206,8 @@ Config: {
 		}
 
 		MinionSlotReduction: {
-			Label: 👻 Minion Slot Reduction
-			Tooltip: Configure minion slot cost reduction per level (max 95%)
+			Label: 👻 Minion Slot Cost Reduction
+			Tooltip: Configure minion slot cost reduction per level for summoner weapons (max 99%)
 		}
 
 		GlobalItemBlacklist: {
@@ -255,14 +251,25 @@ Config: {
 		}
 
 		LevelLimitsHeader: Global Max Level Header
+		EventPenaltyHeader: 🚫 Anti-Farm Penalty Settings (Optional by Category)
+		BossEventsPreHardmodeHeader: ⚔️ Boss Events (Pre-Hardmode)
+		BossEventsHardmodeHeader: ⚔️ Boss Events (Hardmode)
+		MoonEventsHeader: � Moon Events
+		InvasionEventsHeader: 🛡️ Invasion Events
+		TimeEventsHeader: ⏰ Time Events
+		WeatherEventsHeader: 🌦️ Weather Events
+		SpecialEventsHeader: ✨ Special Events
 		GeneralExperienceHeader: Global Exp Multiplier Header
 		WeaponExperienceHeader: Weapon Exp Multiplier Header
 		ArmorExperienceHeader: Armor Exp Multiplier Header
-		AccessoryExperienceHeader: Accessory Exp Multiplier Header
 		WeaponStatsHeader: Weapon Damage Header
 		ArmorStatsHeader: Armor Defense Header
-		AccessoryStatsHeader: Accessory Damage Header
 		IndividualLevelLimitsHeader: Individual Max Level Header
+		AccessoryExperienceHeader: Accessory Exp Multiplier Header
+		AccessoryStatsHeader: Accessory Damage Header
+		AdditionalProjectilesHeader: Additional Projectile Chance Increment Header
+		ProjectileIncrementsHeader: Projectile Size Increment Header
+		ExpPriceHeader: Start Price Header
 	}
 
 	ClientConfig: {
@@ -889,31 +896,6 @@ Configs: {
 			Tooltip: ""
 		}
 
-		AccessoryXPPerSecondEquipped: {
-			Label: Accessory X P Per Second Equipped
-			Tooltip: ""
-		}
-
-		AccessoryXPPerHit: {
-			Label: Accessory X P Per Hit
-			Tooltip: ""
-		}
-
-		AccessoryXPPerKill: {
-			Label: Accessory X P Per Kill
-			Tooltip: ""
-		}
-
-		AccessoryXPPerDamageTaken: {
-			Label: Accessory X P Per Damage Taken
-			Tooltip: ""
-		}
-
-		AccessoryMaxLevel: {
-			Label: Accessory Max Level
-			Tooltip: ""
-		}
-
 		WeaponDamage: {
 			Label: Weapon Damage
 			Tooltip: ""
@@ -924,13 +906,13 @@ Configs: {
 			Tooltip: ""
 		}
 
-		WeaponUseSpeed: {
-			Label: Weapon Use Speed
+		WeaponUseTime: {
+			Label: Weapon Use Time
 			Tooltip: ""
 		}
 
-		WeaponMeleeSpeed: {
-			Label: Weapon Melee Speed
+		WeaponUseAnimation: {
+			Label: Weapon Use Animation
 			Tooltip: ""
 		}
 
@@ -974,6 +956,36 @@ Configs: {
 			Tooltip: ""
 		}
 
+		WeaponMinionSlotReduction: {
+			Label: Weapon Minion Slot Reduction
+			Tooltip: ""
+		}
+
+		AccessoryXPPerSecondEquipped: {
+			Label: Accessory X P Per Second Equipped
+			Tooltip: ""
+		}
+
+		AccessoryXPPerHit: {
+			Label: Accessory X P Per Hit
+			Tooltip: ""
+		}
+
+		AccessoryXPPerKill: {
+			Label: Accessory X P Per Kill
+			Tooltip: ""
+		}
+
+		AccessoryXPPerDamageTaken: {
+			Label: Accessory X P Per Damage Taken
+			Tooltip: ""
+		}
+
+		AccessoryMaxLevel: {
+			Label: Accessory Max Level
+			Tooltip: ""
+		}
+
 		AccessoryDamage: {
 			Label: Accessory Damage
 			Tooltip: ""
@@ -989,8 +1001,213 @@ Configs: {
 			Tooltip: ""
 		}
 
-		AccessoryMinionSlotReduction: {
-			Label: Accessory Minion Slot Reduction
+		DamageIncrement: {
+			Label: Damage Increment
+			Tooltip: ""
+		}
+
+		IncreaseBaseDamage: {
+			Label: Increase Base Damage
+			Tooltip: ""
+		}
+
+		IncreaseFlatDamage: {
+			Label: Increase Flat Damage
+			Tooltip: ""
+		}
+
+		IncreaseMultDamage: {
+			Label: Increase Mult Damage
+			Tooltip: ""
+		}
+
+		CritIncrement: {
+			Label: Crit Increment
+			Tooltip: ""
+		}
+
+		UseTimeIncrement: {
+			Label: Use Time Increment
+			Tooltip: ""
+		}
+
+		UseAnimationIncrement: {
+			Label: Use Animation Increment
+			Tooltip: ""
+		}
+
+		MeleeWeaponSizeIncrement: {
+			Label: Melee Weapon Size Increment
+			Tooltip: ""
+		}
+
+		NotUseAmmoChanceIncrement: {
+			Label: Not Use Ammo Chance Increment
+			Tooltip: ""
+		}
+
+		ManaCostReductionIncrement: {
+			Label: Mana Cost Reduction Increment
+			Tooltip: ""
+		}
+
+		MinionSlotsReduceIncrement: {
+			Label: Minion Slots Reduce Increment
+			Tooltip: ""
+		}
+
+		AdditionalProjectileChanceIncrement: {
+			Label: Additional Projectile Chance Increment
+			Tooltip: ""
+		}
+
+		AdditionalProjectileMinRad: {
+			Label: Additional Projectile Min Rad
+			Tooltip: ""
+		}
+
+		AdditionalProjectileMaxRad: {
+			Label: Additional Projectile Max Rad
+			Tooltip: ""
+		}
+
+		AdditionalProjectileMinRadMinion: {
+			Label: Additional Projectile Min Rad Minion
+			Tooltip: ""
+		}
+
+		AdditionalProjectileMaxRadMinion: {
+			Label: Additional Projectile Max Rad Minion
+			Tooltip: ""
+		}
+
+		ProjectilesToMaxRad: {
+			Label: Projectiles To Max Rad
+			Tooltip: ""
+		}
+
+		ProjectileSizeIncrement: {
+			Label: Projectile Size Increment
+			Tooltip: ""
+		}
+
+		ProjectileSpeedIncrement: {
+			Label: Projectile Speed Increment
+			Tooltip: ""
+		}
+
+		ProjectilePenetrationIncrement: {
+			Label: Projectile Penetration Increment
+			Tooltip: ""
+		}
+
+		ProjectileLifeTimeIncrement: {
+			Label: Projectile Life Time Increment
+			Tooltip: ""
+		}
+
+		WeaponAdditionalProjectileChance: {
+			Label: Weapon Additional Projectile Chance
+			Tooltip: ""
+		}
+
+		DefenceIncrement: {
+			Label: Defence Increment
+			Tooltip: ""
+		}
+
+		GlobalExpMultiplierExtra: {
+			Label: Global Exp Multiplier Extra
+			Tooltip: ""
+		}
+
+		StartPrice: {
+			Label: Start Price
+			Tooltip: ""
+		}
+
+		AditionalPrice: {
+			Label: Aditional Price
+			Tooltip: ""
+		}
+
+		ExtraPrice: {
+			Label: Extra Price
+			Tooltip: ""
+		}
+
+		MultiPrice: {
+			Label: Multi Price
+			Tooltip: ""
+		}
+
+		Events: {
+			Label: Events
+			Tooltip: ""
+		}
+
+		BossEventsPreHardmode: {
+			Label: Boss Events Pre Hardmode
+			Tooltip: ""
+		}
+
+		BossEventsHardmode: {
+			Label: Boss Events Hardmode
+			Tooltip: ""
+		}
+
+		MoonEvents: {
+			Label: Moon Events
+			Tooltip: ""
+		}
+
+		InvasionEvents: {
+			Label: Invasion Events
+			Tooltip: ""
+		}
+
+		TimeEvents: {
+			Label: Time Events
+			Tooltip: ""
+		}
+
+		WeatherEvents: {
+			Label: Weather Events
+			Tooltip: ""
+		}
+
+		SpecialEvents: {
+			Label: Special Events
+			Tooltip: ""
+		}
+
+		EnableBossPenalty: {
+			Label: Enable Boss Penalty
+			Tooltip: ""
+		}
+
+		EnableInvasionPenalty: {
+			Label: Enable Invasion Penalty
+			Tooltip: ""
+		}
+
+		EnableMoonPenalty: {
+			Label: Enable Moon Penalty
+			Tooltip: ""
+		}
+
+		EnableWeatherPenalty: {
+			Label: Enable Weather Penalty
+			Tooltip: ""
+		}
+
+		EnableTimePenalty: {
+			Label: Enable Time Penalty
+			Tooltip: ""
+		}
+
+		EnableSpecialPenalty: {
+			Label: Enable Special Penalty
 			Tooltip: ""
 		}
 	}
@@ -1206,5 +1423,192 @@ Configs: {
 			Label: Local Immunity Frames
 			Tooltip: ""
 		}
+	}
+
+	SignatureConfig: {
+		DisplayName: Signature Config
+
+		Headers: {
+			XPSettings: X P Settings Header
+			LevelSettings: Level Settings Header
+			BonusSettings: Bonus Settings Header
+			AbilitySettings: Ability Settings Header
+			VisualSettings: Visual Settings Header
+			GameplaySettings: Gameplay Settings Header
+		}
+
+		XPPerKill: {
+			Label: X P Per Kill
+			Tooltip: ""
+		}
+
+		BossXPMultiplier: {
+			Label: Boss X P Multiplier
+			Tooltip: ""
+		}
+
+		XPPerHit: {
+			Label: X P Per Hit
+			Tooltip: ""
+		}
+
+		DamageXPMultiplier: {
+			Label: Damage X P Multiplier
+			Tooltip: ""
+		}
+
+		MaxLevel: {
+			Label: Max Level
+			Tooltip: ""
+		}
+
+		MaxPrestige: {
+			Label: Max Prestige
+			Tooltip: ""
+		}
+
+		DamagePerLevel: {
+			Label: Damage Per Level
+			Tooltip: ""
+		}
+
+		CritPer5Levels: {
+			Label: Crit Per5 Levels
+			Tooltip: ""
+		}
+
+		SpeedPerLevel: {
+			Label: Speed Per Level
+			Tooltip: ""
+		}
+
+		PrestigeDamageMultiplier: {
+			Label: Prestige Damage Multiplier
+			Tooltip: ""
+		}
+
+		LifestealLevel: {
+			Label: Lifesteal Level
+			Tooltip: ""
+		}
+
+		ExtraProjectileLevel: {
+			Label: Extra Projectile Level
+			Tooltip: ""
+		}
+
+		DamageAuraLevel: {
+			Label: Damage Aura Level
+			Tooltip: ""
+		}
+
+		EnablePrestigeAbilities: {
+			Label: Enable Prestige Abilities
+			Tooltip: ""
+		}
+
+		ShowParticles: {
+			Label: Show Particles
+			Tooltip: ""
+		}
+
+		ShowGlow: {
+			Label: Show Glow
+			Tooltip: ""
+		}
+
+		ShowXPNumbers: {
+			Label: Show X P Numbers
+			Tooltip: ""
+		}
+
+		AllowMultipleSigned: {
+			Label: Allow Multiple Signed
+			Tooltip: ""
+		}
+
+		SignatureSwitchCooldown: {
+			Label: Signature Switch Cooldown
+			Tooltip: ""
+		}
+
+		XPBoosterLimit: {
+			Label: X P Booster Limit
+			Tooltip: ""
+		}
+	}
+
+	EventMultiplier: {
+		Tooltip: ""
+
+		EventType: {
+			Label: Event Type
+			Tooltip: ""
+		}
+
+		Enabled: {
+			Label: Enabled
+			Tooltip: ""
+		}
+
+		XPMultiplierPercent: {
+			Label: X P Multiplier Percent
+			Tooltip: ""
+		}
+
+		Tier: {
+			Label: Tier
+			Tooltip: ""
+		}
+	}
+
+	GameEventType: {
+		Tooltip: ""
+		KingSlime.Label: King Slime
+		EyeOfCthulhu.Label: Eye Of Cthulhu
+		EaterOfWorlds.Label: Eater Of Worlds
+		BrainOfCthulhu.Label: Brain Of Cthulhu
+		QueenBee.Label: Queen Bee
+		Skeletron.Label: Skeletron
+		Deerclops.Label: Deerclops
+		WallOfFlesh.Label: Wall Of Flesh
+		QueenSlime.Label: Queen Slime
+		TheTwins.Label: The Twins
+		TheDestroyer.Label: The Destroyer
+		SkeletronPrime.Label: Skeletron Prime
+		Plantera.Label: Plantera
+		Golem.Label: Golem
+		DukeFishron.Label: Duke Fishron
+		EmpressOfLight.Label: Empress Of Light
+		LunaticCultist.Label: Lunatic Cultist
+		MoonLord.Label: Moon Lord
+		BloodMoon.Label: Blood Moon
+		FullMoon.Label: Full Moon
+		NewMoon.Label: New Moon
+		GoblinArmy.Label: Goblin Army
+		FrostLegion.Label: Frost Legion
+		PirateInvasion.Label: Pirate Invasion
+		SolarEclipse.Label: Solar Eclipse
+		PumpkinMoon.Label: Pumpkin Moon
+		FrostMoon.Label: Frost Moon
+		MartianMadness.Label: Martian Madness
+		LunarEvent.Label: Lunar Event
+		Day.Label: Day
+		Night.Label: Night
+		Rain.Label: Rain
+		Sandstorm.Label: Sandstorm
+		Blizzard.Label: Blizzard
+		PartyEvent.Label: Party Event
+		LanternNight.Label: Lantern Night
+	}
+
+	XPMultiplierTier: {
+		Tooltip: ""
+		None.Label: None
+		Low.Label: Low
+		Medium.Label: Medium
+		High.Label: High
+		VeryHigh.Label: Very High
+		Extreme.Label: Extreme
 	}
 }

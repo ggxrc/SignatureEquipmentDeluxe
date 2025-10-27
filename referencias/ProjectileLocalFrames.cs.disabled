@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Terraria.ModLoader.Config;
+
+namespace SignatureEquipment
+{
+    public class ProjectileLocalFrames
+    {
+        public ProjectileDefinition Projectile;
+
+        [DefaultValue(-2)]
+        [Range(-2, int.MaxValue)]
+        public int LocalImmunityFrames;
+    }
+}

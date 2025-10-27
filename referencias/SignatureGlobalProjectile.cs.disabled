@@ -1,0 +1,728 @@
+﻿using Microsoft.Xna.Framework;
+using SignatureEquipment.Commands;
+using SignatureEquipment.Configs;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Terraria;
+using Terraria.DataStructures;
+using Terraria.ID;
+using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
+
+namespace SignatureEquipment
+{
+    internal class SignatureGlobalProjectile : GlobalProjectile
+    {
+        private SignatureEquipmentServerConfig config = ModContent.GetInstance<SignatureEquipmentServerConfig>();
+
+        public override bool InstancePerEntity => true;
+
+        public Item ProjectileCreatorItem;
+        public Player ProjectileCreatorPlayer;
+        public SignatureEquipmentPlayer ProjectileCreatorSignaturePlayer;
+        public SignatureGlobalItem SignatureItem;
+
+        private int itemWeaponDamage;
+
+        private int defaultDamage;
+        private float defaultMinionSlots;
+
+        /// <summary>
+        /// В моде есть мультивыстрел, который стреляет несколькими зарядами, и чтобы не делать вычисления для всех копий, оно делается для одного и запоминается сюда
+        /// </summary>
+        private ProjectileStatsData multiShotCalculatedData;
+
+        private bool isInReferencesList = false;
+
+        public override void OnSpawn(Projectile projectile, IEntitySource source)
+        {
+            //if (source == default(IEntitySource))
+            //    return;
+
+            //if (projectile == null || source == default(IEntitySource) || (source is EntitySource_Parent p && p.Entity != null && p.Entity is NPC)) return;
+            if (projectile == null || source == default(IEntitySource)) return;
+
+            if (config.ShowProjectileNameAndType)
+                if (!(source is EntitySource_WorldEvent))
+                    Main.NewText($"{projectile.Name}:{projectile.type}; {source.GetType()};");
+
+            defaultDamage = projectile.damage;
+            defaultMinionSlots = projectile.minionSlots;
+
+            if (source is EntitySource_ItemUse sourceItemData && sourceItemData.Item != null && !sourceItemData.Item.IsAir)
+            {
+                ProjectileCreatorPlayer = Main.player[projectile.owner];
+                ProjectileCreatorSignaturePlayer = ProjectileCreatorPlayer.GetModPlayer<SignatureEquipmentPlayer>();
+                ProjectileCreatorItem = sourceItemData.Item;
+                SignatureItem = sourceItemData.Item.GetGlobalItem<SignatureGlobalItem>();
+
+                itemWeaponDamage = sourceItemData.Player.GetWeaponDamage(sourceItemData.Item);
+
+                OnSpawnByItem(projectile, sourceItemData.Item, sourceItemData);
+            }
+            else if (source is EntitySource_Parent sourceParentData)
+            {
+                if (sourceParentData.Entity is Projectile proj)
+                {
+                    var parentGlobalProj = proj.GetGlobalProjectile<SignatureGlobalProjectile>();
+
+                    if (defaultMinionSlots == 0)
+                        defaultMinionSlots = parentGlobalProj.defaultMinionSlots;
+
+                    itemWeaponDamage = parentGlobalProj.itemWeaponDamage;
+
+                    ProjectileCreatorPlayer = Main.player[projectile.owner];
+                    ProjectileCreatorSignaturePlayer = ProjectileCreatorPlayer.GetModPlayer<SignatureEquipmentPlayer>();
+                    ProjectileCreatorItem = parentGlobalProj.ProjectileCreatorItem;
+                    SignatureItem = parentGlobalProj.SignatureItem;
+
+                    if (source is CloneEntitySource_Parent)
+                        OnSpawnCloneProjectile(projectile, proj, sourceParentData);
+                    else
+                        OnSpawnByParentProjectile(projectile, proj, sourceParentData);
+                }
+                else if (sourceParentData.Entity is Player player)
+                {
+                    if (projectile.IsMinionOrSentryRelated)
+                        itemWeaponDamage = player.GetWeaponDamage(player.HeldItem);
+
+                    ProjectileCreatorPlayer = Main.player[projectile.owner];
+                    ProjectileCreatorSignaturePlayer = ProjectileCreatorPlayer.GetModPlayer<SignatureEquipmentPlayer>();
+                    ProjectileCreatorItem = player.HeldItem;
+                    SignatureItem = player.HeldItem?.GetGlobalItem<SignatureGlobalItem>();
+                }
+            }
+            else if (source is EntitySource_Misc sourceMisc && projectile.IsMinionOrSentryRelated)
+            {
+                Player player = Main.player[projectile.owner];
+
+                if (projectile.IsMinionOrSentryRelated)
+                    itemWeaponDamage = player.GetWeaponDamage(player.HeldItem);
+
+                ProjectileCreatorPlayer = player;
+                ProjectileCreatorSignaturePlayer = ProjectileCreatorPlayer.GetModPlayer<SignatureEquipmentPlayer>();
+                ProjectileCreatorItem = player.HeldItem;
+                SignatureItem = player.HeldItem?.GetGlobalItem<SignatureGlobalItem>();
+            }
+
+            foreach (var reference in config.ItemProjectileReferences)
+            {
+                if (reference.projectile.Type == projectile.type)
+                {
+                    ProjectileCreatorPlayer = Main.player[projectile.owner];
+                    ProjectileCreatorSignaturePlayer = ProjectileCreatorPlayer.GetModPlayer<SignatureEquipmentPlayer>();
+
+                    int itemIndex = ProjectileCreatorPlayer.FindItem(reference.item.Type);
+
+                    if (itemIndex != -1)
+                        ProjectileCreatorItem = ProjectileCreatorPlayer.inventory[itemIndex];
+                    else
+                    {
+                        for (int i = 0; i < ProjectileCreatorPlayer.armor.Length; i++)
+                            if (reference.item.Type == ProjectileCreatorPlayer.armor[i].type)
+                                ProjectileCreatorItem = ProjectileCreatorPlayer.armor[i];
+                    }
+
+                    SignatureItem = ProjectileCreatorItem.GetGlobalItem<SignatureGlobalItem>();
+
+                    itemWeaponDamage = ProjectileCreatorPlayer.GetWeaponDamage(ProjectileCreatorItem);
+
+                    OnSpawnByItem(projectile, ProjectileCreatorItem, new EntitySource_ItemUse(ProjectileCreatorPlayer, ProjectileCreatorItem));
+
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Вызывается, когда снаряд был заспавнен самим предметом, это следствие его использования
+        /// </summary>
+        private void OnSpawnByItem(Projectile projectile, Item item, EntitySource_ItemUse source)
+        {
+            if (SignatureItem == null || SignatureItem.isBlackListed(item) || SignatureItem.isBlackListed(projectile))
+                return;
+
+            if (config.EnableWhiteList && !SignatureItem.isWhiteListed(item))
+                return;
+
+            if (item.accessory && !config.StatsAffectsAccessoriesProjectiles)
+                return;
+
+            if (isDisableTileCollide(item))
+            {
+                if (config.MinLevelForDisableTileCollide <= SignatureItem.Level)
+                    projectile.tileCollide = false;
+            }
+
+            if (!projectile.minion && !isBlackListedLocalFrames(item))
+                SetProjectileLocalImmunity(projectile);
+
+            if (isHaveLocalFrames(projectile, out int cooldown))
+            {
+                projectile.usesLocalNPCImmunity = true;
+                projectile.localNPCHitCooldown = cooldown;
+            }
+
+            multiShotCalculatedData = new ProjectileStatsData();
+
+            //Life Time
+            if (config.ProjectileLifeTimeIncrement && !projectile.IsMinionOrSentryRelated && projectile.timeLeft > 0 && !SignatureItem.isBlackListed(config.ProjectileLifeTime, item) && !SignatureItem.isBlackListed(config.ProjectileLifeTime, projectile))
+            {
+                if (SignatureItem.isHardCapped(config.ProjectileLifeTime, item, out var itemCap))
+                    projectile.timeLeft += multiShotCalculatedData.LifeTime = (int)Math.Clamp(SignatureItem.ProjectileLifeTimeNotCapped, int.MinValue, itemCap.Max) * itemCap.Sign;
+                else if (SignatureItem.isHardCapped(config.ProjectileLifeTime, projectile, out var projectileCap))
+                    projectile.timeLeft += multiShotCalculatedData.LifeTime = (int)Math.Clamp(SignatureItem.ProjectileLifeTimeNotCapped, int.MinValue, projectileCap.Max) * projectileCap.Sign;
+                else
+                    projectile.timeLeft += multiShotCalculatedData.LifeTime = (int)SignatureItem.ProjectileLifeTimeCapped;
+            }
+
+            //Start Velocity
+            if (config.ProjectileStartVelocityIncrement && !SignatureItem.isBlackListed(config.ProjectileStartVelocity, item) && !SignatureItem.isBlackListed(config.ProjectileStartVelocity, item) && !SignatureItem.isBlackListed(config.ProjectileStartVelocity, projectile))
+            {
+                if (SignatureItem.isHardCapped(config.ProjectileStartVelocity, item, out var itemCap))
+                    projectile.velocity *= multiShotCalculatedData.StartVelocity = 1f + Math.Clamp(SignatureItem.ProjectileStartVelocityScaleNotCapped, int.MinValue, itemCap.Max) * 0.01f * itemCap.Sign;
+                else if (SignatureItem.isHardCapped(config.ProjectileStartVelocity, projectile, out var projectileCap))
+                    projectile.velocity *= multiShotCalculatedData.StartVelocity = 1f + Math.Clamp(SignatureItem.ProjectileStartVelocityScaleNotCapped, int.MinValue, projectileCap.Max) * 0.01f * projectileCap.Sign;
+                else
+                    projectile.velocity *= multiShotCalculatedData.StartVelocity = 1f + SignatureItem.ProjectileStartVelocityScaleCappedPercent;
+            }
+
+            //Size
+            if (config.ProjectileSizeIncrement && !projectile.sentry && !SignatureItem.isBlackListed(config.ProjectileSize, item) && !SignatureItem.isBlackListed(config.ProjectileSize, projectile))
+            {
+                float projScale;
+                if (SignatureItem.isHardCapped(config.ProjectileSize, item, out var itemCap))
+                    projScale = multiShotCalculatedData.Size = 1f + Math.Clamp(SignatureItem.ProjectileScaleNotCapped, int.MinValue, itemCap.Max) * 0.01f * itemCap.Sign;
+                else if (SignatureItem.isHardCapped(config.ProjectileSize, projectile, out var projectileCap))
+                    projScale = multiShotCalculatedData.Size = 1f + (Math.Clamp(SignatureItem.ProjectileScaleNotCapped, int.MinValue, projectileCap.Max) * 0.01f) * projectileCap.Sign;
+                else
+                    projScale = multiShotCalculatedData.Size = 1f + SignatureItem.ProjectileScaleCappedPercent;
+
+                int width = (int)(projectile.width * projScale);
+                int height = (int)(projectile.height * projScale);
+
+                projectile.Resize(width, height);
+                projectile.scale *= projScale;
+
+                if (config.TryServerProjectileSize)
+                    if (Main.netMode == NetmodeID.MultiplayerClient)
+                    {
+                        ModPacket packet = Mod.GetPacket();
+                        packet.Write(projectile.whoAmI);
+                        packet.Write(projectile.type);
+                        packet.Write(width);
+                        packet.Write(height);
+                        packet.Write(projectile.scale);
+                        packet.Send();
+                    }
+            }
+
+            //Minion Slots Reduce
+            if (config.MinionSlotsReduceIncrement && !SignatureItem.isBlackListed(config.MinionSlotsReduce, item) && !SignatureItem.isBlackListed(config.MinionSlotsReduce, projectile) && projectile.IsMinionOrSentryRelated)
+            {
+                if (SignatureItem.isHardCapped(config.MinionSlotsReduce, item, out var itemCap))
+                    projectile.minionSlots = multiShotCalculatedData.MinionSlotsReduce = defaultMinionSlots * (1 - (Math.Clamp(SignatureItem.MinionSlotsReduceNotCapped, int.MinValue, itemCap.Max) * 0.01f * itemCap.Sign));
+                else if (SignatureItem.isHardCapped(config.MinionSlotsReduce, projectile, out var projectileCap))
+                    projectile.minionSlots = multiShotCalculatedData.MinionSlotsReduce = defaultMinionSlots * (1 - (Math.Clamp(SignatureItem.MinionSlotsReduceNotCapped, int.MinValue, projectileCap.Max) * 0.01f * projectileCap.Sign));
+                else
+                    projectile.minionSlots = multiShotCalculatedData.MinionSlotsReduce = defaultMinionSlots * (1 - (SignatureItem.MinionSlotsReduceCapped * 0.01f));
+            }
+
+            //Penetrate
+            if (config.ProjectilePenetrateIncrement && !SignatureItem.isBlackListed(config.ProjectilePenetrate, item) && !SignatureItem.isBlackListed(config.ProjectilePenetrate, projectile) && config.PenetrateMustBeInitiallyForIncrease ? projectile.penetrate > 0 : projectile.penetrate >= 0)
+            {
+                if (SignatureItem.isHardCapped(config.ProjectilePenetrate, item, out var itemCap))
+                    projectile.penetrate += multiShotCalculatedData.Penetrate = (int)(Math.Clamp(SignatureItem.ProjectilePenetrateNotCapped, int.MinValue, itemCap.Max) * 0.01f * itemCap.Sign);
+                else if (SignatureItem.isHardCapped(config.ProjectilePenetrate, projectile, out var projectileCap))
+                    projectile.penetrate += multiShotCalculatedData.Penetrate = (int)(Math.Clamp(SignatureItem.ProjectilePenetrateNotCapped, int.MinValue, projectileCap.Max) * 0.01f * projectileCap.Sign);
+                else
+                    projectile.penetrate += multiShotCalculatedData.Penetrate = (int)SignatureItem.ProjectilePenetrateCappedPercent;
+            }
+
+            //Projectile chance
+            if (config.AdditionalProjectileChanceIncrement && !projectile.IsMinionOrSentryRelated && !SignatureItem.isBlackListed(config.AdditionalProjectileOnShootChance, item) && !SignatureItem.isBlackListed(config.AdditionalProjectileOnShootChance, item))
+            {
+                //ProjectileID.Sets.SentryShot[type]
+
+                //if (projectile.minion || projectile.sentry)
+                //    return;
+
+                int garantChance;
+
+                if (SignatureItem.isHardCapped(config.AdditionalProjectileOnShootChance, item, out var itemCap))
+                    garantChance = (int)Math.Round(Math.Clamp(SignatureItem.AdditionalProjectileChanceNotCapped, int.MinValue, itemCap.Max) * itemCap.Sign);
+                else if (SignatureItem.isHardCapped(config.AdditionalProjectileOnShootChance, projectile, out var projectileCap))
+                    garantChance = (int)Math.Round(Math.Clamp(SignatureItem.AdditionalProjectileChanceNotCapped, int.MinValue, projectileCap.Max) * projectileCap.Sign);
+                else
+                    garantChance = (int)SignatureItem.AdditionalProjectileChanceCapped;
+
+                int countShoots = garantChance / 100;
+
+                int additionalChance = garantChance % 100;
+
+                if (additionalChance > Main.rand.Next(100))
+                    countShoots++;
+
+                int minRad = config.AdditionalProjectileMinRad;
+                int maxAdditionalRad = config.AdditionalProjectileMaxRad;
+                float shootsToMaxRad = config.ProjectilesToMaxRad;
+
+                for (int i = 0; i < countShoots; i++)
+                {
+                    Vector2 newVelocity = projectile.velocity.RotatedByRandom(MathHelper.ToRadians(minRad + maxAdditionalRad * Math.Clamp(countShoots / shootsToMaxRad, int.MinValue, maxAdditionalRad)));
+
+                    newVelocity *= 1f - Main.rand.NextFloat(-0.1f, 0.1f);
+
+                    var cloneSource = new EntitySource_Parent(projectile);
+
+                    Projectile.NewProjectile(cloneSource, projectile.position, newVelocity, projectile.type, projectile.damage, item.knockBack, projectile.owner);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Вызывается, когда снаряд был заспавнен другим снарядом, например один снаряд разлетается на 5 кусков через время, эти куски - этот метод
+        /// </summary>
+        private void OnSpawnByParentProjectile(Projectile projectile, Projectile parentProjectile, EntitySource_Parent parentSource)
+        {
+            if (SignatureItem == null || SignatureItem.isBlackListed(ProjectileCreatorItem) || SignatureItem.isBlackListed(projectile))
+                return;
+
+            if (config.EnableWhiteList && !SignatureItem.isWhiteListed(ProjectileCreatorItem))
+                return;
+
+            if (ProjectileCreatorItem.accessory && !config.StatsAffectsAccessoriesProjectiles)
+                return;
+
+            if (isDisableTileCollide(ProjectileCreatorItem))
+            {
+                if (config.MinLevelForDisableTileCollide <= SignatureItem.Level)
+                    projectile.tileCollide = false;
+            }
+
+            if (!projectile.minion && !isBlackListedLocalFrames(ProjectileCreatorItem))
+                SetProjectileLocalImmunity(projectile);
+
+            if (isHaveLocalFrames(projectile, out int cooldown))
+            {
+                projectile.usesLocalNPCImmunity = true;
+                projectile.localNPCHitCooldown = cooldown;
+            }
+
+            //Экономия производительности, если снаряд с таким типом уже был расчитан
+            if (projectile.type == parentProjectile.type)
+            {
+                var signatureParentProjectile = parentProjectile.GetGlobalProjectile<SignatureGlobalProjectile>();
+
+                if (!signatureParentProjectile.multiShotCalculatedData.Equals(default(ProjectileStatsData)))
+                {
+                    projectile.timeLeft += signatureParentProjectile.multiShotCalculatedData.LifeTime;
+                    projectile.velocity *= signatureParentProjectile.multiShotCalculatedData.StartVelocity;
+                    projectile.minionSlots = signatureParentProjectile.multiShotCalculatedData.MinionSlotsReduce;
+                    projectile.penetrate += signatureParentProjectile.multiShotCalculatedData.Penetrate;
+
+                    float projScale = signatureParentProjectile.multiShotCalculatedData.Size;
+
+                    int width = (int)(projectile.width * projScale);
+                    int height = (int)(projectile.height * projScale);
+
+                    projectile.Resize(width, height);
+                    projectile.scale *= projScale;
+
+                    if (config.TryServerProjectileSize)
+                        if (Main.netMode == NetmodeID.MultiplayerClient)
+                        {
+                            ModPacket packet = Mod.GetPacket();
+                            packet.Write(projectile.whoAmI);
+                            packet.Write(projectile.type);
+                            packet.Write(width);
+                            packet.Write(height);
+                            packet.Write(projectile.scale);
+                            packet.Send();
+                        }
+                }
+
+                return;
+            }
+
+            //Life Time
+            if (config.ProjectileLifeTimeIncrement && !projectile.IsMinionOrSentryRelated && projectile.timeLeft > 0 && !SignatureItem.isBlackListed(config.ProjectileLifeTime, ProjectileCreatorItem) && !SignatureItem.isBlackListed(config.ProjectileLifeTime, projectile))
+            {
+                if (SignatureItem.isHardCapped(config.ProjectileLifeTime, ProjectileCreatorItem, out var itemCap))
+                    projectile.timeLeft += (int)Math.Clamp(SignatureItem.ProjectileLifeTimeNotCapped, int.MinValue, itemCap.Max) * itemCap.Sign;
+                else if (SignatureItem.isHardCapped(config.ProjectileLifeTime, projectile, out var projectileCap))
+                    projectile.timeLeft += (int)Math.Clamp(SignatureItem.ProjectileLifeTimeNotCapped, int.MinValue, projectileCap.Max) * projectileCap.Sign;
+                else
+                    projectile.timeLeft += (int)SignatureItem.ProjectileLifeTimeCapped;
+            }
+
+            //Start Velocity
+            if (config.ProjectileStartVelocityIncrement && !SignatureItem.isBlackListed(config.ProjectileStartVelocity, ProjectileCreatorItem) && !SignatureItem.isBlackListed(config.ProjectileStartVelocity, projectile))
+            {
+                if (SignatureItem.isHardCapped(config.ProjectileStartVelocity, ProjectileCreatorItem, out var itemCap))
+                    projectile.velocity *= 1f + Math.Clamp(SignatureItem.ProjectileStartVelocityScaleNotCapped, int.MinValue, itemCap.Max) * 0.01f * itemCap.Sign;
+                else if (SignatureItem.isHardCapped(config.ProjectileStartVelocity, projectile, out var projectileCap))
+                    projectile.velocity *= 1f + Math.Clamp(SignatureItem.ProjectileStartVelocityScaleNotCapped, int.MinValue, projectileCap.Max) * 0.01f * projectileCap.Sign;
+                else
+                    projectile.velocity *= 1f + SignatureItem.ProjectileStartVelocityScaleCappedPercent;
+            }
+
+            //Size
+            if (config.ProjectileSizeIncrement && !projectile.sentry && !SignatureItem.isBlackListed(config.ProjectileSize, ProjectileCreatorItem) && !SignatureItem.isBlackListed(config.ProjectileSize, projectile))
+            {
+                float projScale;
+                if (SignatureItem.isHardCapped(config.ProjectileSize, ProjectileCreatorItem, out var itemCap))
+                    projScale = 1f + Math.Clamp(SignatureItem.ProjectileScaleNotCapped, int.MinValue, itemCap.Max) * 0.01f * itemCap.Sign;
+                else if (SignatureItem.isHardCapped(config.ProjectileSize, projectile, out var projectileCap))
+                    projScale = 1f + (Math.Clamp(SignatureItem.ProjectileScaleNotCapped, int.MinValue, projectileCap.Max) * 0.01f) * projectileCap.Sign;
+                else
+                    projScale = 1f + SignatureItem.ProjectileScaleCappedPercent;
+
+                int width = (int)(projectile.width * projScale);
+                int height = (int)(projectile.height * projScale);
+
+                projectile.Resize(width, height);
+                projectile.scale *= projScale;
+
+                if (config.TryServerProjectileSize)
+                    if (Main.netMode == NetmodeID.MultiplayerClient)
+                    {
+                        ModPacket packet = Mod.GetPacket();
+                        packet.Write(projectile.whoAmI);
+                        packet.Write(projectile.type);
+                        packet.Write(width);
+                        packet.Write(height);
+                        packet.Write(projectile.scale);
+                        packet.Send();
+                    }
+            }
+
+            //Minion Slots Reduce
+            if (config.MinionSlotsReduceIncrement && !SignatureItem.isBlackListed(config.MinionSlotsReduce, ProjectileCreatorItem) && !SignatureItem.isBlackListed(config.MinionSlotsReduce, projectile) && projectile.IsMinionOrSentryRelated)
+            {
+                if (SignatureItem.isHardCapped(config.MinionSlotsReduce, ProjectileCreatorItem, out var itemCap))
+                    projectile.minionSlots = defaultMinionSlots * (1 - (Math.Clamp(SignatureItem.MinionSlotsReduceNotCapped, int.MinValue, itemCap.Max) * 0.01f) * itemCap.Sign);
+                else if (SignatureItem.isHardCapped(config.MinionSlotsReduce, projectile, out var projectileCap))
+                    projectile.minionSlots = defaultMinionSlots * (1 - (Math.Clamp(SignatureItem.MinionSlotsReduceNotCapped, int.MinValue, projectileCap.Max) * 0.01f) * projectileCap.Sign);
+                else
+                    projectile.minionSlots = defaultMinionSlots * SignatureItem.MinionSlotsReduceCapped * 0.01f;
+            }
+
+            //Penetrate
+            if (config.ProjectilePenetrateIncrement && !SignatureItem.isBlackListed(config.ProjectilePenetrate, ProjectileCreatorItem) && !SignatureItem.isBlackListed(config.ProjectilePenetrate, projectile) && config.PenetrateMustBeInitiallyForIncrease ? projectile.penetrate > 0 : projectile.penetrate >= 0)
+            {
+                if (SignatureItem.isHardCapped(config.ProjectilePenetrate, ProjectileCreatorItem, out var itemCap))
+                    projectile.penetrate += (int)(Math.Clamp(SignatureItem.ProjectilePenetrateNotCapped, int.MinValue, itemCap.Max) * 0.01f) * itemCap.Sign;
+                else if (SignatureItem.isHardCapped(config.ProjectilePenetrate, projectile, out var projectileCap))
+                    projectile.penetrate += (int)(Math.Clamp(SignatureItem.ProjectilePenetrateNotCapped, int.MinValue, projectileCap.Max) * 0.01f) * projectileCap.Sign;
+                else
+                    projectile.penetrate += (int)SignatureItem.ProjectilePenetrateCappedPercent;
+            }
+
+            //Additional Projectile Chance for minion
+            if (config.AdditionalProjectileChanceIncrement && config.DoubleProjMultForAll ? true : projectile.IsMinionOrSentryRelated  && !SignatureItem.isBlackListed(config.AdditionalProjectileOnShootChance, ProjectileCreatorItem) && !SignatureItem.isBlackListed(config.AdditionalProjectileOnShootChance, ProjectileCreatorItem))
+            {
+                if (projectile.minion || projectile.sentry)
+                    return;
+
+                int garantChance;
+
+                if (SignatureItem.isHardCapped(config.AdditionalProjectileOnShootChance, ProjectileCreatorItem, out var itemCap))
+                    garantChance = (int)Math.Round(Math.Clamp(SignatureItem.AdditionalProjectileChanceNotCapped, int.MinValue, itemCap.Max) * itemCap.Sign);
+                else if (SignatureItem.isHardCapped(config.AdditionalProjectileOnShootChance, projectile, out var projectileCap))
+                    garantChance = (int)Math.Round(Math.Clamp(SignatureItem.AdditionalProjectileChanceNotCapped, int.MinValue, projectileCap.Max) * projectileCap.Sign);
+                else
+                    garantChance = (int)SignatureItem.AdditionalProjectileChanceCapped;
+
+                int countShoots = garantChance / 100;
+
+                int additionalChance = garantChance % 100;
+
+                if (additionalChance > Main.rand.Next(100))
+                    countShoots++;
+
+                int minRad = config.AdditionalProjectileMinRadMinion;
+                int maxAdditionalRad = config.AdditionalProjectileMaxRadMinion;
+                float shootsToMaxRad = config.ProjectilesToMaxRad;
+
+                for (int i = 0; i < countShoots; i++)
+                {
+                    Vector2 newVelocity = projectile.velocity.RotatedByRandom(MathHelper.ToRadians(minRad + maxAdditionalRad * Math.Clamp(countShoots / shootsToMaxRad, int.MinValue, maxAdditionalRad)));
+
+                    newVelocity *= 1f - Main.rand.NextFloat(-0.2f, 0.2f);
+
+                    var cloneSource = new CloneEntitySource_Parent(parentProjectile);
+
+                    Projectile.NewProjectile(cloneSource, projectile.position, newVelocity, projectile.type, projectile.damage, ProjectileCreatorItem.knockBack, projectile.owner);
+                }
+            }
+        }
+
+        private void OnSpawnCloneProjectile(Projectile projectile, Projectile parentProjectile, EntitySource_Parent parentSource)
+        {
+            if (SignatureItem == null || SignatureItem.isBlackListed(ProjectileCreatorItem) || SignatureItem.isBlackListed(projectile))
+                return;
+
+            if (config.EnableWhiteList && !SignatureItem.isWhiteListed(ProjectileCreatorItem))
+                return;
+
+            if (ProjectileCreatorItem.accessory && !config.StatsAffectsAccessoriesProjectiles)
+                return;
+
+            if (isDisableTileCollide(ProjectileCreatorItem))
+            {
+                if (config.MinLevelForDisableTileCollide <= SignatureItem.Level)
+                    projectile.tileCollide = false;
+            }
+
+            if (!projectile.minion && !isBlackListedLocalFrames(ProjectileCreatorItem))
+                SetProjectileLocalImmunity(projectile);
+
+            if (isHaveLocalFrames(projectile, out int cooldown))
+            {
+                projectile.usesLocalNPCImmunity = true;
+                projectile.localNPCHitCooldown = cooldown;
+            }
+
+            if (projectile.type == parentProjectile.type)
+            {
+                var signatureParentProjectile = parentProjectile.GetGlobalProjectile<SignatureGlobalProjectile>();
+
+                if (!signatureParentProjectile.multiShotCalculatedData.Equals(default(ProjectileStatsData)))
+                {
+                    projectile.timeLeft += signatureParentProjectile.multiShotCalculatedData.LifeTime;
+                    projectile.velocity *= signatureParentProjectile.multiShotCalculatedData.StartVelocity;
+                    projectile.minionSlots = signatureParentProjectile.multiShotCalculatedData.MinionSlotsReduce;
+                    projectile.penetrate += signatureParentProjectile.multiShotCalculatedData.Penetrate;
+
+                    float projScale = signatureParentProjectile.multiShotCalculatedData.Size;
+
+                    int width = (int)(projectile.width * projScale);
+                    int height = (int)(projectile.height * projScale);
+
+                    projectile.Resize(width, height);
+                    projectile.scale *= projScale;
+
+                    if (config.TryServerProjectileSize)
+                        if (Main.netMode == NetmodeID.MultiplayerClient)
+                        {
+                            ModPacket packet = Mod.GetPacket();
+                            packet.Write(projectile.whoAmI);
+                            packet.Write(projectile.type);
+                            packet.Write(width);
+                            packet.Write(height);
+                            packet.Write(projectile.scale);
+                            packet.Send();
+                        }
+                }
+
+                return;
+            }
+
+            //Life Time
+            if (config.ProjectileLifeTimeIncrement && !projectile.IsMinionOrSentryRelated && projectile.timeLeft > 0 && !SignatureItem.isBlackListed(config.ProjectileLifeTime, ProjectileCreatorItem) && !SignatureItem.isBlackListed(config.ProjectileLifeTime, projectile))
+            {
+                if (SignatureItem.isHardCapped(config.ProjectileLifeTime, ProjectileCreatorItem, out var itemCap))
+                    projectile.timeLeft += (int)Math.Clamp(SignatureItem.ProjectileLifeTimeNotCapped, int.MinValue, itemCap.Max) * itemCap.Sign;
+                else if (SignatureItem.isHardCapped(config.ProjectileLifeTime, projectile, out var projectileCap))
+                    projectile.timeLeft += (int)Math.Clamp(SignatureItem.ProjectileLifeTimeNotCapped, int.MinValue, projectileCap.Max) * projectileCap.Sign;
+                else
+                    projectile.timeLeft += (int)SignatureItem.ProjectileLifeTimeCapped;
+            }
+
+            //Start Velocity
+            if (config.ProjectileStartVelocityIncrement && !SignatureItem.isBlackListed(config.ProjectileStartVelocity, ProjectileCreatorItem) && !SignatureItem.isBlackListed(config.ProjectileStartVelocity, projectile))
+            {
+                if (SignatureItem.isHardCapped(config.ProjectileStartVelocity, ProjectileCreatorItem, out var itemCap))
+                    projectile.velocity *= 1f + Math.Clamp(SignatureItem.ProjectileStartVelocityScaleNotCapped, int.MinValue, itemCap.Max) * 0.01f * itemCap.Sign;
+                else if (SignatureItem.isHardCapped(config.ProjectileStartVelocity, projectile, out var projectileCap))
+                    projectile.velocity *= 1f + Math.Clamp(SignatureItem.ProjectileStartVelocityScaleNotCapped, int.MinValue, projectileCap.Max) * 0.01f * projectileCap.Sign;
+                else
+                    projectile.velocity *= 1f + SignatureItem.ProjectileStartVelocityScaleCappedPercent;
+            }
+
+            //Size
+            if (config.ProjectileSizeIncrement && !projectile.sentry && !SignatureItem.isBlackListed(config.ProjectileSize, ProjectileCreatorItem) && !SignatureItem.isBlackListed(config.ProjectileSize, projectile))
+            {
+                float projScale;
+                if (SignatureItem.isHardCapped(config.ProjectileSize, ProjectileCreatorItem, out var itemCap))
+                    projScale = 1f + (Math.Clamp(SignatureItem.ProjectileScaleNotCapped, int.MinValue, itemCap.Max) * 0.01f) * itemCap.Sign;
+                else if (SignatureItem.isHardCapped(config.ProjectileSize, projectile, out var projectileCap))
+                    projScale = 1f + (Math.Clamp(SignatureItem.ProjectileScaleNotCapped, int.MinValue, projectileCap.Max) * 0.01f) * projectileCap.Sign;
+                else
+                    projScale = 1f + SignatureItem.ProjectileScaleCappedPercent;
+
+                int width = (int)(projectile.width * projScale);
+                int height = (int)(projectile.height * projScale);
+
+                projectile.Resize(width, height);
+                projectile.scale *= projScale;
+
+                if (config.TryServerProjectileSize)
+                    if (Main.netMode == NetmodeID.MultiplayerClient)
+                    {
+                        ModPacket packet = Mod.GetPacket();
+                        packet.Write(projectile.whoAmI);
+                        packet.Write(projectile.type);
+                        packet.Write(width);
+                        packet.Write(height);
+                        packet.Write(projectile.scale);
+                        packet.Send();
+                    }
+            }
+
+            //Minion Slots Reduce
+            if (config.MinionSlotsReduceIncrement && !SignatureItem.isBlackListed(config.MinionSlotsReduce, ProjectileCreatorItem) && !SignatureItem.isBlackListed(config.MinionSlotsReduce, projectile) && projectile.IsMinionOrSentryRelated)
+            {
+                if (SignatureItem.isHardCapped(config.MinionSlotsReduce, ProjectileCreatorItem, out var itemCap))
+                    projectile.minionSlots = defaultMinionSlots * (1 - (Math.Clamp(SignatureItem.MinionSlotsReduceNotCapped, int.MinValue, itemCap.Max) * 0.01f) * itemCap.Sign);
+                else if (SignatureItem.isHardCapped(config.MinionSlotsReduce, projectile, out var projectileCap))
+                    projectile.minionSlots = defaultMinionSlots * (1 - (Math.Clamp(SignatureItem.MinionSlotsReduceNotCapped, int.MinValue, projectileCap.Max) * 0.01f) * projectileCap.Sign);
+                else
+                    projectile.minionSlots = defaultMinionSlots * SignatureItem.MinionSlotsReduceCapped * 0.01f;
+            }
+
+            //Penetrate
+            if (config.ProjectilePenetrateIncrement && !SignatureItem.isBlackListed(config.ProjectilePenetrate, ProjectileCreatorItem) && !SignatureItem.isBlackListed(config.ProjectilePenetrate, projectile) && config.PenetrateMustBeInitiallyForIncrease ? projectile.penetrate > 0 : projectile.penetrate >= 0)
+            {
+                if (SignatureItem.isHardCapped(config.ProjectilePenetrate, ProjectileCreatorItem, out var itemCap))
+                    projectile.penetrate += (int)(Math.Clamp(SignatureItem.ProjectilePenetrateNotCapped, int.MinValue, itemCap.Max) * 0.01f * itemCap.Sign);
+                else if (SignatureItem.isHardCapped(config.ProjectilePenetrate, projectile, out var projectileCap))
+                    projectile.penetrate += (int)(Math.Clamp(SignatureItem.ProjectilePenetrateNotCapped, int.MinValue, projectileCap.Max) * 0.01f * projectileCap.Sign);
+                else
+                    projectile.penetrate += (int)SignatureItem.ProjectilePenetrateCappedPercent;
+            }
+        }
+
+        public override void ModifyHitNPC(Projectile projectile, NPC target, ref NPC.HitModifiers modifiers)
+        {
+            if (ProjectileCreatorItem == null) return;
+
+
+            if (ProjectileCreatorItem != null)
+            {
+                if (config.EnableWhiteList && !SignatureItem.isWhiteListed(ProjectileCreatorItem))
+                    return;
+
+                if (ProjectileCreatorItem.accessory)
+                {
+                    var statDamage = SignatureItem.isHardCapped(config.Damage, ProjectileCreatorItem, out var cap) ? Math.Clamp(SignatureItem.DamageNotCapped, int.MinValue, cap.Max) * cap.Sign : SignatureItem.DamageCapped;
+                    projectile.damage = defaultDamage + statDamage;
+                }
+            }
+
+            if (config.UseMinionFix && projectile.IsMinionOrSentryRelated && itemWeaponDamage > 0)
+            {
+                projectile.damage = (int)(itemWeaponDamage * (defaultMinionSlots > 1 || defaultMinionSlots == 0 ? 1 : defaultMinionSlots));
+                //modifiers.SourceDamage.Base = itemWeaponDamage * (defaultMinionSlots > 1 || defaultMinionSlots == 0 ? 1 : defaultMinionSlots);
+            }
+            if (isInheritDamage(projectile))
+                projectile.damage += itemWeaponDamage - defaultDamage;
+        }
+
+        private void SetProjectileLocalImmunity(Projectile projectile)
+        {
+            switch (config.LocalImmunModeOnProj)
+            {
+                case LocalNPCImmunityMode.UseLocal:
+                    projectile.usesLocalNPCImmunity = true;
+                    break;
+
+                case LocalNPCImmunityMode.NoEffectKeepCd:
+                    projectile.usesLocalNPCImmunity = true;
+
+                    if (projectile.localNPCHitCooldown < 0)
+                        projectile.localNPCHitCooldown = -2;
+                    break;
+
+                case LocalNPCImmunityMode.NoEffect:
+                    projectile.usesLocalNPCImmunity = true;
+                    projectile.localNPCHitCooldown = -2;
+                    break;
+
+                case LocalNPCImmunityMode.HitOnceKeepCd:
+                    projectile.usesLocalNPCImmunity = true;
+
+                    if (projectile.localNPCHitCooldown < 0)
+                        projectile.localNPCHitCooldown = -1;
+                    break;
+
+                case LocalNPCImmunityMode.HitOnce:
+                    projectile.usesLocalNPCImmunity = true;
+                    projectile.localNPCHitCooldown = -1;
+                    break;
+
+                case LocalNPCImmunityMode.Cooldown0KeepCd:
+                    projectile.usesLocalNPCImmunity = true;
+
+                    if (projectile.localNPCHitCooldown < 0)
+                        projectile.localNPCHitCooldown = 0;
+                    break;
+
+                case LocalNPCImmunityMode.Cooldown0:
+                    projectile.usesLocalNPCImmunity = true;
+                    projectile.localNPCHitCooldown = 0;
+                    break;
+
+                case LocalNPCImmunityMode.Cooldown10:
+                    projectile.usesLocalNPCImmunity = true;
+                    projectile.localNPCHitCooldown = 10;
+                    break;
+
+                case LocalNPCImmunityMode.Cooldown15:
+                    projectile.usesLocalNPCImmunity = true;
+                    projectile.localNPCHitCooldown = 15;
+                    break;
+
+                case LocalNPCImmunityMode.Cooldown20:
+                    projectile.usesLocalNPCImmunity = true;
+                    projectile.localNPCHitCooldown = 20;
+                    break;
+
+                case LocalNPCImmunityMode.Cooldown25:
+                    projectile.usesLocalNPCImmunity = true;
+                    projectile.localNPCHitCooldown = 25;
+                    break;
+
+                case LocalNPCImmunityMode.Cooldown30:
+                    projectile.usesLocalNPCImmunity = true;
+                    projectile.localNPCHitCooldown = 30;
+                    break;
+            }
+        }
+
+        public bool isDisableTileCollide(Item item) => config.DisableTileCollideList.Any(Item => Item.Type == item.type);
+
+        public bool isBlackListedLocalFrames(Item item) => config.ProjectilesLocalImmunityFramesBlacklist.Any(blackListItem => blackListItem.Type == item.type);
+
+        public bool isHaveLocalFrames(Projectile projectile, out int cooldown)
+        {
+            cooldown = 0;
+
+            foreach (var projData in config.ProjectilesLocalImmunityFrames)
+            {
+                if (projData.Projectile.Type == projectile.type)
+                {
+                    cooldown = projData.LocalImmunityFrames;
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool isInheritDamage(Projectile projectile)
+        {
+            foreach (var projData in config.ProjectilesInheritItemDamage)
+                if (projData.Type == projectile.type)
+                    return true;
+
+            return false;
+        }
+    }
+}

@@ -1,0 +1,41 @@
+using SignatureEquipment.Configs;
+using System;
+using System.IO;
+using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader;
+
+namespace SignatureEquipment
+{
+    public class SignatureEquipment : Mod
+    {
+        //private SignatureEquipmentServerConfig config = ModContent.GetInstance<SignatureEquipmentServerConfig>();
+
+        public override void HandlePacket(BinaryReader reader, int whoAmI)
+        {
+            int projectileWhoAmI = reader.ReadInt32();
+            int type = reader.ReadInt32();
+            int width = reader.ReadInt32();
+            int height = reader.ReadInt32();
+            float projScale = reader.ReadSingle();
+
+            if (Main.netMode == NetmodeID.Server)
+            {
+                ModPacket packet = GetPacket();
+                packet.Write(projectileWhoAmI);
+                packet.Write(projScale);
+                packet.Send();
+            }
+            else
+            {
+                var projectile = Main.projectile[projectileWhoAmI];
+
+                if (projectile.type != type) 
+                    return;
+
+                projectile.Resize(width, height);
+                projectile.scale = projScale;
+            }
+        }
+    }
+}

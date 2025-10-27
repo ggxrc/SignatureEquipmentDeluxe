@@ -1,0 +1,47 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Terraria.ModLoader.Config;
+
+namespace SignatureEquipment
+{
+    [BackgroundColor(80, 80, 80)]
+    public class ItemStatFloat
+    {
+        /// <summary>
+        /// Modo de scaling: Legacy, Cumulative, CurrentTierOnly, ou AccumulativePerTier
+        /// </summary>
+        [BackgroundColor(100, 100, 100)]
+        [DefaultValue(ScalingMode.Legacy)]
+        public ScalingMode ScalingMode = ScalingMode.Legacy;
+
+        /// <summary>
+        /// Lista de tiers de scaling progressivo
+        /// Cada tier define uma faixa de níveis com seus próprios valores de PerLevel e PerLevelMult
+        /// </summary>
+        [BackgroundColor(100, 100, 100)]
+        public List<ScalingTier> ScalingTiers = new List<ScalingTier>();
+
+        [BackgroundColor(100, 100, 100)]
+        [Range(-2.5f, 2.5f)]
+        [Increment(0.05f)]
+        public float PerLevel;
+
+        [BackgroundColor(100, 100, 100)]
+        [Range(int.MinValue, int.MaxValue)]
+        public int PerLevelMult;
+
+        [BackgroundColor(100, 100, 100)]
+        [Range(0, int.MaxValue)]
+        public int Max;
+
+        [BackgroundColor(100, 100, 100)]
+        public Dictionary<ItemDefinition, StatHardCap> HardCap = new Dictionary<ItemDefinition, StatHardCap>();
+
+        [BackgroundColor(100, 100, 100)]
+        public HashSet<ItemDefinition> BlackList = new HashSet<ItemDefinition>();
+    }
+}

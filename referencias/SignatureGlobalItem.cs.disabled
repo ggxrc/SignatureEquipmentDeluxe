@@ -1,0 +1,597 @@
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using SignatureEquipment.Commands;
+using SignatureEquipment.Configs;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Terraria;
+using Terraria.DataStructures;
+using Terraria.GameContent;
+using Terraria.ID;
+using Terraria.ModLoader;
+using Terraria.ModLoader.Config;
+using Terraria.ModLoader.IO;
+
+namespace SignatureEquipment
+{
+    internal class SignatureGlobalItem : GlobalItem
+    {
+        private SignatureEquipmentServerConfig config = ModContent.GetInstance<SignatureEquipmentServerConfig>();
+        private SignatureEquipmentClientConfig configClient = ModContent.GetInstance<SignatureEquipmentClientConfig>();
+
+        public override bool InstancePerEntity => true;
+
+        public int Level => Math.Clamp(signatureLevel, 0, config.MaxLevel > 0 ? config.MaxLevel : int.MaxValue);
+        public bool isMaxLevel => config.MaxLevel > 0 ? Level >= config.MaxLevel : false;
+        private int signatureLevel = 0;
+        private int signatureExpCurrent = 0;
+        private int signatureExpToUp => CalcComplication();
+
+        //Capped - то что ограничено конфигом, вычисления выше этого потолка не уйдут
+        //NotCapeed - чистые вычисления, игнорирующие конфиг
+        //Percent - обычное число умноженное на 0.01, которая превратит единицу из конфигов в 0.01, делая этим 1%
+        //Можно сделать класс с обобщением дабы избавиться от ужаса ниже, но тут легко ошибиться и наделать миллиард багов, так что пускай так будет
+
+        public int DamageCapped => Math.Clamp(DamageNotCapped, -config.Damage.Max, config.Damage.Max > 0 ? config.Damage.Max : int.MaxValue);
+        public int DefenceCapped => Math.Clamp(DefenceNotCapped, -config.Defence.Max, config.Defence.Max > 0 ? config.Defence.Max : int.MaxValue);
+        public float CritCapped => Math.Clamp(CritNotCapped, -config.Crit.Max, config.Crit.Max > 0 ? config.Crit.Max : int.MaxValue);
+        public float UseTimeCappedPercent => Math.Clamp(UseTimeNotCapped, -config.UseTime.Max, config.UseTime.Max > 0 ? config.UseTime.Max : int.MaxValue) * 0.01f;
+        public float UseAnimCappedPercent => Math.Clamp(UseAnimNotCapped, -config.UseAnimation.Max, config.UseAnimation.Max > 0 ? config.UseAnimation.Max : int.MaxValue) * 0.01f;
+        public float MinionSlotsReduceCapped => Math.Clamp(MinionSlotsReduceNotCapped, -config.MinionSlotsReduce.Max, config.MinionSlotsReduce.Max > 0 ? config.MinionSlotsReduce.Max : int.MaxValue);
+        public float MeleeSizeCappedPercent => Math.Clamp(MeleeSizeNotCapped, -config.MeleeSize.Max, config.MeleeSize.Max > 0 ? config.MeleeSize.Max : int.MaxValue) * 0.01f;
+        public float AdditionalProjectileChanceCapped => Math.Clamp(AdditionalProjectileChanceNotCapped, 0, config.AdditionalProjectileOnShootChance.Max > 0 ? config.AdditionalProjectileOnShootChance.Max : int.MaxValue);
+        public float ProjectileScaleCappedPercent => Math.Clamp(ProjectileScaleNotCapped, -config.ProjectileSize.Max, config.ProjectileSize.Max > 0 ? config.ProjectileSize.Max : int.MaxValue) * 0.01f;
+        public float ProjectileStartVelocityScaleCappedPercent => Math.Clamp(ProjectileStartVelocityScaleNotCapped, -config.ProjectileStartVelocity.Max, config.ProjectileStartVelocity.Max > 0 ? config.ProjectileStartVelocity.Max : int.MaxValue) * 0.01f;
+        public float ProjectilePenetrateCappedPercent => Math.Clamp(ProjectilePenetrateNotCapped, -config.ProjectilePenetrate.Max, config.ProjectilePenetrate.Max > 0 ? config.ProjectilePenetrate.Max : int.MaxValue) * 0.01f;
+        public float ProjectileLifeTimeCapped => Math.Clamp(ProjectileLifeTimeNotCapped, -config.ProjectileLifeTime.Max, config.ProjectileLifeTime.Max > 0 ? config.ProjectileLifeTime.Max : int.MaxValue);
+        public float NotUseAmmoChanceCapped => Math.Clamp(NotUseAmmoChanceNotCapped, 0, config.NotUseAmmoChance.Max > 0 ? config.NotUseAmmoChance.Max : int.MaxValue);
+        public float ManaCostCappedPercent => Math.Clamp(ManaCostNotCapped, -config.ManaCost.Max, config.ManaCost.Max > 0 ? config.ManaCost.Max : int.MaxValue) * 0.01f;
+
+        public int DamageNotCapped => (int)ScalingCalculator.CalculateStat(
+            Level, config.Damage.ScalingMode, config.Damage.ScalingTiers,
+            config.Damage.PerLevel, config.Damage.PerLevelMult);
+
+        public int DefenceNotCapped => (int)ScalingCalculator.CalculateStat(
+            Level, config.Defence.ScalingMode, config.Defence.ScalingTiers,
+            config.Defence.PerLevel, config.Defence.PerLevelMult);
+
+        public float CritNotCapped => ScalingCalculator.CalculateStat(
+            Level, config.Crit.ScalingMode, config.Crit.ScalingTiers,
+            config.Crit.PerLevel, config.Crit.PerLevelMult);
+
+        public float UseTimeNotCapped => ScalingCalculator.CalculateStat(
+            Level, config.UseTime.ScalingMode, config.UseTime.ScalingTiers,
+            config.UseTime.PerLevel, config.UseTime.PerLevelMult);
+        public float UseTimeNotCappedPercent => UseTimeNotCapped * 0.01f;
+
+        public float UseAnimNotCapped => ScalingCalculator.CalculateStat(
+            Level, config.UseAnimation.ScalingMode, config.UseAnimation.ScalingTiers,
+            config.UseAnimation.PerLevel, config.UseAnimation.PerLevelMult);
+        public float UseAnimNotCappedPercent => UseAnimNotCapped * 0.01f;
+
+        public float MinionSlotsReduceNotCapped => ScalingCalculator.CalculateStat(
+            Level, config.MinionSlotsReduce.ScalingMode, config.MinionSlotsReduce.ScalingTiers,
+            config.MinionSlotsReduce.PerLevel, config.MinionSlotsReduce.PerLevelMult);
+        public float MinionSlotsReduceNotCappedPercent => MinionSlotsReduceNotCapped * 0.01f;
+
+        public float MeleeSizeNotCapped => ScalingCalculator.CalculateStat(
+            Level, config.MeleeSize.ScalingMode, config.MeleeSize.ScalingTiers,
+            config.MeleeSize.PerLevel, config.MeleeSize.PerLevelMult);
+        public float MeleeSizeNotCappedPercent => MeleeSizeNotCapped * 0.01f;
+
+        public float AdditionalProjectileChanceNotCapped => ScalingCalculator.CalculateStat(
+            Level, config.AdditionalProjectileOnShootChance.ScalingMode, config.AdditionalProjectileOnShootChance.ScalingTiers,
+            config.AdditionalProjectileOnShootChance.PerLevel, config.AdditionalProjectileOnShootChance.PerLevelMult);
+
+        public float ProjectileScaleNotCapped => ScalingCalculator.CalculateStat(
+            Level, config.ProjectileSize.ScalingMode, config.ProjectileSize.ScalingTiers,
+            config.ProjectileSize.PerLevel, config.ProjectileSize.PerLevelMult);
+        public float ProjectileScaleNotCappedPercent => ProjectileScaleNotCapped * 0.01f;
+
+        public float ProjectileStartVelocityScaleNotCapped => ScalingCalculator.CalculateStat(
+            Level, config.ProjectileStartVelocity.ScalingMode, config.ProjectileStartVelocity.ScalingTiers,
+            config.ProjectileStartVelocity.PerLevel, config.ProjectileStartVelocity.PerLevelMult);
+        public float ProjectileStartVelocityScaleNotCappedPercent => ProjectileStartVelocityScaleNotCapped * 0.01f;
+
+        public float ProjectilePenetrateNotCapped => ScalingCalculator.CalculateStat(
+            Level, config.ProjectilePenetrate.ScalingMode, config.ProjectilePenetrate.ScalingTiers,
+            config.ProjectilePenetrate.PerLevel, config.ProjectilePenetrate.PerLevelMult);
+
+        public float ProjectileLifeTimeNotCapped => ScalingCalculator.CalculateStat(
+            Level, config.ProjectileLifeTime.ScalingMode, config.ProjectileLifeTime.ScalingTiers,
+            config.ProjectileLifeTime.PerLevel, config.ProjectileLifeTime.PerLevelMult);
+
+        public float NotUseAmmoChanceNotCapped => ScalingCalculator.CalculateStat(
+            Level, config.NotUseAmmoChance.ScalingMode, config.NotUseAmmoChance.ScalingTiers,
+            config.NotUseAmmoChance.PerLevel, config.NotUseAmmoChance.PerLevelMult);
+
+        public float ManaCostNotCapped => ScalingCalculator.CalculateStat(
+            Level, config.ManaCost.ScalingMode, config.ManaCost.ScalingTiers,
+            config.ManaCost.PerLevel, config.ManaCost.PerLevelMult);
+        public float ManaCostNotCappedPercent => ManaCostNotCapped * 0.01f;
+
+        /// <summary>
+        /// Вычисляет, сколько опыта нужно будет предмету для улучшения
+        /// </summary>
+        private int CalcComplication()
+        {
+            int needExpValue = config.StartPrice;
+
+            for (int i = 0; i < Level; i++)
+            {
+                needExpValue += (int)(config.AdditionalPrice + (int)(needExpValue * config.PriceIncreasePercent * 0.01f)
+                    * config.PriceMult * config.PriceMult2 + config.AdditionalPriceFlat);
+            }
+            return needExpValue;
+        }
+
+        /// <summary>
+        /// Метод - чит, позволяющий через команду повышать уровни
+        /// </summary>
+        public void SetLevel(int level)
+        {
+            signatureLevel = level;
+            signatureExpCurrent = 0;
+        }
+
+        /// <summary>
+        /// Добавляет опыт предмету
+        /// </summary>
+        /// <param name="add">Сколько опыта добавить</param>
+        public void AddExp(int add)
+        {
+            if (isMaxLevel) return;
+
+            if (add < 0)
+            {
+                signatureExpCurrent = 0;
+                signatureLevel++;
+
+                return;
+            }
+
+            signatureExpCurrent += add;
+
+            var expToUp = signatureExpToUp;
+
+            int whileCount = 0;
+            while (signatureExpCurrent >= expToUp)
+            {
+                if (whileCount >= 1000)
+                    return;
+
+                signatureExpCurrent -= expToUp;
+
+                signatureLevel++;
+
+                whileCount++;
+            }
+        }
+
+        //public override void ModifyShootStats(Item item, Player player, ref Vector2 position, ref Vector2 velocity, ref int type, ref int damage, ref float knockback)
+        //{
+        //    if (config.ProjectileStartVelocityIncrement && !isBlackListed(config.ProjectileStartVelocity, item))
+        //        velocity *= isHardCapped(config.ProjectileStartVelocity, item, out var cap) ? Math.Clamp(ProjectileStartVelocityScaleNotCappedPercent, 0, cap.Max * 0.01f) : ProjectileStartVelocityScaleCappedPercent;
+
+        //}
+
+        public override void ModifyWeaponDamage(Item item, Player player, ref StatModifier damage)
+        {
+            if (config.EnableWhiteList && !isWhiteListed(item))
+                return;
+
+            if (!config.DamageIncrement || isBlackListed(item))
+                return;
+
+            var statDamage = isHardCapped(config.Damage, item, out var cap) ? Math.Clamp(DamageNotCapped, int.MinValue, cap.Max) * cap.Sign : DamageCapped;
+
+            if (config.IncreaseBaseDamage)
+                damage.Base += statDamage;
+
+            if (config.IncreaseFlatDamage)
+                damage.Flat += statDamage;
+
+            if (config.IncreaseMultDamage)
+                damage += statDamage * 0.01f;
+        }
+
+        public override void UpdateEquip(Item item, Player player)
+        {
+            if (config.EnableWhiteList && !isWhiteListed(item))
+                return;
+
+            if (!config.DefenceIncrement || isBlackListed(item))
+                return;
+
+            if (item.accessory && config.AccessoriesShouldHaveDefaultDefenceToIncreaseDefence && item.OriginalDefense <= 0)
+                return;
+
+            item.defense = item.OriginalDefense + (isHardCapped(config.Defence, item, out var cap) ? Math.Clamp(DefenceNotCapped, int.MinValue, cap.Max) * cap.Sign : DefenceCapped);
+        }
+
+        public override void ModifyWeaponCrit(Item item, Player player, ref float crit)
+        {
+            if (config.EnableWhiteList && !isWhiteListed(item))
+                return;
+
+            if (!config.CritIncrement || isBlackListed(item))
+                return;
+
+            if (!isBlackListed(config.Crit, item))
+                crit += isHardCapped(config.Crit, item, out var cap) ? Math.Clamp(CritNotCapped, int.MinValue, cap.Max) * cap.Sign : CritCapped;
+        }
+
+        public override float UseTimeMultiplier(Item item, Player player)
+        {
+            if (config.EnableWhiteList && !isWhiteListed(item))
+                return 1f;
+
+            if (!config.UseTimeIncrement || isBlackListed(item))
+                return 1f;
+
+            if (isBlackListed(config.UseTime, item))
+                return 1f;
+
+            return 1f - (isHardCapped(config.UseTime, item, out var cap) ? Math.Clamp(UseTimeNotCappedPercent, int.MinValue, cap.Max * 0.01f) * cap.Sign : UseTimeCappedPercent);
+        }
+
+        public override float UseAnimationMultiplier(Item item, Player player)
+        {
+            if (config.EnableWhiteList && !isWhiteListed(item))
+                return 1f;
+
+            if (!config.UseAnimationIncrement || isBlackListed(item))
+                return 1f;
+
+            if (isBlackListed(config.UseAnimation, item))
+                return 1f;
+
+            return 1f - (isHardCapped(config.UseAnimation, item, out var cap) ? Math.Clamp(UseAnimNotCappedPercent, int.MinValue, cap.Max * 0.01f) * cap.Sign : UseAnimCappedPercent);
+        }
+
+        public override void ModifyItemScale(Item item, Player player, ref float scale)
+        {
+            if (config.EnableWhiteList && !isWhiteListed(item))
+                return;
+
+            if (item.noMelee || !config.MeleeWeaponSizeIncrement || isBlackListed(item))
+                return;
+
+            if (isBlackListed(config.MeleeSize, item))
+                return;
+
+            scale += isHardCapped(config.MeleeSize, item, out var cap) ? Math.Clamp(MeleeSizeNotCappedPercent, int.MinValue, cap.Max * 0.01f) * cap.Sign : MeleeSizeCappedPercent;
+        }
+
+        public override bool CanConsumeAmmo(Item weapon, Item ammo, Player player)
+        {
+            if (config.EnableWhiteList && !isWhiteListed(weapon))
+                return true;
+
+            if (!config.NotUseAmmoChanceIncrement || isBlackListed(weapon))
+                return true;
+
+            var chance = isHardCapped(config.NotUseAmmoChance, weapon, out var cap) ? Math.Clamp(NotUseAmmoChanceNotCapped, int.MinValue, cap.Max) * cap.Sign : NotUseAmmoChanceCapped;
+
+            if (chance > Main.rand.Next(100))
+                return false;
+
+            return true;
+        }
+
+        public override void OnConsumeItem(Item item, Player player)
+        {
+            if (config.EnableWhiteList && !isWhiteListed(item))
+                return;
+
+            if (!config.NotUseAmmoChanceIncrement || isBlackListed(item))
+                return;
+
+            var chance = isHardCapped(config.NotUseAmmoChance, item, out var cap) ? Math.Clamp(NotUseAmmoChanceNotCapped, int.MinValue, cap.Max) * cap.Sign : NotUseAmmoChanceCapped;
+
+            if (chance > Main.rand.Next(100))
+                item.stack++;
+        }
+
+        public override void ModifyManaCost(Item item, Player player, ref float reduce, ref float mult)
+        {
+            if (config.EnableWhiteList && !isWhiteListed(item))
+                return;
+
+            if (!config.WeaponManaCostIncrement || isBlackListed(item))
+                return;
+
+            if (isBlackListed(config.ManaCost, item))
+                return;
+
+            var manaModifier = isHardCapped(config.ManaCost, item, out var cap) ? Math.Clamp(ManaCostNotCappedPercent, int.MinValue, cap.Max * 0.01f) * cap.Sign : ManaCostCappedPercent;
+
+            if (manaModifier >= 0)
+                reduce -= manaModifier;
+            else
+                mult -= manaModifier;
+        }
+
+        //Интерфейсы надо
+        public bool isHardCapped(ItemStatInt itemStat, Item item, out StatHardCap cap)
+        {
+            foreach (var pair in itemStat.HardCap)
+            {
+                if (pair.Key.Type == item.type)
+                {
+                    cap = pair.Value;
+
+                    return true;
+                }
+            }
+
+            cap = null;
+            return false;
+        }
+
+        public bool isHardCapped(ItemStatFloat itemStat, Item item, out StatHardCap cap)
+        {
+            foreach (var pair in itemStat.HardCap)
+            {
+                if (pair.Key.Type == item.type)
+                {
+                    cap = pair.Value;
+
+                    return true;
+                }
+            }
+
+            cap = null;
+            return false;
+        }
+
+        public bool isHardCapped(ProjectileStatFloat projectileStat, Item item, out StatHardCap cap)
+        {
+            foreach (var pair in projectileStat.ItemHardCap)
+            {
+                if (pair.Key.Type == item.type)
+                {
+                    cap = pair.Value;
+
+                    return true;
+                }
+            }
+
+            cap = null;
+            return false;
+        }
+
+        public bool isHardCapped(ProjectileStatFloat projectileStat, Projectile proj, out StatHardCap cap)
+        {
+            foreach (var pair in projectileStat.ProjectileHardCap)
+            {
+                if (pair.Key.Type == proj.type)
+                {
+                    cap = pair.Value;
+
+                    return true;
+                }
+            }
+
+            cap = null;
+            return false;
+        }
+
+        //Есть ли предмет в белом списке
+        public bool isWhiteListed(Item item) => config.ItemsWhiteList.Any(whiteListItem => whiteListItem.Type == item.type);
+        //Есть ли предмет в чёрном списке
+        public bool isBlackListed(Item item) => config.ItemsBlackList.Any(blackListItem => blackListItem.Type == item.type);
+        //Есть ли снаряд в списке
+        public bool isBlackListed(Projectile proj) => config.ProjectilesBlackList.Any(blackListProj => blackListProj.Type == proj.type);
+        //Есть ли нпс в списке
+        public bool isBlackListed(NPC npc) => config.NpcBlackList.Any(blackListNPC => blackListNPC.Type == npc.type);
+        //Есть ли в стате предмета предмет в чёрном списке
+        public bool isBlackListed(ItemStatInt stat, Item item) => stat.ItemBlackList.Any(blackListItem => blackListItem.Type == item.type);
+        //Есть ли в стате предмета предмет в чёрном списке
+        public bool isBlackListed(ItemStatFloat stat, Item item) => stat.BlackList.Any(blackListItem => blackListItem.Type == item.type);
+        //Есть ли в стате снаряда предмет в чёрном списке
+        public bool isBlackListed(ProjectileStatFloat stat, Item item) => stat.ItemBlackList.Any(blackListItem => blackListItem.Type == item.type);
+        //Есть ли в стате снаряда снаряд в чёрном списке
+        public bool isBlackListed(ProjectileStatFloat stat, Projectile projectile) => stat.ProjectileBlackList.Any(blackListProj => blackListProj.Type == projectile.type);
+
+        public bool isShowExpBlackListed(Item item) => configClient.ShowExpBlackList.Any(blackListItem => blackListItem.Type == item.type);
+        public bool isOutlineBlackListed(Item item) => configClient.OutlineBlackList.Any(blackListItem => blackListItem.Type == item.type);
+
+        public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
+        {
+            if (config.EnableWhiteList && !isWhiteListed(item))
+                return;
+
+            if (!configClient.ShowSignatureExp || isShowExpBlackListed(item)) return;
+
+            if (item.ammo != AmmoID.None)
+                return;
+
+            var expToUp = signatureExpToUp;
+
+            int digitCountExpToUp = (int)Math.Log10(expToUp) + 1;
+            int digitCountExpCurrent = (int)Math.Log10(signatureExpCurrent) + 1;
+            int difference = digitCountExpToUp - digitCountExpCurrent;
+            string space = "";
+            for (int i = 0; i < difference; i++)
+                space += " ";
+
+            string signatureEquipmentText;
+
+            if (isMaxLevel)
+                signatureEquipmentText = $"\n[c/FF8C00:Signature:    Lvl {Level} (Max)]";
+            else
+                signatureEquipmentText = $"\n[c/FF8C00:Signature:    Lvl {Level}  |  Exp {space}{signatureExpCurrent}/{expToUp} ({Math.Round((double)signatureExpCurrent / expToUp * 100)}%)]";
+
+            bool isArmor = item.headSlot >= 0 || item.bodySlot >= 0 || item.legSlot >= 0;
+            bool isAccessory = item.accessory;
+
+            if (signatureExpCurrent == 0 && Level == 0)
+            {
+                if (isArmor && !config.ArmorRecieveExp)
+                    return;
+
+                if (isAccessory && !config.AccessoriesRecieveExpFromGetHit)
+                    return;
+            }
+
+            foreach (var tooltip in tooltips)
+            {
+                if (tooltip.Name.Equals("Damage"))
+                {
+                    tooltip.Text += signatureEquipmentText;
+                    return;
+                }
+                else if (tooltip.Name.Equals("Defense"))
+                {
+                    tooltip.Text += signatureEquipmentText;
+                    return;
+                }
+                else if (tooltip.Name.Equals("Equipable"))
+                {
+                    if (isArmor || isAccessory)
+                        tooltip.Text += signatureEquipmentText;
+
+                    return;
+                }
+                else if (tooltip.Name.Equals("Tooltip0"))
+                    if (signatureExpCurrent > 0 || Level > 0)
+                    {
+                        tooltip.Text += signatureEquipmentText;
+                        return;
+                    }
+            }
+        }
+
+        public override bool PreDrawInInventory(Item item, SpriteBatch spriteBatch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)
+        {
+            if (!configClient.EnableOutline || Level == 0 || isOutlineBlackListed(item))
+                return true;
+
+            Texture2D texture = TextureAssets.Item[item.type].Value;
+
+            //if (item.ModItem != null)
+            //    texture = TextureAssets.Item[item.ModItem.Type].Value;
+            //else
+            //    texture = TextureAssets.Item[item.type].Value;
+
+            spriteBatch.End();
+
+            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, null, null, null, null, Main.UIScaleMatrix);
+
+            float minOffset = 0.5f;
+            float addOffset = 0.5f;
+
+            float minItemScale = 1f;
+            float maxItemScale = 1.5f;
+            float speed = configClient.OutlineRate;
+
+            float minOutlineSize = 0f;
+            float startOutlineSize = 0.1f;
+            float addOutlineSize = 1f - startOutlineSize;
+
+            int levelsToMaxScale = config.MaxLevel != 0 ? config.MaxLevel : configClient.LevelsToMaxOutline;
+            float maxLevelScale = 0.5f; //(maxItemScale - startOutlineSize) / addOutlineSize;
+            float levelScale = maxLevelScale / levelsToMaxScale;
+            float currentLevelScale = Math.Clamp(Level, 0, configClient.LevelsToMaxOutline) * levelScale;
+
+            var difference = minOffset + addOffset;
+
+            var amount = (float)Math.Abs(Math.Sin((double)(Main.GlobalTimeWrappedHourly * speed)) * difference);
+
+            Color outlineColor = Color.Lerp(configClient.FirstColor, configClient.SecondColor, amount);
+
+            switch (configClient.OutlineMode)
+            {
+                case OutlineMode.Scale:
+
+                    spriteBatch.Draw(texture, position, new Rectangle?(frame), outlineColor, 0f, origin,
+                        scale * Math.Clamp(1 + Math.Clamp(Math.Clamp(currentLevelScale, 0, maxLevelScale) * startOutlineSize, minOutlineSize, startOutlineSize)
+                        + Math.Clamp(currentLevelScale, 0, maxLevelScale) * addOutlineSize * amount, minItemScale, maxItemScale), 0, 0f);
+
+                    break;
+                case OutlineMode.Copy:
+
+                    float outlineMaxSize = 6f;
+                    float outlineWidth = MathHelper.Lerp(currentLevelScale * 0.5f, currentLevelScale * outlineMaxSize, amount);
+
+                    for (int i = 0; i < 4; i += 1)
+                        spriteBatch.Draw(texture, position + (i / 4f * MathF.PI * 2).ToRotationVector2() * outlineWidth, new Rectangle?(frame), outlineColor, 0f, origin, scale, 0, 0f);
+
+                    break;
+            }
+
+            spriteBatch.End();
+            spriteBatch.Begin(0, null, null, null, null, null, Main.UIScaleMatrix);
+
+            return true;
+        }
+
+        public override void SaveData(Item item, TagCompound tag)
+        {
+            tag.Set("signatureLevel", signatureLevel, true);
+            tag.Set("signatureExpCurrent", signatureExpCurrent, true);
+        }
+
+        public override void LoadData(Item item, TagCompound tag)
+        {
+            if (tag.ContainsKey("signatureLevel"))
+                signatureLevel = tag.GetAsInt("signatureLevel");
+            if (tag.ContainsKey("signatureExpCurrent"))
+                signatureExpCurrent = tag.GetAsInt("signatureExpCurrent");
+        }
+
+        //Два метода ниже нужны, чтобы при перековке и выбрасывании предмета на сервере не терялся опыт
+
+        //Отправляет на сервер пакет данных с уровнем и опытом предмета, остальные переменные вычисляются на клиентах
+        public override void NetSend(Item item, BinaryWriter writer)
+        {
+            SignatureGlobalItem globalItem;
+
+            if (item.TryGetGlobalItem(out globalItem))
+            {
+                writer.Write(globalItem.signatureLevel);
+                writer.Write(globalItem.signatureExpCurrent);
+            }
+        }
+
+        //Принимает пакет данных
+        public override void NetReceive(Item item, BinaryReader reader)
+        {
+            SignatureGlobalItem globalItem;
+
+            if (item.TryGetGlobalItem(out globalItem))
+            {
+                globalItem.signatureLevel = reader.ReadInt32();
+                globalItem.signatureExpCurrent = reader.ReadInt32();
+            }
+        }
+
+        public override void OnCreated(Item item, ItemCreationContext context)
+        {
+            if (!config.LevelInheritForCraft)
+                return;
+
+            if (context is RecipeItemCreationContext con)
+            {
+                var materials = con.ConsumedItems;
+
+                int maxLevel = 0;
+
+                foreach (var material in materials)
+                {
+                    var signature = material.GetGlobalItem<SignatureGlobalItem>();
+
+                    if (signature.Level > maxLevel)
+                        maxLevel = signature.Level;
+                }
+
+                item.GetGlobalItem<SignatureGlobalItem>().SetLevel(maxLevel);
+            }
+        }
+    }
+}

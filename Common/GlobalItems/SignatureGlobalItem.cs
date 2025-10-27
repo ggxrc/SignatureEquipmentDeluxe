@@ -223,56 +223,76 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
         public int GetCritChanceCapped(Item item) => GetStatCapped(GetServerConfig().WeaponCritChance, item);
         public int GetCritChanceNotCapped(Item item) => GetStatUncapped(GetServerConfig().WeaponCritChance, item);
         
-        public float GetUseSpeedCapped(Item item) => GetStatCappedFloat(GetServerConfig().WeaponUseSpeed, item);
-        public float GetUseSpeedNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().WeaponUseSpeed, item);
+        public float GetUseTimeCapped(Item item) => GetStatCappedFloat(GetServerConfig().WeaponUseTime, item);
+        public float GetUseTimeNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().WeaponUseTime, item);
+        public float GetUseTimeCappedPercent(Item item) => GetUseTimeCapped(item) * 0.01f;
+        public float GetUseTimeNotCappedPercent(Item item) => GetUseTimeNotCapped(item) * 0.01f;
         
-        public float GetMeleeSpeedCapped(Item item) => GetStatCappedFloat(GetServerConfig().WeaponMeleeSpeed, item);
-        public float GetMeleeSpeedNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().WeaponMeleeSpeed, item);
+        public float GetUseAnimationCapped(Item item) => GetStatCappedFloat(GetServerConfig().WeaponUseAnimation, item);
+        public float GetUseAnimationNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().WeaponUseAnimation, item);
+        public float GetUseAnimationCappedPercent(Item item) => GetUseAnimationCapped(item) * 0.01f;
+        public float GetUseAnimationNotCappedPercent(Item item) => GetUseAnimationNotCapped(item) * 0.01f;
         
         public float GetMeleeSizeCapped(Item item) => GetStatCappedFloat(GetServerConfig().WeaponMeleeSize, item);
         public float GetMeleeSizeNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().WeaponMeleeSize, item);
+        public float GetMeleeSizeCappedPercent(Item item) => GetMeleeSizeCapped(item) * 0.01f;
+        public float GetMeleeSizeNotCappedPercent(Item item) => GetMeleeSizeNotCapped(item) * 0.01f;
         
         public float GetManaCostReductionCapped(Item item) => GetStatCappedFloat(GetServerConfig().WeaponManaCostReduction, item);
         public float GetManaCostReductionNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().WeaponManaCostReduction, item);
+        public float GetManaCostReductionCappedPercent(Item item) => GetManaCostReductionCapped(item) * 0.01f;
+        public float GetManaCostReductionNotCappedPercent(Item item) => GetManaCostReductionNotCapped(item) * 0.01f;
         
         public float GetAmmoConsumptionReductionCapped(Item item) => GetStatCappedFloat(GetServerConfig().WeaponAmmoConsumptionReduction, item);
         public float GetAmmoConsumptionReductionNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().WeaponAmmoConsumptionReduction, item);
+        public float GetAmmoConsumptionReductionCappedPercent(Item item) => GetAmmoConsumptionReductionCapped(item) * 0.01f;
+        public float GetAmmoConsumptionReductionNotCappedPercent(Item item) => GetAmmoConsumptionReductionNotCapped(item) * 0.01f;
         
         // Projectile Stats
         public float GetProjectileSizeCapped(Item item) => GetProjectileStatCappedFloat(GetServerConfig().WeaponProjectileSize, item);
         public float GetProjectileSizeNotCapped(Item item) => GetProjectileStatUncappedFloat(GetServerConfig().WeaponProjectileSize, item);
+        public float GetProjectileSizeCappedPercent(Item item) => GetProjectileSizeCapped(item) * 0.01f;
+        public float GetProjectileSizeNotCappedPercent(Item item) => GetProjectileSizeNotCapped(item) * 0.01f;
         
         public float GetProjectileSpeedCapped(Item item) => GetProjectileStatCappedFloat(GetServerConfig().WeaponProjectileSpeed, item);
         public float GetProjectileSpeedNotCapped(Item item) => GetProjectileStatUncappedFloat(GetServerConfig().WeaponProjectileSpeed, item);
+        public float GetProjectileSpeedCappedPercent(Item item) => GetProjectileSpeedCapped(item) * 0.01f;
+        public float GetProjectileSpeedNotCappedPercent(Item item) => GetProjectileSpeedNotCapped(item) * 0.01f;
         
         public float GetProjectileLifeTimeCapped(Item item) => GetProjectileStatCappedFloat(GetServerConfig().WeaponProjectileLifeTime, item);
         public float GetProjectileLifeTimeNotCapped(Item item) => GetProjectileStatUncappedFloat(GetServerConfig().WeaponProjectileLifeTime, item);
+        public float GetProjectileLifeTimeCappedPercent(Item item) => GetProjectileLifeTimeCapped(item) * 0.01f;
+        public float GetProjectileLifeTimeNotCappedPercent(Item item) => GetProjectileLifeTimeNotCapped(item) * 0.01f;
         
         public float GetProjectilePenetrationCapped(Item item) => GetProjectileStatCappedFloat(GetServerConfig().WeaponProjectilePenetration, item);
         public float GetProjectilePenetrationNotCapped(Item item) => GetProjectileStatUncappedFloat(GetServerConfig().WeaponProjectilePenetration, item);
+        public float GetProjectilePenetrationCappedPercent(Item item) => GetProjectilePenetrationCapped(item) * 0.01f;
+        public float GetProjectilePenetrationNotCappedPercent(Item item) => GetProjectilePenetrationNotCapped(item) * 0.01f;
+        
+        public float GetAdditionalProjectileChanceCapped(Item item) => GetProjectileStatCappedFloat(GetServerConfig().WeaponAdditionalProjectileChance, item);
+        public float GetAdditionalProjectileChanceNotCapped(Item item) => GetProjectileStatUncappedFloat(GetServerConfig().WeaponAdditionalProjectileChance, item);
         
         // Armor Stats
         public int GetDefenceCapped(Item item) => GetStatCapped(GetServerConfig().ArmorDefense, item);
         public int GetDefenceNotCapped(Item item) => GetStatUncapped(GetServerConfig().ArmorDefense, item);
         
-        // Accessory Stats
-        public int GetAccessoryDamageCapped(Item item) => GetStatCapped(GetServerConfig().AccessoryDamage, item);
-        public int GetAccessoryDefenseCapped(Item item) => GetStatCapped(GetServerConfig().AccessoryDefense, item);
-        public int GetAccessoryCritChanceCapped(Item item) => GetStatCapped(GetServerConfig().AccessoryCritChance, item);
-        public float GetMinionSlotReductionCapped(Item item) => GetStatCappedFloat(GetServerConfig().AccessoryMinionSlotReduction, item);
-        public float GetMinionSlotReductionNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().AccessoryMinionSlotReduction, item);
+        // Accessory Stats (sem stats próprios - XP vai para armas)
         
         // ==================== INTEGRAÇÃO COM PLAYER ====================
         // O XP agora é distribuído pelo SignaturePlayer.cs via OnHitNPC hook
         // Removido o OnHitNPC aqui para evitar duplicação
         
         /// <summary>
-        /// Verifica se o item pode ganhar XP (é arma, armor ou accessory, mas NÃO munição)
+        /// Verifica se o item pode ganhar XP (é arma ou armor, mas NÃO munição nem acessório)
         /// </summary>
         public bool CanGainExperience(Item item)
         {
             // Munições não ganham XP
             if (item.ammo > 0 || item.consumable && item.damage > 0)
+                return false;
+            
+            // Acessórios não ganham XP (XP vai para armas equipadas)
+            if (item.accessory)
                 return false;
                 
             // Blacklist global
@@ -280,144 +300,296 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
             if (config.GlobalItemBlacklist != null && config.GlobalItemBlacklist.Any(def => def.Type == item.type))
                 return false;
             
-            return item.damage > 0 || item.defense > 0 || item.accessory;
+            return item.damage > 0 || item.defense > 0;
         }
         
         // ==================== HOOKS DE MODIFICAÇÃO ====================
         
         public override void ModifyWeaponDamage(Item item, Player player, ref StatModifier damage)
         {
-            if (Level > 0 && item.damage > 0)
+            var config = GetServerConfig();
+            
+            // Verifica se o item está na blacklist
+            if (isBlackListed(item, config.WeaponDamage.ItemBlackList))
+                return;
+            
+            // Verifica se o incremento de dano está habilitado
+            if (!config.DamageIncrement)
+                return;
+            
+            // Verifica se o item tem dano
+            if (Level == 0 || item.damage <= 0)
+                return;
+            
+            // Calcula o dano com HardCap se existir
+            int statDamage;
+            if (isHardCapped(item, config.WeaponDamage.HardCap, out var cap))
             {
-                int damageBonus = GetDamageCapped(item);
-                if (damageBonus > 0)
-                {
-                    damage.Flat += damageBonus;
-                    
-                    // Debug
-                    var config = GetServerConfig();
-                    if (config.DebugMode)
-                    {
-                        Main.NewText($"[DEBUG] Item: {item.Name}, Level: {Level}, Damage Bonus: +{damageBonus}");
-                    }
-                }
+                int uncappedDamage = GetDamageNotCapped(item);
+                statDamage = Math.Clamp(uncappedDamage, int.MinValue, cap.Max) * cap.Sign;
+            }
+            else
+            {
+                statDamage = GetDamageCapped(item);
+            }
+            
+            // Aplica o dano de acordo com os modos configurados
+            if (config.IncreaseBaseDamage)
+                damage.Base += statDamage;
+            
+            if (config.IncreaseFlatDamage)
+                damage.Flat += statDamage;
+            
+            if (config.IncreaseMultDamage)
+                damage += statDamage * 0.01f;
+            
+            // Debug
+            if (config.DebugMode && statDamage > 0)
+            {
+                Main.NewText($"[DEBUG] Item: {item.Name}, Level: {Level}, Damage Bonus: +{statDamage} (Base: {config.IncreaseBaseDamage}, Flat: {config.IncreaseFlatDamage}, Mult: {config.IncreaseMultDamage})");
             }
         }
         
         public override void ModifyWeaponCrit(Item item, Player player, ref float crit)
         {
-            if (Level > 0 && item.damage > 0)
+            var config = GetServerConfig();
+            
+            // Verifica se o item está na blacklist
+            if (isBlackListed(item, config.WeaponCritChance.ItemBlackList))
+                return;
+            
+            // Verifica se o incremento de crit está habilitado
+            if (!config.CritIncrement)
+                return;
+            
+            // Verifica se o item tem dano
+            if (Level == 0 || item.damage <= 0)
+                return;
+            
+            // Calcula o crit com HardCap se existir
+            int statCrit;
+            if (isHardCapped(item, config.WeaponCritChance.HardCap, out var cap))
             {
-                int critBonus = GetCritChanceCapped(item);
-                if (critBonus > 0)
-                {
-                    crit += critBonus;
-                }
+                int uncappedCrit = GetCritChanceNotCapped(item);
+                statCrit = Math.Clamp(uncappedCrit, int.MinValue, cap.Max) * cap.Sign;
+            }
+            else
+            {
+                statCrit = GetCritChanceCapped(item);
+            }
+            
+            if (statCrit > 0)
+            {
+                crit += statCrit;
             }
         }
         
         public override float UseSpeedMultiplier(Item item, Player player)
         {
-            if (Level > 0 && item.useTime > 0)
+            var config = GetServerConfig();
+            
+            // Verifica se o incremento está habilitado
+            if (!config.UseTimeIncrement)
+                return 1f;
+            
+            // Verifica se o item está na blacklist
+            if (isBlackListed(item, config.WeaponUseTime.BlackList))
+                return 1f;
+            
+            // Verifica se o item tem useTime válido
+            if (Level == 0 || item.useTime <= 0)
+                return 1f;
+            
+            // Calcula com HardCap se aplicável, senão usa o valor capped normal
+            float percentValue;
+            if (isHardCapped(item, config.WeaponUseTime.HardCap, out var hardCap))
             {
-                float speedBonus = GetUseSpeedCapped(item);
-                if (speedBonus > 0)
-                {
-                    // Reduz o use time (valores menores = mais rápido)
-                    return 1f / (1f + speedBonus / 100f);
-                }
+                float notCappedPercent = GetUseTimeNotCappedPercent(item);
+                percentValue = Math.Clamp(notCappedPercent, int.MinValue, hardCap.Max * 0.01f) * hardCap.Sign;
             }
-            return 1f;
+            else
+            {
+                percentValue = GetUseTimeCappedPercent(item);
+            }
+            
+            // Fórmula da referência: 1f - percentValue
+            return 1f - percentValue;
+        }
+        
+        public override float UseAnimationMultiplier(Item item, Player player)
+        {
+            var config = GetServerConfig();
+            
+            // Verifica se o incremento está habilitado
+            if (!config.UseAnimationIncrement)
+                return 1f;
+            
+            // Verifica se o item está na blacklist
+            if (isBlackListed(item, config.WeaponUseAnimation.BlackList))
+                return 1f;
+            
+            // Verifica se o item tem useAnimation válido
+            if (Level == 0 || item.useAnimation <= 0)
+                return 1f;
+            
+            // Calcula com HardCap se aplicável, senão usa o valor capped normal
+            float percentValue;
+            if (isHardCapped(item, config.WeaponUseAnimation.HardCap, out var hardCap))
+            {
+                float notCappedPercent = GetUseAnimationNotCappedPercent(item);
+                percentValue = Math.Clamp(notCappedPercent, int.MinValue, hardCap.Max * 0.01f) * hardCap.Sign;
+            }
+            else
+            {
+                percentValue = GetUseAnimationCappedPercent(item);
+            }
+            
+            // Fórmula da referência: 1f - percentValue
+            return 1f - percentValue;
+        }
+        
+        public override void ModifyItemScale(Item item, Player player, ref float scale)
+        {
+            var config = GetServerConfig();
+            
+            // Verifica se o item é noMelee (não tem melee hitbox)
+            if (item.noMelee)
+                return;
+            
+            // Verifica se o incremento está habilitado
+            if (!config.MeleeWeaponSizeIncrement)
+                return;
+            
+            // Verifica se o item está na blacklist
+            if (isBlackListed(item, config.WeaponMeleeSize.BlackList))
+                return;
+            
+            // Verifica se tem nível
+            if (Level == 0)
+                return;
+            
+            // Calcula com HardCap se aplicável, senão usa o valor capped normal
+            float percentValue;
+            if (isHardCapped(item, config.WeaponMeleeSize.HardCap, out var hardCap))
+            {
+                float notCappedPercent = GetMeleeSizeNotCappedPercent(item);
+                percentValue = Math.Clamp(notCappedPercent, int.MinValue, hardCap.Max * 0.01f) * hardCap.Sign;
+            }
+            else
+            {
+                percentValue = GetMeleeSizeCappedPercent(item);
+            }
+            
+            scale += percentValue;
         }
         
         public override void HoldItem(Item item, Player player)
         {
-            if (Level > 0 && item.CountsAsClass(DamageClass.Melee))
-            {
-                float meleeSpeedBonus = GetMeleeSpeedCapped(item);
-                if (meleeSpeedBonus > 0)
-                {
-                    player.GetAttackSpeed(DamageClass.Melee) += meleeSpeedBonus / 100f;
-                }
-                
-                float meleeSizeBonus = GetMeleeSizeCapped(item);
-                if (meleeSizeBonus > 0)
-                {
-                    player.GetDamage(DamageClass.Melee).Flat += meleeSizeBonus / 100f;
-                }
-            }
-        }
-        
-        public override void UpdateAccessory(Item item, Player player, bool hideVisual)
-        {
-            if (Level > 0 && item.accessory)
-            {
-                // Defense bonus
-                int defenseBonus = GetAccessoryDefenseCapped(item);
-                if (defenseBonus > 0)
-                {
-                    player.statDefense += defenseBonus;
-                }
-                
-                // Damage bonus
-                int damageBonus = GetAccessoryDamageCapped(item);
-                if (damageBonus > 0)
-                {
-                    player.GetDamage(DamageClass.Generic).Flat += damageBonus;
-                }
-                
-                // Crit chance bonus
-                int critBonus = GetAccessoryCritChanceCapped(item);
-                if (critBonus > 0)
-                {
-                    player.GetCritChance(DamageClass.Generic) += critBonus;
-                }
-                
-                // Minion slot reduction
-                float minionReduction = GetMinionSlotReductionCapped(item);
-                if (minionReduction > 0 && player.maxMinions > 0)
-                {
-                    // Reduz o custo de slots de minions (não implementado diretamente, mas pode ser via buff)
-                    // Por enquanto, deixamos como placeholder para futuras implementações
-                }
-            }
-        }
-        
-        public override void UpdateEquip(Item item, Player player)
-        {
-            if (Level > 0 && item.defense > 0)
-            {
-                int defenseBonus = GetDefenceCapped(item);
-                if (defenseBonus > 0)
-                {
-                    player.statDefense += defenseBonus;
-                }
-            }
-        }
-        
-        public override void ModifyManaCost(Item item, Player player, ref float reduce, ref float mult)
-        {
-            if (Level > 0 && item.mana > 0)
-            {
-                float manaReduction = GetManaCostReductionCapped(item);
-                if (manaReduction > 0)
-                {
-                    mult *= 1f - (manaReduction / 100f);
-                }
-            }
+            // Hook mantido mas vazio - lógica movida para ModifyItemScale
         }
         
         public override bool CanConsumeAmmo(Item weapon, Item ammo, Player player)
         {
-            if (Level > 0 && weapon.useAmmo > 0)
+            var config = GetServerConfig();
+            
+            // Verifica se o incremento está habilitado
+            if (!config.NotUseAmmoChanceIncrement)
+                return true;
+            
+            // Verifica se o item está na blacklist
+            if (isBlackListed(weapon, config.WeaponAmmoConsumptionReduction.BlackList))
+                return true;
+            
+            // Verifica se tem nível
+            if (Level == 0)
+                return true;
+            
+            // Calcula a chance de não consumir com HardCap se aplicável
+            float chance;
+            if (isHardCapped(weapon, config.WeaponAmmoConsumptionReduction.HardCap, out var cap))
             {
-                float ammoReduction = GetAmmoConsumptionReductionCapped(weapon);
-                if (ammoReduction > 0 && Main.rand.NextFloat(100f) < ammoReduction)
-                {
-                    return false;
-                }
+                float notCapped = GetAmmoConsumptionReductionNotCapped(weapon);
+                chance = Math.Clamp(notCapped, int.MinValue, cap.Max) * cap.Sign;
             }
-            return base.CanConsumeAmmo(weapon, ammo, player);
+            else
+            {
+                chance = GetAmmoConsumptionReductionCapped(weapon);
+            }
+            
+            // Checa se não consome
+            if (chance > Main.rand.Next(100))
+                return false;
+            
+            return true;
+        }
+        
+        public override void ModifyManaCost(Item item, Player player, ref float reduce, ref float mult)
+        {
+            var config = GetServerConfig();
+            
+            // Verifica se o incremento está habilitado
+            if (!config.ManaCostReductionIncrement)
+                return;
+            
+            // Verifica se o item está na blacklist
+            if (isBlackListed(item, config.WeaponManaCostReduction.BlackList))
+                return;
+            
+            // Verifica se tem nível e o item usa mana
+            if (Level == 0 || item.mana <= 0)
+                return;
+            
+            // Calcula o modificador com HardCap se aplicável
+            float manaModifier;
+            if (isHardCapped(item, config.WeaponManaCostReduction.HardCap, out var cap))
+            {
+                float notCappedPercent = GetManaCostReductionNotCappedPercent(item);
+                manaModifier = Math.Clamp(notCappedPercent, int.MinValue, cap.Max * 0.01f) * cap.Sign;
+            }
+            else
+            {
+                manaModifier = GetManaCostReductionCappedPercent(item);
+            }
+            
+            // Aplica o modificador
+            if (manaModifier >= 0)
+                reduce -= manaModifier;
+            else
+                mult -= manaModifier;
+        }
+        
+        // UpdateAccessory removido - acessórios não ganham XP nem stats
+        
+        public override void UpdateEquip(Item item, Player player)
+        {
+            var config = GetServerConfig();
+            
+            // Verifica se o incremento está habilitado
+            if (!config.DefenceIncrement)
+                return;
+            
+            // Verifica se o item está na blacklist
+            if (isBlackListed(item, config.ArmorDefense.ItemBlackList))
+                return;
+            
+            // Verifica se tem nível e defesa
+            if (Level == 0 || item.defense <= 0)
+                return;
+            
+            // Calcula a defesa com HardCap se existir
+            int statDefense;
+            if (isHardCapped(item, config.ArmorDefense.HardCap, out var cap))
+            {
+                int uncappedDefense = GetDefenceNotCapped(item);
+                statDefense = Math.Clamp(uncappedDefense, int.MinValue, cap.Max) * cap.Sign;
+            }
+            else
+            {
+                statDefense = GetDefenceCapped(item);
+            }
+            
+            // Aplica a defesa usando OriginalDefense do Terraria
+            item.defense = item.OriginalDefense + statDefense;
         }
         
         // ==================== TOOLTIPS ====================
@@ -428,8 +600,7 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
             if (!CanGainExperience(item)) return;
             
             var clientConfig = GetClientConfig();
-            
-            // Items começam no nível 0, não precisamos inicializar
+            var serverConfig = GetServerConfig();
             
             if (!clientConfig.ShowItemLevel && !clientConfig.ShowItemStats) return;
             
@@ -489,26 +660,167 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
                 }
             }
             
-            // Mostra stats
-            if (clientConfig.ShowItemStats)
+            // Mostra stats (apenas os relevantes ao item e que estão habilitados)
+            if (clientConfig.ShowItemStats && Level > 0)
             {
-                AddStatTooltip(tooltips, "Damage", GetDamageCapped(item), clientConfig);
-                AddStatTooltip(tooltips, "Defense", GetDefenceCapped(item), clientConfig);
-                AddStatTooltip(tooltips, "Crit Chance", GetCritChanceCapped(item), clientConfig, "%");
-                AddStatTooltip(tooltips, "Use Speed", GetUseSpeedCapped(item), clientConfig, "%");
-                AddStatTooltip(tooltips, "Melee Speed", GetMeleeSpeedCapped(item), clientConfig, "%");
-                AddStatTooltip(tooltips, "Melee Size", GetMeleeSizeCapped(item), clientConfig, "%");
-                AddStatTooltip(tooltips, "Mana Cost", -GetManaCostReductionCapped(item), clientConfig, "%");
-                AddStatTooltip(tooltips, "Ammo Save", GetAmmoConsumptionReductionCapped(item), clientConfig, "%");
+                bool isWeapon = item.damage > 0;
+                bool isArmor = item.defense > 0;
+                
+                // WEAPON STATS - só se for arma
+                if (isWeapon)
+                {
+                    bool isMelee = item.CountsAsClass(DamageClass.Melee);
+                    bool isRanged = item.CountsAsClass(DamageClass.Ranged);
+                    bool isMagic = item.CountsAsClass(DamageClass.Magic);
+                    bool isSummoner = item.CountsAsClass(DamageClass.Summon);
+                    bool hasMana = item.mana > 0;
+                    bool hasAmmo = item.useAmmo > 0;
+                    bool hasProjectile = item.shoot > ProjectileID.None && item.shoot != ProjectileID.None;
+                    
+                    // Damage (com os 3 modos)
+                    if (serverConfig.DamageIncrement)
+                    {
+                        int damageBonus = GetDamageCapped(item);
+                        if (damageBonus > 0)
+                        {
+                            string damageText = "";
+                            if (serverConfig.IncreaseBaseDamage) damageText += "Base ";
+                            if (serverConfig.IncreaseFlatDamage) damageText += "Flat ";
+                            if (serverConfig.IncreaseMultDamage) damageText += "Mult ";
+                            
+                            AddStatTooltip(tooltips, $"Damage ({damageText.Trim()})", damageBonus, clientConfig);
+                        }
+                    }
+                    
+                    // Crit Chance
+                    if (serverConfig.CritIncrement)
+                    {
+                        int critBonus = GetCritChanceCapped(item);
+                        if (critBonus > 0)
+                            AddStatTooltip(tooltips, "Crit Chance", critBonus, clientConfig, "%");
+                    }
+                    
+                    // Use Time
+                    if (serverConfig.UseTimeIncrement)
+                    {
+                        float useTime = GetUseTimeCapped(item);
+                        if (useTime > 0)
+                            AddStatTooltip(tooltips, "Attack Speed (Use Time)", useTime, clientConfig, "%", false);
+                    }
+                    
+                    // Use Animation
+                    if (serverConfig.UseAnimationIncrement)
+                    {
+                        float useAnim = GetUseAnimationCapped(item);
+                        if (useAnim > 0)
+                            AddStatTooltip(tooltips, "Attack Speed (Animation)", useAnim, clientConfig, "%", false);
+                    }
+                    
+                    // Melee Size - APENAS para melee (e não noMelee)
+                    if (isMelee && !item.noMelee && serverConfig.MeleeWeaponSizeIncrement)
+                    {
+                        float meleeSize = GetMeleeSizeCapped(item);
+                        if (meleeSize > 0)
+                            AddStatTooltip(tooltips, "Melee Size", meleeSize, clientConfig, "%");
+                    }
+                    
+                    // Mana Cost - APENAS para armas com custo de mana
+                    if (hasMana && serverConfig.ManaCostReductionIncrement)
+                    {
+                        float manaCost = GetManaCostReductionCapped(item);
+                        if (manaCost > 0)
+                            AddStatTooltip(tooltips, "Mana Cost Reduction", manaCost, clientConfig, "%");
+                    }
+                    
+                    // Ammo Consumption - APENAS para armas com munição
+                    if (hasAmmo && serverConfig.NotUseAmmoChanceIncrement)
+                    {
+                        float ammoSave = GetAmmoConsumptionReductionCapped(item);
+                        if (ammoSave > 0)
+                            AddStatTooltip(tooltips, "Ammo Save Chance", ammoSave, clientConfig, "%");
+                    }
+                    
+                    // PROJECTILE STATS - APENAS para armas que disparam projéteis
+                    if (hasProjectile)
+                    {
+                        // Additional Projectiles
+                        if (serverConfig.AdditionalProjectileChanceIncrement)
+                        {
+                            float additionalChance = GetAdditionalProjectileChanceCapped(item);
+                            if (additionalChance > 0)
+                            {
+                                int guaranteed = (int)(additionalChance / 100);
+                                int chanceExtra = (int)(additionalChance % 100);
+                                
+                                if (guaranteed > 0 && chanceExtra > 0)
+                                    AddStatTooltip(tooltips, "Additional Projectiles", $"{guaranteed} + {chanceExtra}% chance", clientConfig);
+                                else if (guaranteed > 0)
+                                    AddStatTooltip(tooltips, "Additional Projectiles", $"{guaranteed}", clientConfig);
+                                else
+                                    AddStatTooltip(tooltips, "Additional Projectiles", additionalChance, clientConfig, "%");
+                            }
+                        }
+                        
+                        // Projectile Size
+                        if (serverConfig.ProjectileSizeIncrement)
+                        {
+                            float projSize = GetProjectileSizeCapped(item);
+                            if (projSize > 0)
+                                AddStatTooltip(tooltips, "Projectile Size", projSize, clientConfig, "%");
+                        }
+                        
+                        // Projectile Speed
+                        if (serverConfig.ProjectileSpeedIncrement)
+                        {
+                            float projSpeed = GetProjectileSpeedCapped(item);
+                            if (projSpeed > 0)
+                                AddStatTooltip(tooltips, "Projectile Speed", projSpeed, clientConfig, "%");
+                        }
+                        
+                        // Projectile Lifetime
+                        if (serverConfig.ProjectileLifeTimeIncrement)
+                        {
+                            float lifetime = GetProjectileLifeTimeCapped(item);
+                            if (lifetime > 0)
+                                AddStatTooltip(tooltips, "Projectile Lifetime", lifetime, clientConfig, " ticks");
+                        }
+                        
+                        // Projectile Penetration
+                        if (serverConfig.ProjectilePenetrationIncrement)
+                        {
+                            float penetration = GetProjectilePenetrationCapped(item);
+                            if (penetration > 0)
+                                AddStatTooltip(tooltips, "Projectile Penetration", penetration, clientConfig);
+                        }
+                    }
+                }
+                
+                // ARMOR STATS - só se for armadura
+                if (isArmor && !isWeapon && serverConfig.DefenceIncrement)
+                {
+                    int defenseBonus = GetDefenceCapped(item);
+                    if (defenseBonus > 0)
+                        AddStatTooltip(tooltips, "Defense", defenseBonus, clientConfig);
+                }
             }
         }
         
-        private void AddStatTooltip(List<TooltipLine> tooltips, string statName, float value, ClientConfig config, string suffix = "")
+        private void AddStatTooltip(List<TooltipLine> tooltips, string statName, float value, ClientConfig config, string suffix = "", bool showSign = true)
         {
             if (value == 0) return;
             
-            string sign = value > 0 ? "+" : "";
-            string text = $"{sign}{value:F0}{suffix} {statName}";
+            string sign = showSign && value > 0 ? "+" : "";
+            string text = $"  {sign}{value:F0}{suffix} {statName}";
+            
+            tooltips.Add(new TooltipLine(Mod, $"Signature{statName.Replace(" ", "").Replace("(", "").Replace(")", "")}", text)
+            {
+                OverrideColor = config.TooltipStatColor
+            });
+        }
+        
+        private void AddStatTooltip(List<TooltipLine> tooltips, string statName, string customValue, ClientConfig config)
+        {
+            string text = $"  {customValue} {statName}";
             
             tooltips.Add(new TooltipLine(Mod, $"Signature{statName.Replace(" ", "")}", text)
             {
@@ -672,16 +984,27 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
         
         /// <summary>
         /// Calcula XP necessário para alcançar um nível - FORMULA CONFIGURÁVEL
+        /// Fórmula: (StartPrice + (level * AditionalPrice)) * (1 + (ExtraPrice * level)) * MultiPrice^(level-1)
         /// </summary>
         public int GetRequiredXP(int level)
         {
             var config = GetServerConfig();
             
-            // Fórmula: BaseXP * (1 + level * ScalingFactor)^ExpScalingFactor
-            double baseXP = config.BaseExpPerLevel;
-            double scalingFactor = config.ExpScalingFactor;
+            double startPrice = config.StartPrice;
+            double aditionalPrice = config.AditionalPrice;
+            double extraPrice = config.ExtraPrice * 0.01; // Converte percent para decimal
+            double multiPrice = config.MultiPrice;
             
-            return (int)(baseXP * Math.Pow(scalingFactor, level - 1));
+            // Preço base linear
+            double basePrice = startPrice + (level * aditionalPrice);
+            
+            // Multiplicador percentual por level
+            double percentMultiplier = 1.0 + (extraPrice * level);
+            
+            // Multiplicador exponencial
+            double expMultiplier = Math.Pow(multiPrice, level - 1);
+            
+            return (int)(basePrice * percentMultiplier * expMultiplier);
         }
     }
 }

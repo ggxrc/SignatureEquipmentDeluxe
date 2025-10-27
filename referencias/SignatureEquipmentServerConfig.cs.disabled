@@ -1,0 +1,519 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader.Config;
+
+namespace SignatureEquipment.Configs
+{
+    [BackgroundColor(30, 30, 30)]
+    public class SignatureEquipmentServerConfig : ModConfig
+    {
+        public override ConfigScope Mode => ConfigScope.ServerSide;
+
+        [Header("ImportantSettings")]
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(LocalNPCImmunityMode.Disabled)]
+        public LocalNPCImmunityMode LocalImmunModeOnProj;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(false)]
+        public bool AllowCheatCommand;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool LevelInheritForCraft;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool DoubleProjMultForAll;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool UseMinionFix;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(false)]
+        public bool PenetrateMustBeInitiallyForIncrease;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(false)]
+        public bool TryServerProjectileSize;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(300)]
+        public int MinLevelForDisableTileCollide;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(10)]
+        public int AdditionalProjectileMinRad;
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(150)]
+        public int AdditionalProjectileMaxRad;
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(30)]
+        public int AdditionalProjectileMinRadMinion;
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(360)]
+        public int AdditionalProjectileMaxRadMinion;
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(100)]
+        public int ProjectilesToMaxRad;
+
+
+        #region[Damage Mode]
+        [BackgroundColor(80, 80, 80)]
+        [Header("UpgradeWeaponDamageMode")]
+        [DefaultValue(true)]
+        public bool IncreaseBaseDamage;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(false)]
+        public bool IncreaseFlatDamage;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool IncreaseMultDamage;
+        #endregion
+
+        [Header("AllowImprovements")]
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool DamageIncrement;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool DefenceIncrement;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool CritIncrement;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool UseTimeIncrement;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool UseAnimationIncrement;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool MinionSlotsReduceIncrement;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool MeleeWeaponSizeIncrement;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool AdditionalProjectileChanceIncrement;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool ProjectileSizeIncrement;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool ProjectileStartVelocityIncrement;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool ProjectilePenetrateIncrement;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool NotUseAmmoChanceIncrement;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool WeaponManaCostIncrement;
+
+        [Header("UnstableImprovements")]
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(false)]
+        public bool ProjectileLifeTimeIncrement;
+
+        [Header("AcessoriesSettings")]
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool StatsAffectsAccessoriesProjectiles;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool AccessoriesShouldHaveDefaultDefenceToIncreaseDefence;
+
+
+        #region[Exp]
+        #region[Getting Exp]
+
+        [Header("ExpGetting")]
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool ExpFromKills;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(false)]
+        public bool ExpFromStatue;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool WeaponRecieveExp;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool ArmorRecieveExp;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(false)]
+        public bool ArmorShouldHaveDefaultDefenceToRecieveExp;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(false)]
+        public bool SocialArmorRecieveExp;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool AccessoriesRecieveExpForHitOrKill;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(false)]
+        public bool AccessoriesRecieveExpFromGetHit;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(true)]
+        public bool AccessoriesShouldHaveDefenceToRecieveExpFromGetHit;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(false)]
+        public bool SocialAccessoriesRecieveExp;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(0)]
+        public int ExpPerHit;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(5)]
+        public int ExpPerKill;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(2)]
+        public int ExpFromGettingHit;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(1f)]
+        [Range(0f, 2.5f)]
+        [Increment(0.05f)]
+        public float FinalMult;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(1)]
+        public int FinalMult2;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(0)]
+        public int FromDamagePercentWeapon;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(1)]
+        [Range(0f, 2.5f)]
+        [Increment(0.05f)]
+        public float ExpForWeaponMult;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(1)]
+        public int ExpForWeaponMult2;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(10)]
+        [Range(0, int.MaxValue)]
+        public int ExpForWeaponFromBossMult;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(1)]
+        [Range(0, 2.5f)]
+        [Increment(0.05f)]
+        public float ExpForWeaponFromBossMult2;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(0)]
+        public int FromDamagePercentArmor;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(1)]
+        [Range(0f, 2.5f)]
+        [Increment(0.05f)]
+        public float ExpForArmorMult;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(1)]
+        public int ExpForArmorMult2;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(1)]
+        [Range(0f, 2.5f)]
+        [Increment(0.05f)]
+        public float ExpForAccessoryWeaponMult;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(2)]
+        public int ExpForAccessoryWeaponMult2;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(false)]
+        public bool IgnoreDefence;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(0)]
+        public int AdditionalExpBeforeMult;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(0)]
+        public int FlatExp;
+        #endregion
+
+        #region[Complication]
+        [Header("Complication")]
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(500)]
+        public int StartPrice;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(0)]
+        public int AdditionalPrice;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(0)]
+        public int PriceIncreasePercent;
+
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(1f)]
+        [Range(0f, 2.5f)]
+        [Increment(0.05f)]
+        public float PriceMult;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(1f)]
+        public int PriceMult2;
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(0)]
+        public int AdditionalPriceFlat;
+        #endregion
+        #endregion
+
+        #region[Individual Config]
+        [Header("IndividualConfig")]
+        [BackgroundColor(80, 80, 80)]
+        [DefaultValue(false)]
+        public bool EnableWhiteList;
+
+        [BackgroundColor(80, 80, 80)]
+        public HashSet<ItemDefinition> ItemsWhiteList = new HashSet<ItemDefinition>();
+
+        [BackgroundColor(80, 80, 80)]
+        public HashSet<ItemDefinition> ItemsBlackList = new HashSet<ItemDefinition>();
+
+        [BackgroundColor(80, 80, 80)]
+        public HashSet<ItemDefinition> DisableTileCollideList = new HashSet<ItemDefinition>();
+
+        [BackgroundColor(80, 80, 80)]
+        public HashSet<ProjectileDefinition> ProjectilesBlackList = new HashSet<ProjectileDefinition>();
+
+        [BackgroundColor(80, 80, 80)]
+        public HashSet<NPCDefinition> NpcBlackList = new HashSet<NPCDefinition>()
+        {
+            new NPCDefinition(NPCID.TargetDummy),
+            new NPCDefinition("CalamityMod", "SuperDummyNPC"),
+            new NPCDefinition("Fargowiltas", "SuperDummy")
+        };
+
+        [BackgroundColor(80, 80, 80)]
+        public HashSet<ProjectileLocalFrames> ProjectilesLocalImmunityFrames = new HashSet<ProjectileLocalFrames>();
+        [BackgroundColor(80, 80, 80)]
+        public HashSet<ItemDefinition> ProjectilesLocalImmunityFramesBlacklist = new HashSet<ItemDefinition>();
+
+        [BackgroundColor(80, 80, 80)]
+        public HashSet<ProjectileDefinition> ProjectilesInheritItemDamage = new HashSet<ProjectileDefinition>()
+        {
+            new ProjectileDefinition("LastPrismLaser"),
+            new ProjectileDefinition("HallowBossRainbowStreak"),
+        };
+
+
+        [BackgroundColor(80, 80, 80)]
+        public bool ShowProjectileNameAndType;
+
+        [BackgroundColor(80, 80, 80)]
+        public List<ItemProjectileReference> ItemProjectileReferences = new List<ItemProjectileReference>();
+        #endregion
+
+        #region[Improvements]
+        [Header("ImprovementsSettings")]
+
+        [BackgroundColor(80, 80, 80)]
+        [Range(int.MinValue, int.MaxValue)]
+        [DefaultValue(0)]
+        public int MaxLevel;
+
+        public ItemStatFloat Damage = new ItemStatFloat()
+        {
+            ScalingMode = ScalingMode.Legacy,
+            ScalingTiers = new List<ScalingTier>(),
+            PerLevel = 1,
+            PerLevelMult = 1,
+            Max = 0
+        };
+
+        public ItemStatFloat Defence = new ItemStatFloat()
+        {
+            ScalingMode = ScalingMode.Legacy,
+            ScalingTiers = new List<ScalingTier>(),
+            PerLevel = 1,
+            PerLevelMult = 1,
+            Max = 0
+        };
+
+        public ItemStatFloat Crit = new ItemStatFloat()
+        {
+            ScalingMode = ScalingMode.Legacy,
+            ScalingTiers = new List<ScalingTier>(),
+            PerLevel = 0.1f,
+            PerLevelMult = 2,
+            Max = 0
+        };
+
+        public ItemStatFloat UseTime = new ItemStatFloat()
+        {
+            ScalingMode = ScalingMode.Legacy,
+            ScalingTiers = new List<ScalingTier>(),
+            PerLevel = 0.1f,
+            PerLevelMult = 4,
+            Max = 100
+        };
+
+        public ItemStatFloat UseAnimation = new ItemStatFloat()
+        {
+            ScalingMode = ScalingMode.Legacy,
+            ScalingTiers = new List<ScalingTier>(),
+            PerLevel = 0.1f,
+            PerLevelMult = 4,
+            Max = 90
+        };
+
+        public ProjectileStatFloat MinionSlotsReduce = new ProjectileStatFloat()
+        {
+            ScalingMode = ScalingMode.Legacy,
+            ScalingTiers = new List<ScalingTier>(),
+            PerLevel = 0.5f,
+            PerLevelMult = 1,
+            Max = 90
+        };
+
+        public ItemStatFloat MeleeSize = new ItemStatFloat()
+        {
+            ScalingMode = ScalingMode.Legacy,
+            ScalingTiers = new List<ScalingTier>(),
+            PerLevel = 0.5f,
+            PerLevelMult = 3,
+            Max = 0
+        };
+
+
+        public ProjectileStatFloat AdditionalProjectileOnShootChance = new ProjectileStatFloat()
+        {
+            ScalingMode = ScalingMode.Legacy,
+            ScalingTiers = new List<ScalingTier>(),
+            PerLevel = 1f,
+            PerLevelMult = 2,
+            Max = 0
+        };
+
+        public ProjectileStatFloat ProjectileSize = new ProjectileStatFloat()
+        {
+            ScalingMode = ScalingMode.Legacy,
+            ScalingTiers = new List<ScalingTier>(),
+            PerLevel = 0.5f,
+            PerLevelMult = 2,
+            Max = 300
+        };
+
+        public ProjectileStatFloat ProjectileStartVelocity = new ProjectileStatFloat()
+        {
+            ScalingMode = ScalingMode.Legacy,
+            ScalingTiers = new List<ScalingTier>(),
+            PerLevel = 0.5f,
+            PerLevelMult = 2,
+            Max = 200
+        };
+
+        public ProjectileStatFloat ProjectilePenetrate = new ProjectileStatFloat()
+        {
+            ScalingMode = ScalingMode.Legacy,
+            ScalingTiers = new List<ScalingTier>(),
+            PerLevel = 1f,
+            PerLevelMult = 1,
+            Max = 3000
+        };
+
+        public ProjectileStatFloat ProjectileLifeTime = new ProjectileStatFloat()
+        {
+            ScalingMode = ScalingMode.Legacy,
+            ScalingTiers = new List<ScalingTier>(),
+            PerLevel = 1f,
+            PerLevelMult = 2,
+            Max = 0
+        };
+
+        public ItemStatFloat NotUseAmmoChance = new ItemStatFloat()
+        {
+            ScalingMode = ScalingMode.Legacy,
+            ScalingTiers = new List<ScalingTier>(),
+            PerLevel = 0.5f,
+            PerLevelMult = 2,
+            Max = 100
+        };
+
+        public ItemStatFloat ManaCost = new ItemStatFloat()
+        {
+            ScalingMode = ScalingMode.Legacy,
+            ScalingTiers = new List<ScalingTier>(),
+            PerLevel = 0.5f,
+            PerLevelMult = 1,
+            Max = 0
+        };
+
+        #endregion
+    }
+}
