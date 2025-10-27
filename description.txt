@@ -1,0 +1,25 @@
+Signature Equipment Deluxe - Advanced Equipment Progression System
+
+Transform your favorite weapons, armor, and accessories into powerful signature equipment that grows stronger with use!
+
+MAIN FEATURES:
+• Level Up System: Equipment gains XP through combat, reaching up to level 100
+• Prestige System: Max-level equipment can be prestiged up to 10 times for massive bonuses
+• Dynamic Bonuses: Increased damage, crit chance, and use speed as equipment levels up
+• Special Abilities: Unlock powerful abilities at levels 25, 50, 75 and prestige tiers
+• Visual Effects: Signature equipment glows and creates special particle effects
+• Management UI: Easy-to-use interface to track and manage all your signed equipment
+• Save Progress: All equipment progress is saved and persists between sessions
+
+ABILITIES:
+- Level 25: Lifesteal on critical hits
+- Level 50: Chance to fire extra projectiles
+- Level 75: Damage aura that harms nearby enemies
+- Prestige 1+: Chance to dodge attacks
+- Prestige 3+: Enemies explode on death
+- Prestige 5+: Enhanced life regeneration
+
+Sign any weapon, armor piece, or accessory by right-clicking it!
+Craft the Signature Management Tome to access the management interface.
+
+Perfect for players who want to build a deep connection with their favorite equipment!

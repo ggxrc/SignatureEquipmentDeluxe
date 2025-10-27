@@ -1,0 +1,41 @@
+[h1]Signature Equipment Deluxe[/h1]
+
+Transform your favorite equipment into legendary gear that grows stronger with you!
+
+[h2]🌟 Main Features[/h2]
+[list]
+[*] [b]Level Up System[/b]: Equipment gains XP and levels up to 100 through combat
+[*] [b]Prestige System[/b]: Max-level items can prestige up to 10 times for exponential bonuses
+[*] [b]Dynamic Scaling[/b]: Damage, crit, and speed bonuses increase with level
+[*] [b]Special Abilities[/b]: Unlock powerful effects at milestone levels
+[*] [b]Visual Effects[/b]: Beautiful particle effects and glowing auras
+[*] [b]Management Interface[/b]: Track all signed equipment in one place
+[*] [b]Full Persistence[/b]: Progress saves automatically
+[/list]
+
+[h2]⚡ Unlockable Abilities[/h2]
+[list]
+[*] [b]Level 25[/b]: Lifesteal on Critical Hits
+[*] [b]Level 50[/b]: Chance for Extra Projectiles
+[*] [b]Level 75[/b]: Damage Aura
+[*] [b]Prestige 1+[/b]: Dodge Chance
+[*] [b]Prestige 3+[/b]: Death Explosions
+[*] [b]Prestige 5+[/b]: Fast Regeneration
+[/list]
+
+[h2]🎮 How to Use[/h2]
+[list]
+[*] Right-click any weapon, armor, or accessory to sign it
+[*] Craft the [b]Signature Management Tome[/b] (Book + 5 Fallen Stars + 10 Gold/Platinum Bars)
+[*] Use the tome to open the management interface
+[*] Fight enemies to gain XP and level up your equipment
+[*] Reach level 100 to unlock Prestige options
+[/list]
+
+[h2]🔧 Compatibility[/h2]
+Works with ALL weapons, armor, and accessories from Terraria and other mods!
+
+[h2]📊 Balance[/h2]
+Carefully balanced to enhance gameplay without being overpowered. Bonuses scale gradually and require significant investment to maximize.
+
+[url=https://github.com/tModLoader/tModLoader/wiki]tModLoader Wiki[/url]

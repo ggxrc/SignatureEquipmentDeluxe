@@ -1,0 +1,22 @@
+using Terraria.ModLoader;
+using Terraria;
+using Terraria.GameInput;
+using SignatureEquipmentDeluxe.Common.UI;
+
+namespace SignatureEquipmentDeluxe.Common.Players
+{
+    /// <summary>
+    /// Gerencia input do jogador para o mod
+    /// </summary>
+    public class SignatureInputPlayer : ModPlayer
+    {
+        public override void ProcessTriggers(TriggersSet triggersSet)
+        {
+            // Verifica se a tecla de abrir UI foi pressionada
+            if (SignatureKeybinds.OpenSignatureUI.JustPressed)
+            {
+                ModContent.GetInstance<SignatureUISystem>()?.ToggleUI();
+            }
+        }
+    }
+}

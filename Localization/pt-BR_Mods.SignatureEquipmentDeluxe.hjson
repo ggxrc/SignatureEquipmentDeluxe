@@ -1,0 +1,1042 @@
+# Signature Equipment Deluxe - English Localization
+
+Mods: {
+	SignatureEquipmentDeluxe: {
+		Keybinds.OpenSignatureUI: Abrir Interface de Equipamentos Assinados
+
+		ItemName: {
+			SignatureManagementTome: Tomo de Gerenciamento de Assinaturas
+			XPBooster: Impulsionador de XP
+		}
+
+		ItemTooltip: {
+			SignatureManagementTome:
+				'''
+				Abre a interface de Gerenciamento de Equipamentos Assinados
+				Visualize e gerencie todos os seus equipamentos assinados
+				'''
+			XPBooster:
+				'''
+				Aumenta permanentemente o ganho de XP em 10%
+				O efeito acumula com múltiplos usos
+				'''
+		}
+
+		Common: {
+			SignedEquipment: ⭐ Equipamento Assinado ⭐
+			Level: Nível {0}
+			Prestige: Prestígio {0}
+			XP: XP: {0}/{1} ({2}%)
+			MaxLevel: NÍVEL MÁXIMO
+			Bonuses: +{0}% Dano, +{1}% Crítico, +{2}% Velocidade
+			Stats: Kills: {0} | Dano Total: {1} | Tempo: {2}
+			PrestigeAvailable: ⚡ PRESTÍGIO DISPONÍVEL! ⚡
+			CanSign: Clique com botão direito para vincular como equipamento assinado
+			Signed: "[c/FFD700:{0}] foi vinculado como seu equipamento assinado!"
+			Unsigned: "{0} foi desvinculado!"
+			PrestigeComplete: "{0} alcançou Prestígio {1}!"
+			LevelUp: Seu equipamento subiu para o nível {0}!
+			XPGained: +{0} XP
+			XPMultiplierIncreased: Multiplicador de XP aumentado para {0}!
+			Dodge: ⚡ ESQUIVA! ⚡
+		}
+
+		UI: {
+			Title: ⭐ Equipamentos Assinados ⭐
+			TotalEquipment: Total: {0} equipamentos assinados
+			NoEquipment: Nenhum equipamento assinado ainda
+			HelpText:
+				'''
+				Clique com o botão direito em qualquer arma,
+				armadura ou acessório para vinculá-lo!
+				'''
+			Close: X
+			Remove: ✖
+			Prestige: ⚡
+		}
+
+		Abilities: {
+			Lifesteal: {
+				Name: Roubo de Vida (Nv 25+)
+				Description: Acertos críticos curam {0}% do dano causado
+			}
+
+			ExtraProjectile: {
+				Name: Tiro Duplo (Nv 50+)
+				Description: 20% de chance de disparar um projétil adicional
+			}
+
+			DamageAura: {
+				Name: Aura de Dano (Nv 75+)
+				Description: Causa dano periodicamente em inimigos próximos
+			}
+
+			Dodge: {
+				Name: Esquiva (Prestígio 1+)
+				Description: "{0}% de chance de esquivar completamente de ataques"
+			}
+
+			ExplosionOnKill: {
+				Name: Explosão (Prestígio 3+)
+				Description: Kills criam explosões que causam dano
+			}
+
+			FastRegen: {
+				Name: Regeneração Rápida (Prestígio 5+)
+				Description: Regeneração de vida muito aumentada
+			}
+		}
+	}
+}
+
+Items: {
+	SignatureManagementTome: {
+		// DisplayName: Signature Management Tome
+		// Tooltip: ""
+	}
+
+	XPBooster: {
+		// DisplayName: X P Booster
+		// Tooltip: ""
+	}
+}
+
+Config: {
+	ServerConfig: {
+		// DisplayName: ⚙️ Server Configuration (Leveling System)
+		// ExperienceHeader: 📊 Experience & Leveling
+		// DamageStatsHeader: ⚔️ Damage & Combat Stats
+		// SpeedStatsHeader: ⚡ Speed & Use Time Stats
+		// SizeStatsHeader: 📏 Size & Scale Stats
+		// ProjectileStatsHeader: 🎯 Projectile Behavior Stats
+		// UtilityStatsHeader: 🔧 Utility & Resource Stats
+		// ListsHeader: 📋 Blacklists & Special Mappings
+		// ImmunityHeader: 🛡️ Projectile Immunity Settings
+		// AdvancedHeader: 🔬 Advanced Settings
+
+		GlobalExpMultiplier: {
+			// Label: Global XP Multiplier
+			// Tooltip: Multiplies all XP gains across the board
+		}
+
+		WeaponExpMultiplier: {
+			// Label: Weapon XP Multiplier
+			// Tooltip: Additional multiplier for weapon XP gains
+		}
+
+		ArmorExpMultiplier: {
+			// Label: Armor XP Multiplier
+			// Tooltip: Additional multiplier for armor XP gains
+		}
+
+		AccessoryExpMultiplier: {
+			// Label: Accessory XP Multiplier
+			// Tooltip: Additional multiplier for accessory XP gains
+		}
+
+		BossExpMultiplier: {
+			// Label: Boss XP Multiplier
+			// Tooltip: Extra multiplier applied when killing bosses
+		}
+
+		BaseExpPerLevel: {
+			// Label: Base XP Per Level
+			// Tooltip: Base XP required to reach level 1. Scales with ExpScalingFactor.
+		}
+
+		ExpScalingFactor: {
+			// Label: XP Scaling Factor
+			// Tooltip: How much more XP is needed per level (exponential growth)
+		}
+
+		Damage: {
+			// Label: ⚔️ Damage Scaling
+			// Tooltip: Configure how weapon damage scales with level. Use ScalingMode and ScalingTiers for non-linear progression.
+		}
+
+		CritChance: {
+			// Label: 🎯 Critical Chance Scaling
+			// Tooltip: Configure how critical hit chance increases with level (max 100%)
+		}
+
+		Defense: {
+			// Label: 🛡️ Defense Scaling
+			// Tooltip: Configure how armor defense increases with level
+		}
+
+		UseSpeed: {
+			// Label: ⚡ Use Speed Scaling
+			// Tooltip: Configure how weapon use speed increases with level (max 100% = instant use)
+		}
+
+		MeleeSpeed: {
+			// Label: ⚔️ Melee Speed Scaling
+			// Tooltip: Configure melee swing speed increases with level
+		}
+
+		MeleeSize: {
+			// Label: 📏 Melee Size Scaling
+			// Tooltip: Configure how melee weapon hitbox size increases with level
+		}
+
+		ProjectileSize: {
+			// Label: 📏 Projectile Size Scaling
+			// Tooltip: Configure how projectile size scales with level
+		}
+
+		ProjectileSpeed: {
+			// Label: 🚀 Projectile Speed Scaling
+			// Tooltip: Configure how projectile velocity increases with level
+		}
+
+		ProjectileLifeTime: {
+			// Label: ⏱️ Projectile Lifetime Scaling
+			// Tooltip: Configure how long projectiles exist before despawning
+		}
+
+		ProjectilePenetration: {
+			// Label: 💥 Projectile Penetration Scaling
+			// Tooltip: Configure how many enemies projectiles can pierce through
+		}
+
+		ManaCostReduction: {
+			// Label: 💙 Mana Cost Reduction
+			// Tooltip: Configure mana cost reduction per level (max 99%)
+		}
+
+		AmmoConsumptionReduction: {
+			// Label: 🏹 Ammo Conservation
+			// Tooltip: Configure chance to not consume ammo per level (max 99%)
+		}
+
+		MinionSlotReduction: {
+			// Label: 👻 Minion Slot Reduction
+			// Tooltip: Configure minion slot cost reduction per level (max 95%)
+		}
+
+		GlobalItemBlacklist: {
+			// Label: 🚫 Global Item Blacklist
+			// Tooltip: Items in this list cannot gain levels or become signature equipment
+		}
+
+		NPCBlacklist: {
+			// Label: 🚫 NPC Blacklist
+			// Tooltip: NPCs in this list don't give XP when killed
+		}
+
+		SpecialProjectileMapping: {
+			// Label: 🔗 Special Projectile Mapping
+			// Tooltip: Links specific items to specific projectiles for stat calculation
+		}
+
+		LocalImmunityMode: {
+			// Label: Projectile Immunity Mode
+			// Tooltip: Controls how projectile immunity frames work (Disabled, UseLocal, various cooldown modes)
+		}
+
+		ProjectileLocalFramesOverride: {
+			// Label: Projectile Immunity Overrides
+			// Tooltip: Set custom immunity frames for specific projectiles
+		}
+
+		EnableMultiplayerSync: {
+			// Label: Enable Multiplayer Sync
+			// Tooltip: Synchronizes projectile stats in multiplayer (recommended: ON)
+		}
+
+		EnableProjectileStatCaching: {
+			// Label: Enable Stat Caching
+			// Tooltip: Caches projectile stat calculations for performance (recommended: ON)
+		}
+
+		DebugMode: {
+			// Label: Debug Mode
+			// Tooltip: Enables debug logging for troubleshooting
+		}
+
+		// LevelLimitsHeader: Global Max Level Header
+	}
+
+	ClientConfig: {
+		// DisplayName: 🎨 Client Configuration (Interface & Visuals)
+		// VisualHeader: 👁️ Visual Display Settings
+		// OutlineHeader: ✨ Item Outline Settings
+		// OutlineColorsHeader: 🌈 Outline Colors by Level
+		// TooltipHeader: 📝 Tooltip Settings
+		// UIHeader: 🖼️ User Interface Settings
+		// NotificationsHeader: 🔔 Notification Settings
+		// PerformanceHeader: ⚙️ Performance Settings
+		// AdvancedHeader: 🔬 Advanced Display Options
+
+		ShowItemLevel: {
+			// Label: Show Item Level
+			// Tooltip: Display level number in item tooltips
+		}
+
+		ShowItemExperience: {
+			// Label: Show Item Experience
+			// Tooltip: Display current XP and progress bar
+		}
+
+		ShowItemStats: {
+			// Label: Show Item Stats
+			// Tooltip: Display bonus stats from levels
+		}
+
+		ShowDetailedStats: {
+			// Label: Show Detailed Stats
+			// Tooltip: Show individual stat breakdowns (damage, crit, speed, etc.)
+		}
+
+		ShowStatChanges: {
+			// Label: Show Stat Changes
+			// Tooltip: Display +X stat changes in green
+		}
+
+		ShowCappedStats: {
+			// Label: Show Capped Stats
+			// Tooltip: Indicate when a stat has reached its maximum cap
+		}
+
+		EnableOutline: {
+			// Label: Enable Item Outlines
+			// Tooltip: Draw colored outlines around leveled items in inventory
+		}
+
+		OutlineMode: {
+			// Label: Outline Mode
+			// Tooltip: Scale: Scales the item texture | Copy: Draws duplicate texture layers
+		}
+
+		OutlineThickness: {
+			// Label: Outline Thickness
+			// Tooltip: How thick the outline appears around items
+		}
+
+		OutlineOpacity: {
+			// Label: Outline Opacity
+			// Tooltip: Transparency of the outline effect
+		}
+
+		OutlineColor_Level1_25: {
+			// Label: Outline Color: Level 1-25
+			// Tooltip: Color for beginner level items (Gray)
+		}
+
+		OutlineColor_Level26_50: {
+			// Label: Outline Color: Level 26-50
+			// Tooltip: Color for intermediate level items (Green)
+		}
+
+		OutlineColor_Level51_75: {
+			// Label: Outline Color: Level 51-75
+			// Tooltip: Color for advanced level items (Blue)
+		}
+
+		OutlineColor_Level76_100: {
+			// Label: Outline Color: Level 76-100
+			// Tooltip: Color for expert level items (Purple)
+		}
+
+		OutlineColor_Level101Plus: {
+			// Label: Outline Color: Level 101+
+			// Tooltip: Color for master level items (Orange/Gold)
+		}
+
+		ShowTooltipSeparator: {
+			// Label: Show Tooltip Separator
+			// Tooltip: Draw a line separating signature stats from normal item stats
+		}
+
+		ShowNextLevelInfo: {
+			// Label: Show Next Level Info
+			// Tooltip: Display how much XP is needed to reach the next level
+		}
+
+		ShowProgressBar: {
+			// Label: Show Progress Bar
+			// Tooltip: Display visual XP progress bar in tooltips
+		}
+
+		TooltipLevelColor: {
+			// Label: Tooltip Level Color
+			// Tooltip: Color for level text in tooltips
+		}
+
+		TooltipExpColor: {
+			// Label: Tooltip XP Color
+			// Tooltip: Color for experience text in tooltips
+		}
+
+		TooltipStatColor: {
+			// Label: Tooltip Stat Color
+			// Tooltip: Color for stat bonus text in tooltips
+		}
+
+		EnableManagementUI: {
+			// Label: Enable Management UI
+			// Tooltip: Allow opening the signature equipment management interface
+		}
+
+		UIScale: {
+			// Label: UI Scale
+			// Tooltip: Size of the management UI window
+		}
+
+		UIOpacity: {
+			// Label: UI Opacity
+			// Tooltip: Transparency of the UI background
+		}
+
+		UIBackgroundColor: {
+			// Label: UI Background Color
+			// Tooltip: Background color of UI panels
+		}
+
+		UIAccentColor: {
+			// Label: UI Accent Color
+			// Tooltip: Accent color for highlights and borders
+		}
+
+		ShowLevelUpNotification: {
+			// Label: Show Level Up Notifications
+			// Tooltip: Display popup when items level up
+		}
+
+		ShowExpGainNotification: {
+			// Label: Show XP Gain Notifications
+			// Tooltip: Display floating XP numbers when gaining experience
+		}
+
+		NotificationDuration: {
+			// Label: Notification Duration
+			// Tooltip: How long notifications stay on screen (seconds)
+		}
+
+		NotificationScale: {
+			// Label: Notification Scale
+			// Tooltip: Size of notification text and popups
+		}
+
+		EnableParticleEffects: {
+			// Label: Enable Particle Effects
+			// Tooltip: Show particle effects for level ups and special events
+		}
+
+		EnableGlowEffects: {
+			// Label: Enable Glow Effects
+			// Tooltip: Show glow effects on high-level items
+		}
+
+		MaxParticlesPerSecond: {
+			// Label: Max Particles Per Second
+			// Tooltip: Limit particle spawns for performance
+		}
+
+		ReducedAnimations: {
+			// Label: Reduced Animations
+			// Tooltip: Use simpler animations for lower-end systems
+		}
+
+		ShowDebugInfo: {
+			// Label: Show Debug Info
+			// Tooltip: Display technical debug information on screen
+		}
+
+		ShowStatCalculations: {
+			// Label: Show Stat Calculations
+			// Tooltip: Display how stats are calculated in tooltips
+		}
+
+		LogStatChanges: {
+			// Label: Log Stat Changes
+			// Tooltip: Write stat changes to the log file for debugging
+		}
+	}
+}
+
+// Keybinds.OpenSignatureUI.DisplayName: Open Signature U I
+
+Configs: {
+	ClientConfig: {
+		// DisplayName: Client Config
+
+		ShowItemLevel: {
+			// Label: Show Item Level
+			// Tooltip: ""
+		}
+
+		ShowItemExperience: {
+			// Label: Show Item Experience
+			// Tooltip: ""
+		}
+
+		ShowItemStats: {
+			// Label: Show Item Stats
+			// Tooltip: ""
+		}
+
+		ShowDetailedStats: {
+			// Label: Show Detailed Stats
+			// Tooltip: ""
+		}
+
+		ShowStatChanges: {
+			// Label: Show Stat Changes
+			// Tooltip: ""
+		}
+
+		ShowCappedStats: {
+			// Label: Show Capped Stats
+			// Tooltip: ""
+		}
+
+		EnableOutline: {
+			// Label: Enable Outline
+			// Tooltip: ""
+		}
+
+		OutlineMode: {
+			// Label: Outline Mode
+			// Tooltip: ""
+		}
+
+		OutlineThickness: {
+			// Label: Outline Thickness
+			// Tooltip: ""
+		}
+
+		OutlineOpacity: {
+			// Label: Outline Opacity
+			// Tooltip: ""
+		}
+
+		OutlineColor_Level1_25: {
+			// Label: Outline Color_ Level1_25
+			// Tooltip: ""
+		}
+
+		OutlineColor_Level26_50: {
+			// Label: Outline Color_ Level26_50
+			// Tooltip: ""
+		}
+
+		OutlineColor_Level51_75: {
+			// Label: Outline Color_ Level51_75
+			// Tooltip: ""
+		}
+
+		OutlineColor_Level76_100: {
+			// Label: Outline Color_ Level76_100
+			// Tooltip: ""
+		}
+
+		OutlineColor_Level101Plus: {
+			// Label: Outline Color_ Level101 Plus
+			// Tooltip: ""
+		}
+
+		ShowTooltipSeparator: {
+			// Label: Show Tooltip Separator
+			// Tooltip: ""
+		}
+
+		ShowNextLevelInfo: {
+			// Label: Show Next Level Info
+			// Tooltip: ""
+		}
+
+		ShowProgressBar: {
+			// Label: Show Progress Bar
+			// Tooltip: ""
+		}
+
+		TooltipLevelColor: {
+			// Label: Tooltip Level Color
+			// Tooltip: ""
+		}
+
+		TooltipExpColor: {
+			// Label: Tooltip Exp Color
+			// Tooltip: ""
+		}
+
+		TooltipStatColor: {
+			// Label: Tooltip Stat Color
+			// Tooltip: ""
+		}
+
+		EnableManagementUI: {
+			// Label: Enable Management U I
+			// Tooltip: ""
+		}
+
+		UIScale: {
+			// Label: U I Scale
+			// Tooltip: ""
+		}
+
+		UIOpacity: {
+			// Label: U I Opacity
+			// Tooltip: ""
+		}
+
+		UIBackgroundColor: {
+			// Label: U I Background Color
+			// Tooltip: ""
+		}
+
+		UIAccentColor: {
+			// Label: U I Accent Color
+			// Tooltip: ""
+		}
+
+		ShowLevelUpNotification: {
+			// Label: Show Level Up Notification
+			// Tooltip: ""
+		}
+
+		ShowExpGainNotification: {
+			// Label: Show Exp Gain Notification
+			// Tooltip: ""
+		}
+
+		NotificationDuration: {
+			// Label: Notification Duration
+			// Tooltip: ""
+		}
+
+		NotificationScale: {
+			// Label: Notification Scale
+			// Tooltip: ""
+		}
+
+		EnableParticleEffects: {
+			// Label: Enable Particle Effects
+			// Tooltip: ""
+		}
+
+		EnableGlowEffects: {
+			// Label: Enable Glow Effects
+			// Tooltip: ""
+		}
+
+		MaxParticlesPerSecond: {
+			// Label: Max Particles Per Second
+			// Tooltip: ""
+		}
+
+		ReducedAnimations: {
+			// Label: Reduced Animations
+			// Tooltip: ""
+		}
+
+		ShowDebugInfo: {
+			// Label: Show Debug Info
+			// Tooltip: ""
+		}
+
+		ShowStatCalculations: {
+			// Label: Show Stat Calculations
+			// Tooltip: ""
+		}
+
+		LogStatChanges: {
+			// Label: Log Stat Changes
+			// Tooltip: ""
+		}
+	}
+
+	OutlineMode: {
+		// Tooltip: ""
+		// Scale.Label: Scale
+		// Copy.Label: Copy
+	}
+
+	ServerConfig: {
+		// DisplayName: Server Config
+
+		GlobalExpMultiplier: {
+			// Label: Global Exp Multiplier
+			// Tooltip: ""
+		}
+
+		WeaponExpMultiplier: {
+			// Label: Weapon Exp Multiplier
+			// Tooltip: ""
+		}
+
+		ArmorExpMultiplier: {
+			// Label: Armor Exp Multiplier
+			// Tooltip: ""
+		}
+
+		AccessoryExpMultiplier: {
+			// Label: Accessory Exp Multiplier
+			// Tooltip: ""
+		}
+
+		BossExpMultiplier: {
+			// Label: Boss Exp Multiplier
+			// Tooltip: ""
+		}
+
+		BaseExpPerLevel: {
+			// Label: Base Exp Per Level
+			// Tooltip: ""
+		}
+
+		ExpScalingFactor: {
+			// Label: Exp Scaling Factor
+			// Tooltip: ""
+		}
+
+		Damage: {
+			// Label: Damage
+			// Tooltip: ""
+		}
+
+		CritChance: {
+			// Label: Crit Chance
+			// Tooltip: ""
+		}
+
+		Defense: {
+			// Label: Defense
+			// Tooltip: ""
+		}
+
+		UseSpeed: {
+			// Label: Use Speed
+			// Tooltip: ""
+		}
+
+		MeleeSpeed: {
+			// Label: Melee Speed
+			// Tooltip: ""
+		}
+
+		MeleeSize: {
+			// Label: Melee Size
+			// Tooltip: ""
+		}
+
+		ProjectileSize: {
+			// Label: Projectile Size
+			// Tooltip: ""
+		}
+
+		ProjectileSpeed: {
+			// Label: Projectile Speed
+			// Tooltip: ""
+		}
+
+		ProjectileLifeTime: {
+			// Label: Projectile Life Time
+			// Tooltip: ""
+		}
+
+		ProjectilePenetration: {
+			// Label: Projectile Penetration
+			// Tooltip: ""
+		}
+
+		ManaCostReduction: {
+			// Label: Mana Cost Reduction
+			// Tooltip: ""
+		}
+
+		AmmoConsumptionReduction: {
+			// Label: Ammo Consumption Reduction
+			// Tooltip: ""
+		}
+
+		MinionSlotReduction: {
+			// Label: Minion Slot Reduction
+			// Tooltip: ""
+		}
+
+		GlobalItemBlacklist: {
+			// Label: Global Item Blacklist
+			// Tooltip: ""
+		}
+
+		NPCBlacklist: {
+			// Label: N P C Blacklist
+			// Tooltip: ""
+		}
+
+		SpecialProjectileMapping: {
+			// Label: Special Projectile Mapping
+			// Tooltip: ""
+		}
+
+		LocalImmunityMode: {
+			// Label: Local Immunity Mode
+			// Tooltip: ""
+		}
+
+		ProjectileLocalFramesOverride: {
+			// Label: Projectile Local Frames Override
+			// Tooltip: ""
+		}
+
+		EnableMultiplayerSync: {
+			// Label: Enable Multiplayer Sync
+			// Tooltip: ""
+		}
+
+		EnableProjectileStatCaching: {
+			// Label: Enable Projectile Stat Caching
+			// Tooltip: ""
+		}
+
+		DebugMode: {
+			// Label: Debug Mode
+			// Tooltip: ""
+		}
+
+		BaseXPPerHit: {
+			// Label: Base X P Per Hit
+			// Tooltip: ""
+		}
+
+		BaseXPPerKill: {
+			// Label: Base X P Per Kill
+			// Tooltip: ""
+		}
+
+		XPPerDamageDealt: {
+			// Label: X P Per Damage Dealt
+			// Tooltip: ""
+		}
+
+		XPPerEnemyMaxHP: {
+			// Label: X P Per Enemy Max H P
+			// Tooltip: ""
+		}
+
+		GlobalMaxLevel: {
+			// Label: Global Max Level
+			// Tooltip: ""
+		}
+
+		IndividualMaxLevel: {
+			// Label: Individual Max Level
+			// Tooltip: ""
+		}
+	}
+
+	ItemStatInt: {
+		// Tooltip: ""
+
+		ScalingMode: {
+			// Label: Scaling Mode
+			// Tooltip: ""
+		}
+
+		ScalingTiers: {
+			// Label: Scaling Tiers
+			// Tooltip: ""
+		}
+
+		PerLevel: {
+			// Label: Per Level
+			// Tooltip: ""
+		}
+
+		PerLevelMult: {
+			// Label: Per Level Mult
+			// Tooltip: ""
+		}
+
+		Max: {
+			// Label: Max
+			// Tooltip: ""
+		}
+
+		HardCap: {
+			// Label: Hard Cap
+			// Tooltip: ""
+		}
+
+		ItemBlackList: {
+			// Label: Item Black List
+			// Tooltip: ""
+		}
+	}
+
+	ScalingMode: {
+		// Tooltip: ""
+		// Legacy.Label: Legacy
+		// Cumulative.Label: Cumulative
+		// CurrentTierOnly.Label: Current Tier Only
+		// AccumulativePerTier.Label: Accumulative Per Tier
+	}
+
+	ScalingTier: {
+		// Tooltip: ""
+
+		StartLevel: {
+			// Label: Start Level
+			// Tooltip: ""
+		}
+
+		PerLevel: {
+			// Label: Per Level
+			// Tooltip: ""
+		}
+
+		PerLevelMult: {
+			// Label: Per Level Mult
+			// Tooltip: ""
+		}
+	}
+
+	StatHardCap: {
+		// Tooltip: ""
+
+		Max: {
+			// Label: Max
+			// Tooltip: ""
+		}
+
+		Sign: {
+			// Label: Sign
+			// Tooltip: ""
+		}
+	}
+
+	ItemStatFloat: {
+		// Tooltip: ""
+
+		ScalingMode: {
+			// Label: Scaling Mode
+			// Tooltip: ""
+		}
+
+		ScalingTiers: {
+			// Label: Scaling Tiers
+			// Tooltip: ""
+		}
+
+		PerLevel: {
+			// Label: Per Level
+			// Tooltip: ""
+		}
+
+		PerLevelMult: {
+			// Label: Per Level Mult
+			// Tooltip: ""
+		}
+
+		Max: {
+			// Label: Max
+			// Tooltip: ""
+		}
+
+		HardCap: {
+			// Label: Hard Cap
+			// Tooltip: ""
+		}
+
+		BlackList: {
+			// Label: Black List
+			// Tooltip: ""
+		}
+	}
+
+	ProjectileStatFloat: {
+		// Tooltip: ""
+
+		ScalingMode: {
+			// Label: Scaling Mode
+			// Tooltip: ""
+		}
+
+		ScalingTiers: {
+			// Label: Scaling Tiers
+			// Tooltip: ""
+		}
+
+		PerLevel: {
+			// Label: Per Level
+			// Tooltip: ""
+		}
+
+		PerLevelMult: {
+			// Label: Per Level Mult
+			// Tooltip: ""
+		}
+
+		Max: {
+			// Label: Max
+			// Tooltip: ""
+		}
+
+		ItemHardCap: {
+			// Label: Item Hard Cap
+			// Tooltip: ""
+		}
+
+		ProjectileHardCap: {
+			// Label: Projectile Hard Cap
+			// Tooltip: ""
+		}
+
+		ItemBlackList: {
+			// Label: Item Black List
+			// Tooltip: ""
+		}
+
+		ProjectileBlackList: {
+			// Label: Projectile Black List
+			// Tooltip: ""
+		}
+	}
+
+	ItemProjectileReference: {
+		// Tooltip: ""
+
+		item: {
+			// Label: item
+			// Tooltip: ""
+		}
+
+		projectile: {
+			// Label: projectile
+			// Tooltip: ""
+		}
+	}
+
+	LocalNPCImmunityMode: {
+		// Tooltip: ""
+		// Disabled.Label: Disabled
+		// UseLocal.Label: Use Local
+		// NoEffectKeepCd.Label: No Effect Keep Cd
+		// NoEffect.Label: No Effect
+		// HitOnceKeepCd.Label: Hit Once Keep Cd
+		// HitOnce.Label: Hit Once
+		// Cooldown0KeepCd.Label: Cooldown0 Keep Cd
+		// Cooldown0.Label: Cooldown0
+		// Cooldown10.Label: Cooldown10
+		// Cooldown15.Label: Cooldown15
+		// Cooldown20.Label: Cooldown20
+		// Cooldown25.Label: Cooldown25
+		// Cooldown30.Label: Cooldown30
+	}
+
+	ProjectileLocalFrames: {
+		// Tooltip: ""
+
+		Projectile: {
+			// Label: Projectile
+			// Tooltip: ""
+		}
+
+		LocalImmunityFrames: {
+			// Label: Local Immunity Frames
+			// Tooltip: ""
+		}
+	}
+}

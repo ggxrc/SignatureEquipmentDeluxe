@@ -1,0 +1,100 @@
+using System.IO;
+using Terraria;
+using Terraria.ModLoader;
+using SignatureEquipmentDeluxe.Common.Players;
+
+namespace SignatureEquipmentDeluxe
+{
+	/// <summary>
+	/// Mod principal - Signature Equipment Deluxe
+	/// Sistema avançado de progressão de equipamentos com níveis, prestígio e habilidades especiais
+	/// </summary>
+	public class SignatureEquipmentDeluxe : Mod
+	{
+		// Tipos de mensagens de rede
+		public enum MessageType : byte
+		{
+			SignaturePlayerSync,
+			SignatureItemUpdate,
+			SignaturePrestige
+		}
+
+		public override void HandlePacket(BinaryReader reader, int whoAmI)
+		{
+			MessageType msgType = (MessageType)reader.ReadByte();
+
+			switch (msgType)
+			{
+				case MessageType.SignaturePlayerSync:
+					HandlePlayerSync(reader, whoAmI);
+					break;
+				case MessageType.SignatureItemUpdate:
+					HandleItemUpdate(reader, whoAmI);
+					break;
+				case MessageType.SignaturePrestige:
+					HandlePrestige(reader, whoAmI);
+					break;
+			}
+		}
+
+		private void HandlePlayerSync(BinaryReader reader, int whoAmI)
+		{
+			byte playerIndex = reader.ReadByte();
+			Player player = Main.player[playerIndex];
+			
+			if (player == null || !player.active)
+				return;
+
+			SignaturePlayer sigPlayer = player.GetModPlayer<SignaturePlayer>();
+			if (sigPlayer == null)
+				return;
+
+			sigPlayer.signedEquipment.Clear();
+
+			int count = reader.ReadInt32();
+			for (int i = 0; i < count; i++)
+			{
+				int itemType = reader.ReadInt32();
+				SignatureData data = SignatureData.ReadFromPacket(reader, itemType);
+				sigPlayer.signedEquipment[itemType] = data;
+			}
+
+			sigPlayer.currentSignatureItem = reader.ReadInt32();
+		}
+
+		private void HandleItemUpdate(BinaryReader reader, int whoAmI)
+		{
+			byte playerIndex = reader.ReadByte();
+			int itemType = reader.ReadInt32();
+			int experience = reader.ReadInt32();
+
+			Player player = Main.player[playerIndex];
+			if (player?.active == true)
+			{
+				SignaturePlayer sigPlayer = player.GetModPlayer<SignaturePlayer>();
+				SignatureData data = sigPlayer?.GetSignatureData(itemType);
+				if (data != null)
+				{
+					data.experience = experience;
+				}
+			}
+		}
+
+		private void HandlePrestige(BinaryReader reader, int whoAmI)
+		{
+			byte playerIndex = reader.ReadByte();
+			int itemType = reader.ReadInt32();
+
+			Player player = Main.player[playerIndex];
+			if (player?.active == true)
+			{
+				SignaturePlayer sigPlayer = player.GetModPlayer<SignaturePlayer>();
+				SignatureData data = sigPlayer?.GetSignatureData(itemType);
+				if (data != null && data.CanPrestige())
+				{
+					data.Prestige();
+				}
+			}
+		}
+	}
+}

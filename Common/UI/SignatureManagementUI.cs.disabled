@@ -1,0 +1,438 @@
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using Terraria;
+using Terraria.GameContent;
+using Terraria.GameContent.UI.Elements;
+using Terraria.ID;
+using Terraria.ModLoader;
+using Terraria.UI;
+using SignatureEquipmentDeluxe.Common.Players;
+
+namespace SignatureEquipmentDeluxe.Common.UI
+{
+    /// <summary>
+    /// Sistema que gerencia a UI do mod
+    /// </summary>
+    public class SignatureUISystem : ModSystem
+    {
+        private UserInterface signatureInterface;
+        public SignatureManagementUI managementUI;
+
+        public override void Load()
+        {
+            if (!Main.dedServ)
+            {
+                signatureInterface = new UserInterface();
+                managementUI = new SignatureManagementUI();
+                managementUI.Activate();
+            }
+        }
+
+        public override void UpdateUI(GameTime gameTime)
+        {
+            if (managementUI?.visible == true)
+            {
+                signatureInterface?.Update(gameTime);
+            }
+        }
+
+        public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
+        {
+            int mouseTextIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Mouse Text"));
+            
+            if (mouseTextIndex != -1)
+            {
+                layers.Insert(mouseTextIndex, new LegacyGameInterfaceLayer(
+                    "SignatureEquipmentDeluxe: Signature UI",
+                    delegate
+                    {
+                        if (managementUI?.visible == true)
+                        {
+                            signatureInterface?.Draw(Main.spriteBatch, Main._drawInterfaceGameTime);
+                        }
+                        return true;
+                    },
+                    InterfaceScaleType.UI)
+                );
+            }
+        }
+
+        public void ToggleUI()
+        {
+            if (managementUI != null)
+            {
+                managementUI.visible = !managementUI.visible;
+                
+                if (managementUI.visible)
+                {
+                    signatureInterface?.SetState(managementUI);
+                    managementUI.RefreshList();
+                }
+                else
+                {
+                    signatureInterface?.SetState(null);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// UI principal para gerenciar equipamentos assinados
+    /// </summary>
+    public class SignatureManagementUI : UIState
+    {
+        public bool visible = false;
+        private UIPanel mainPanel;
+        private UIList itemList;
+        private UIScrollbar scrollbar;
+        private UIText titleText;
+        private UIText statsText;
+
+        public override void OnInitialize()
+        {
+            // Painel principal
+            mainPanel = new UIPanel();
+            mainPanel.SetPadding(10);
+            mainPanel.Width.Set(500, 0f);
+            mainPanel.Height.Set(600, 0f);
+            mainPanel.HAlign = 0.5f;
+            mainPanel.VAlign = 0.5f;
+            mainPanel.BackgroundColor = new Color(33, 43, 79) * 0.95f;
+            mainPanel.BorderColor = Color.Gold;
+            Append(mainPanel);
+
+            // Título
+            titleText = new UIText("⭐ Equipamentos Assinados ⭐", 1.2f);
+            titleText.HAlign = 0.5f;
+            titleText.Top.Set(10, 0f);
+            titleText.TextColor = Color.Gold;
+            mainPanel.Append(titleText);
+
+            // Botão de fechar
+            UITextPanel<string> closeButton = new UITextPanel<string>("X");
+            closeButton.Width.Set(30, 0f);
+            closeButton.Height.Set(30, 0f);
+            closeButton.HAlign = 1f;
+            closeButton.Top.Set(5, 0f);
+            closeButton.BackgroundColor = Color.Red * 0.7f;
+            closeButton.OnLeftClick += (evt, element) => visible = false;
+            mainPanel.Append(closeButton);
+
+            // Estatísticas gerais
+            statsText = new UIText("Total: 0 equipamentos assinados");
+            statsText.Top.Set(50, 0f);
+            statsText.Left.Set(10, 0f);
+            mainPanel.Append(statsText);
+
+            // Lista de itens
+            itemList = new UIList();
+            itemList.Width.Set(-25, 1f);
+            itemList.Height.Set(-120, 1f);
+            itemList.Top.Set(80, 0f);
+            itemList.ListPadding = 5f;
+            mainPanel.Append(itemList);
+
+            // Scrollbar
+            scrollbar = new UIScrollbar();
+            scrollbar.SetView(100f, 1000f);
+            scrollbar.Height.Set(-120, 1f);
+            scrollbar.Top.Set(80, 0f);
+            scrollbar.HAlign = 1f;
+            mainPanel.Append(scrollbar);
+            itemList.SetScrollbar(scrollbar);
+        }
+
+        public void RefreshList()
+        {
+            itemList.Clear();
+
+            SignaturePlayer sigPlayer = Main.LocalPlayer.GetModPlayer<SignaturePlayer>();
+            
+            if (sigPlayer == null || sigPlayer.signedEquipment.Count == 0)
+            {
+                statsText.SetText("Nenhum equipamento assinado ainda");
+                
+                UIText helpText = new UIText("Clique com o botão direito em qualquer arma,\narmadura ou acessório para vinculá-lo!");
+                helpText.TextColor = Color.LightGray;
+                itemList.Add(helpText);
+                
+                return;
+            }
+
+            statsText.SetText($"Total: {sigPlayer.signedEquipment.Count} equipamentos assinados");
+
+            // Ordena por nível (maior primeiro)
+            List<KeyValuePair<int, SignatureData>> sortedList = new List<KeyValuePair<int, SignatureData>>(sigPlayer.signedEquipment);
+            sortedList.Sort((a, b) => b.Value.level.CompareTo(a.Value.level));
+
+            foreach (var kvp in sortedList)
+            {
+                SignatureItemElement element = new SignatureItemElement(kvp.Key, kvp.Value);
+                itemList.Add(element);
+            }
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            if (!visible) return;
+            
+            base.Draw(spriteBatch);
+        }
+    }
+
+    /// <summary>
+    /// Elemento individual da lista representando um equipamento assinado
+    /// </summary>
+    public class SignatureItemElement : UIPanel
+    {
+        private int itemType;
+        private SignatureData data;
+        private Item displayItem;
+
+        public SignatureItemElement(int itemType, SignatureData data)
+        {
+            this.itemType = itemType;
+            this.data = data;
+            this.displayItem = new Item();
+            displayItem.SetDefaults(itemType);
+
+            Width.Set(0, 1f);
+            Height.Set(100, 0f);
+            BackgroundColor = new Color(26, 40, 89) * 0.8f;
+            BorderColor = GetBorderColor();
+            SetPadding(8);
+
+            InitializeContent();
+        }
+
+        private void InitializeContent()
+        {
+            // Nome do item
+            UIText nameText = new UIText(displayItem.Name, 1f);
+            nameText.Top.Set(5, 0f);
+            nameText.Left.Set(60, 0f);
+            nameText.TextColor = Color.White; // Cor simples por ora
+            Append(nameText);
+
+            // Informações de nível
+            string prestigeText = data.prestigeLevel > 0 ? $" (P{data.prestigeLevel})" : "";
+            UIText levelText = new UIText($"Nível {data.level}{prestigeText}", 0.9f);
+            levelText.Top.Set(25, 0f);
+            levelText.Left.Set(60, 0f);
+            levelText.TextColor = Color.Gold;
+            Append(levelText);
+
+            // Barra de progresso XP
+            if (data.level < SignatureData.MAX_LEVEL)
+            {
+                SignaturePlayer sigPlayer = Main.LocalPlayer.GetModPlayer<SignaturePlayer>();
+                int requiredXP = sigPlayer.GetRequiredXP(data.level);
+                float progress = (float)data.experience / requiredXP;
+
+                UIProgressBar xpBar = new UIProgressBar(progress);
+                xpBar.Width.Set(-70, 1f);
+                xpBar.Height.Set(20, 0f);
+                xpBar.Top.Set(45, 0f);
+                xpBar.Left.Set(60, 0f);
+                Append(xpBar);
+
+                UIText xpText = new UIText($"{data.experience}/{requiredXP} XP", 0.7f);
+                xpText.Top.Set(48, 0f);
+                xpText.HAlign = 0.5f;
+                xpBar.Append(xpText);
+            }
+            else
+            {
+                UIText maxText = new UIText("NÍVEL MÁXIMO", 0.9f);
+                maxText.Top.Set(45, 0f);
+                maxText.Left.Set(60, 0f);
+                maxText.TextColor = Color.Gold;
+                Append(maxText);
+            }
+
+            // Estatísticas
+            UIText statsText = new UIText(
+                $"Kills: {data.totalKills} | Dano: {FormatNumber(data.totalDamageDealt)}",
+                0.7f);
+            statsText.Top.Set(70, 0f);
+            statsText.Left.Set(60, 0f);
+            statsText.TextColor = Color.LightGray;
+            Append(statsText);
+
+            // Botão de remover
+            UITextPanel<string> removeButton = new UITextPanel<string>("✖");
+            removeButton.Width.Set(30, 0f);
+            removeButton.Height.Set(30, 0f);
+            removeButton.HAlign = 1f;
+            removeButton.VAlign = 0.5f;
+            removeButton.BackgroundColor = Color.DarkRed * 0.7f;
+            removeButton.OnLeftClick += (evt, element) => RemoveSignature();
+            Append(removeButton);
+
+            // Botão de prestígio (se disponível)
+            if (data.CanPrestige())
+            {
+                UITextPanel<string> prestigeButton = new UITextPanel<string>("⚡");
+                prestigeButton.Width.Set(30, 0f);
+                prestigeButton.Height.Set(30, 0f);
+                prestigeButton.HAlign = 1f;
+                prestigeButton.VAlign = 0f;
+                prestigeButton.BackgroundColor = Color.Orange * 0.7f;
+                prestigeButton.OnLeftClick += (evt, element) => DoPrestige();
+                Append(prestigeButton);
+            }
+        }
+
+        protected override void DrawSelf(SpriteBatch spriteBatch)
+        {
+            base.DrawSelf(spriteBatch);
+
+            // Desenha o ícone do item
+            CalculatedStyle dimensions = GetDimensions();
+            Vector2 itemPos = new Vector2(dimensions.X + 25, dimensions.Y + 45);
+            
+            float scale = 1f;
+            if (displayItem.width > 48 || displayItem.height > 48)
+            {
+                scale = displayItem.width > displayItem.height ? 48f / displayItem.width : 48f / displayItem.height;
+            }
+
+            Main.instance.LoadItem(itemType);
+            Texture2D itemTexture = TextureAssets.Item[itemType].Value;
+            
+            spriteBatch.Draw(
+                itemTexture,
+                itemPos,
+                null,
+                Color.White,
+                0f,
+                itemTexture.Size() / 2f,
+                scale,
+                SpriteEffects.None,
+                0f
+            );
+        }
+
+        private Color GetBorderColor()
+        {
+            if (data.prestigeLevel >= 5)
+                return Color.Red;
+            if (data.prestigeLevel >= 3)
+                return Color.Purple;
+            if (data.prestigeLevel >= 1)
+                return Color.LightBlue;
+            if (data.level >= 75)
+                return Color.Gold;
+            if (data.level >= 50)
+                return Color.Silver;
+            return Color.Gray;
+        }
+
+        private void RemoveSignature()
+        {
+            SignaturePlayer sigPlayer = Main.LocalPlayer.GetModPlayer<SignaturePlayer>();
+            if (sigPlayer.UnsignItem(itemType))
+            {
+                Main.NewText($"{displayItem.Name} foi desvinculado!", Color.Red);
+                Parent?.Parent?.Parent?.RemoveChild(this);
+                
+                // Atualiza a UI
+                if (Parent?.Parent?.Parent is SignatureManagementUI ui)
+                {
+                    ui.RefreshList();
+                }
+            }
+        }
+
+        private void DoPrestige()
+        {
+            data.Prestige();
+            Main.NewText($"{displayItem.Name} alcançou Prestígio {data.prestigeLevel}!", Color.Orange);
+            
+            // Efeito visual épico
+            for (int i = 0; i < 50; i++)
+            {
+                Dust dust = Dust.NewDustDirect(Main.LocalPlayer.position, Main.LocalPlayer.width, 
+                    Main.LocalPlayer.height, DustID.FireworkFountain_Red, 0f, 0f, 100, Color.Orange, 2f);
+                dust.velocity = Main.rand.NextVector2Circular(5f, 5f);
+                dust.noGravity = true;
+            }
+            
+            // Atualiza a UI
+            if (Parent?.Parent?.Parent is SignatureManagementUI ui)
+            {
+                ui.RefreshList();
+            }
+        }
+
+        private string FormatNumber(long number)
+        {
+            if (number >= 1000000000)
+                return $"{number / 1000000000.0:F1}B";
+            if (number >= 1000000)
+                return $"{number / 1000000.0:F1}M";
+            if (number >= 1000)
+                return $"{number / 1000.0:F1}K";
+            return number.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Barra de progresso customizada
+    /// </summary>
+    public class UIProgressBar : UIElement
+    {
+        private float progress;
+        
+        public UIProgressBar(float progress)
+        {
+            this.progress = Math.Clamp(progress, 0f, 1f);
+        }
+
+        protected override void DrawSelf(SpriteBatch spriteBatch)
+        {
+            CalculatedStyle dimensions = GetDimensions();
+            
+            // Fundo
+            spriteBatch.Draw(
+                TextureAssets.MagicPixel.Value,
+                dimensions.ToRectangle(),
+                Color.Black * 0.5f
+            );
+
+            // Barra de progresso
+            Rectangle progressRect = dimensions.ToRectangle();
+            progressRect.Width = (int)(progressRect.Width * progress);
+            
+            Color barColor = Color.Lerp(Color.Orange, Color.Gold, progress);
+            spriteBatch.Draw(
+                TextureAssets.MagicPixel.Value,
+                progressRect,
+                barColor
+            );
+
+            // Borda
+            DrawBorder(spriteBatch, dimensions.ToRectangle(), Color.White);
+        }
+
+        private void DrawBorder(SpriteBatch spriteBatch, Rectangle rect, Color color)
+        {
+            int borderSize = 2;
+            // Top
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value, 
+                new Rectangle(rect.X, rect.Y, rect.Width, borderSize), color);
+            // Bottom
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value, 
+                new Rectangle(rect.X, rect.Bottom - borderSize, rect.Width, borderSize), color);
+            // Left
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value, 
+                new Rectangle(rect.X, rect.Y, borderSize, rect.Height), color);
+            // Right
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value, 
+                new Rectangle(rect.Right - borderSize, rect.Y, borderSize, rect.Height), color);
+        }
+    }
+}

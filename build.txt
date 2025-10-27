@@ -1,0 +1,3 @@
+displayName = Signature Equipment Deluxe
+author = Kenflesh &amp; ggxrc
+version = 0.1
