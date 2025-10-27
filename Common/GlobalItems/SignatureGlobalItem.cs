@@ -50,14 +50,26 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
                 statConfig.PerLevelMult
             );
             
+            // Debug
+            var serverConfig = GetServerConfig();
+            if (serverConfig.DebugMode && calculated > 0 && Main.netMode != NetmodeID.Server)
+            {
+                Main.NewText($"[DEBUG] GetStatCapped: Level={Level}, PerLevel={statConfig.PerLevel}, Calculated={calculated}, Max={statConfig.Max}");
+            }
+            
             // Aplica hard cap específico do item
             if (item != null && isHardCapped(item, statConfig.HardCap, out var hardCap))
             {
                 return Math.Min(calculated, hardCap.Max) * hardCap.Sign;
             }
             
-            // Aplica cap global
-            return Math.Min(calculated, statConfig.Max);
+            // Aplica cap global (0 = sem limite)
+            if (statConfig.Max > 0)
+            {
+                return Math.Min(calculated, statConfig.Max);
+            }
+            
+            return calculated;
         }
         
         /// <summary>
@@ -99,8 +111,13 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
                 return Math.Min(calculated, hardCap.Max) * hardCap.Sign;
             }
             
-            // Aplica cap global
-            return Math.Min(calculated, statConfig.Max);
+            // Aplica cap global (0 = sem limite)
+            if (statConfig.Max > 0)
+            {
+                return Math.Min(calculated, statConfig.Max);
+            }
+            
+            return calculated;
         }
         
         /// <summary>
@@ -142,8 +159,13 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
                 return Math.Min(calculated, hardCap.Max) * hardCap.Sign;
             }
             
-            // Aplica cap global
-            return Math.Min(calculated, statConfig.Max);
+            // Aplica cap global (0 = sem limite)
+            if (statConfig.Max > 0)
+            {
+                return Math.Min(calculated, statConfig.Max);
+            }
+            
+            return calculated;
         }
         
         /// <summary>
@@ -194,71 +216,55 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
         
         // ==================== PROPRIEDADES DE STATS (CALCULADAS DINAMICAMENTE) ====================
         
-        public int GetDamageCapped(Item item) => GetStatCapped(GetServerConfig().Damage, item);
-        public int GetDamageNotCapped(Item item) => GetStatUncapped(GetServerConfig().Damage, item);
+        // Weapon Stats
+        public int GetDamageCapped(Item item) => GetStatCapped(GetServerConfig().WeaponDamage, item);
+        public int GetDamageNotCapped(Item item) => GetStatUncapped(GetServerConfig().WeaponDamage, item);
         
-        public int GetDefenceCapped(Item item) => GetStatCapped(GetServerConfig().Defense, item);
-        public int GetDefenceNotCapped(Item item) => GetStatUncapped(GetServerConfig().Defense, item);
+        public int GetCritChanceCapped(Item item) => GetStatCapped(GetServerConfig().WeaponCritChance, item);
+        public int GetCritChanceNotCapped(Item item) => GetStatUncapped(GetServerConfig().WeaponCritChance, item);
         
-        public int GetCritChanceCapped(Item item) => GetStatCapped(GetServerConfig().CritChance, item);
-        public int GetCritChanceNotCapped(Item item) => GetStatUncapped(GetServerConfig().CritChance, item);
+        public float GetUseSpeedCapped(Item item) => GetStatCappedFloat(GetServerConfig().WeaponUseSpeed, item);
+        public float GetUseSpeedNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().WeaponUseSpeed, item);
         
-        public float GetUseSpeedCapped(Item item) => GetStatCappedFloat(GetServerConfig().UseSpeed, item);
-        public float GetUseSpeedNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().UseSpeed, item);
+        public float GetMeleeSpeedCapped(Item item) => GetStatCappedFloat(GetServerConfig().WeaponMeleeSpeed, item);
+        public float GetMeleeSpeedNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().WeaponMeleeSpeed, item);
         
-        public float GetMeleeSpeedCapped(Item item) => GetStatCappedFloat(GetServerConfig().MeleeSpeed, item);
-        public float GetMeleeSpeedNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().MeleeSpeed, item);
+        public float GetMeleeSizeCapped(Item item) => GetStatCappedFloat(GetServerConfig().WeaponMeleeSize, item);
+        public float GetMeleeSizeNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().WeaponMeleeSize, item);
         
-        public float GetMeleeSizeCapped(Item item) => GetStatCappedFloat(GetServerConfig().MeleeSize, item);
-        public float GetMeleeSizeNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().MeleeSize, item);
+        public float GetManaCostReductionCapped(Item item) => GetStatCappedFloat(GetServerConfig().WeaponManaCostReduction, item);
+        public float GetManaCostReductionNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().WeaponManaCostReduction, item);
         
-        public float GetManaCostReductionCapped(Item item) => GetStatCappedFloat(GetServerConfig().ManaCostReduction, item);
-        public float GetManaCostReductionNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().ManaCostReduction, item);
+        public float GetAmmoConsumptionReductionCapped(Item item) => GetStatCappedFloat(GetServerConfig().WeaponAmmoConsumptionReduction, item);
+        public float GetAmmoConsumptionReductionNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().WeaponAmmoConsumptionReduction, item);
         
-        public float GetAmmoConsumptionReductionCapped(Item item) => GetStatCappedFloat(GetServerConfig().AmmoConsumptionReduction, item);
-        public float GetAmmoConsumptionReductionNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().AmmoConsumptionReduction, item);
+        // Projectile Stats
+        public float GetProjectileSizeCapped(Item item) => GetProjectileStatCappedFloat(GetServerConfig().WeaponProjectileSize, item);
+        public float GetProjectileSizeNotCapped(Item item) => GetProjectileStatUncappedFloat(GetServerConfig().WeaponProjectileSize, item);
         
-        public float GetMinionSlotReductionCapped(Item item) => GetStatCappedFloat(GetServerConfig().MinionSlotReduction, item);
-        public float GetMinionSlotReductionNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().MinionSlotReduction, item);
+        public float GetProjectileSpeedCapped(Item item) => GetProjectileStatCappedFloat(GetServerConfig().WeaponProjectileSpeed, item);
+        public float GetProjectileSpeedNotCapped(Item item) => GetProjectileStatUncappedFloat(GetServerConfig().WeaponProjectileSpeed, item);
         
-        public float GetProjectileSizeCapped(Item item) => GetProjectileStatCappedFloat(GetServerConfig().ProjectileSize, item);
-        public float GetProjectileSizeNotCapped(Item item) => GetProjectileStatUncappedFloat(GetServerConfig().ProjectileSize, item);
+        public float GetProjectileLifeTimeCapped(Item item) => GetProjectileStatCappedFloat(GetServerConfig().WeaponProjectileLifeTime, item);
+        public float GetProjectileLifeTimeNotCapped(Item item) => GetProjectileStatUncappedFloat(GetServerConfig().WeaponProjectileLifeTime, item);
         
-        public float GetProjectileSpeedCapped(Item item) => GetProjectileStatCappedFloat(GetServerConfig().ProjectileSpeed, item);
-        public float GetProjectileSpeedNotCapped(Item item) => GetProjectileStatUncappedFloat(GetServerConfig().ProjectileSpeed, item);
+        public float GetProjectilePenetrationCapped(Item item) => GetProjectileStatCappedFloat(GetServerConfig().WeaponProjectilePenetration, item);
+        public float GetProjectilePenetrationNotCapped(Item item) => GetProjectileStatUncappedFloat(GetServerConfig().WeaponProjectilePenetration, item);
         
-        public float GetProjectileLifeTimeCapped(Item item) => GetProjectileStatCappedFloat(GetServerConfig().ProjectileLifeTime, item);
-        public float GetProjectileLifeTimeNotCapped(Item item) => GetProjectileStatUncappedFloat(GetServerConfig().ProjectileLifeTime, item);
+        // Armor Stats
+        public int GetDefenceCapped(Item item) => GetStatCapped(GetServerConfig().ArmorDefense, item);
+        public int GetDefenceNotCapped(Item item) => GetStatUncapped(GetServerConfig().ArmorDefense, item);
         
-        public float GetProjectilePenetrationCapped(Item item) => GetProjectileStatCappedFloat(GetServerConfig().ProjectilePenetration, item);
-        public float GetProjectilePenetrationNotCapped(Item item) => GetProjectileStatUncappedFloat(GetServerConfig().ProjectilePenetration, item);
+        // Accessory Stats
+        public int GetAccessoryDamageCapped(Item item) => GetStatCapped(GetServerConfig().AccessoryDamage, item);
+        public int GetAccessoryDefenseCapped(Item item) => GetStatCapped(GetServerConfig().AccessoryDefense, item);
+        public int GetAccessoryCritChanceCapped(Item item) => GetStatCapped(GetServerConfig().AccessoryCritChance, item);
+        public float GetMinionSlotReductionCapped(Item item) => GetStatCappedFloat(GetServerConfig().AccessoryMinionSlotReduction, item);
+        public float GetMinionSlotReductionNotCapped(Item item) => GetStatUncappedFloat(GetServerConfig().AccessoryMinionSlotReduction, item);
         
         // ==================== INTEGRAÇÃO COM PLAYER ====================
-        
-        /// <summary>
-        /// Ao acertar um NPC, ganha XP
-        /// </summary>
-        public override void OnHitNPC(Item item, Player player, NPC target, NPC.HitInfo hit, int damageDone)
-        {
-            if (Level > 0 || CanGainExperience(item))
-            {
-                // Fórmula base de XP: 1 XP por hit + % do dano causado
-                float xpGain = 1f + (damageDone * 0.01f);
-                
-                // Aplica multiplicadores do servidor
-                var config = GetServerConfig();
-                xpGain *= config.GlobalExpMultiplier;
-                xpGain *= config.WeaponExpMultiplier;
-                
-                // Boss multiplier
-                if (target.boss)
-                {
-                    xpGain *= config.BossExpMultiplier;
-                }
-                
-                AddExperience((int)xpGain);
-            }
-        }
+        // O XP agora é distribuído pelo SignaturePlayer.cs via OnHitNPC hook
+        // Removido o OnHitNPC aqui para evitar duplicação
         
         /// <summary>
         /// Verifica se o item pode ganhar XP (é arma, armor ou accessory, mas NÃO munição)
@@ -287,6 +293,13 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
                 if (damageBonus > 0)
                 {
                     damage.Flat += damageBonus;
+                    
+                    // Debug
+                    var config = GetServerConfig();
+                    if (config.DebugMode)
+                    {
+                        Main.NewText($"[DEBUG] Item: {item.Name}, Level: {Level}, Damage Bonus: +{damageBonus}");
+                    }
                 }
             }
         }
@@ -339,10 +352,33 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
         {
             if (Level > 0 && item.accessory)
             {
-                int defenseBonus = GetDefenceCapped(item);
+                // Defense bonus
+                int defenseBonus = GetAccessoryDefenseCapped(item);
                 if (defenseBonus > 0)
                 {
                     player.statDefense += defenseBonus;
+                }
+                
+                // Damage bonus
+                int damageBonus = GetAccessoryDamageCapped(item);
+                if (damageBonus > 0)
+                {
+                    player.GetDamage(DamageClass.Generic).Flat += damageBonus;
+                }
+                
+                // Crit chance bonus
+                int critBonus = GetAccessoryCritChanceCapped(item);
+                if (critBonus > 0)
+                {
+                    player.GetCritChance(DamageClass.Generic) += critBonus;
+                }
+                
+                // Minion slot reduction
+                float minionReduction = GetMinionSlotReductionCapped(item);
+                if (minionReduction > 0 && player.maxMinions > 0)
+                {
+                    // Reduz o custo de slots de minions (não implementado diretamente, mas pode ser via buff)
+                    // Por enquanto, deixamos como placeholder para futuras implementações
                 }
             }
         }
@@ -560,6 +596,13 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
             Experience += amount;
             
             var clientConfig = GetClientConfig();
+            var serverConfig = GetServerConfig();
+            
+            // Debug
+            if (serverConfig.DebugMode && Main.netMode != NetmodeID.Server)
+            {
+                Main.NewText($"[DEBUG] AddXP: {amount} (Total: {Experience}/{GetRequiredXP(Level)}) Level: {Level}");
+            }
             
             // Mostra XP ganho se habilitado
             if (clientConfig.ShowExpGainNotification && Main.netMode != NetmodeID.Server)
@@ -575,6 +618,12 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
                 Experience -= requiredXP;
                 Level++;
                 requiredXP = GetRequiredXP(Level);
+                
+                // Debug
+                if (serverConfig.DebugMode && Main.netMode != NetmodeID.Server)
+                {
+                    Main.NewText($"[DEBUG] LEVEL UP! New Level: {Level}");
+                }
                 
                 // Notificação de level up
                 if (Main.netMode != NetmodeID.Server && clientConfig.ShowLevelUpNotification)

@@ -143,7 +143,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         public ItemStatInt WeaponCritChance { get; set; } = new ItemStatInt
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0,
+            PerLevel = 1,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()
@@ -153,7 +153,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         public ItemStatFloat WeaponUseSpeed { get; set; } = new ItemStatFloat
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
+            PerLevel = 1f,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()
@@ -163,7 +163,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         public ItemStatFloat WeaponMeleeSpeed { get; set; } = new ItemStatFloat
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
+            PerLevel = 1f,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()
@@ -173,7 +173,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         public ItemStatFloat WeaponMeleeSize { get; set; } = new ItemStatFloat
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
+            PerLevel = 1f,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()
@@ -183,7 +183,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         public ProjectileStatFloat WeaponProjectileSize { get; set; } = new ProjectileStatFloat
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
+            PerLevel = 1f,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()
@@ -193,7 +193,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         public ProjectileStatFloat WeaponProjectileSpeed { get; set; } = new ProjectileStatFloat
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
+            PerLevel = 1f,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()
@@ -203,7 +203,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         public ProjectileStatFloat WeaponProjectileLifeTime { get; set; } = new ProjectileStatFloat
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
+            PerLevel = 1f,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()
@@ -213,7 +213,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         public ProjectileStatFloat WeaponProjectilePenetration { get; set; } = new ProjectileStatFloat
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
+            PerLevel = 1f,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()
@@ -223,7 +223,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         public ItemStatFloat WeaponManaCostReduction { get; set; } = new ItemStatFloat
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
+            PerLevel = 1f,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()
@@ -233,7 +233,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         public ItemStatFloat WeaponAmmoConsumptionReduction { get; set; } = new ItemStatFloat
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
+            PerLevel = 1f,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()
@@ -247,7 +247,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         public ItemStatInt ArmorDefense { get; set; } = new ItemStatInt
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0,
+            PerLevel = 1,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()
@@ -261,7 +261,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         public ItemStatInt AccessoryDamage { get; set; } = new ItemStatInt
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0,
+            PerLevel = 1,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()
@@ -271,7 +271,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         public ItemStatInt AccessoryDefense { get; set; } = new ItemStatInt
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0,
+            PerLevel = 1,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()
@@ -281,7 +281,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         public ItemStatInt AccessoryCritChance { get; set; } = new ItemStatInt
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0,
+            PerLevel = 1,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()
@@ -291,7 +291,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         public ItemStatFloat AccessoryMinionSlotReduction { get; set; } = new ItemStatFloat
         {
             ScalingMode = ScalingMode.Legacy,
-            PerLevel = 0f,
+            PerLevel = 0.1f,
             PerLevelMult = 1,
             Max = 0,
             ScalingTiers = new List<ScalingTier>()

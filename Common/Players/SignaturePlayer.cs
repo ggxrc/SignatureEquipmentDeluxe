@@ -135,10 +135,10 @@ namespace SignatureEquipmentDeluxe.Common.Players
             var config = ModContent.GetInstance<Configs.ServerConfig>();
             
             // Fórmula base de XP por hit
-            float xpGain = config.BaseXPPerHit;
+            float xpGain = config.WeaponBaseXPPerHit;
             
             // XP baseado no dano causado
-            xpGain += damageDone * config.XPPerDamageDealt;
+            xpGain += damageDone * config.WeaponXPPerDamageDealt;
             
             // Multiplicadores
             xpGain *= config.GlobalExpMultiplier;
@@ -162,10 +162,10 @@ namespace SignatureEquipmentDeluxe.Common.Players
             var config = ModContent.GetInstance<Configs.ServerConfig>();
             
             // XP base de kill
-            float xpGain = config.BaseXPPerKill;
+            float xpGain = config.WeaponBaseXPPerKill;
             
             // XP baseado no HP máximo do inimigo
-            xpGain += target.lifeMax * config.XPPerEnemyMaxHP;
+            xpGain += target.lifeMax * config.WeaponXPPerEnemyMaxHP;
             
             // Multiplicadores
             xpGain *= config.GlobalExpMultiplier;
