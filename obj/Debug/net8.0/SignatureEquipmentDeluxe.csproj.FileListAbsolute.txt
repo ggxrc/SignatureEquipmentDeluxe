@@ -224,6 +224,7 @@ C:\Users\ggxrc\Documents\My Games\Terraria\tModLoader\ModSources\SignatureEquipm
 C:\Users\ggxrc\Documents\My Games\Terraria\tModLoader\ModSources\SignatureEquipmentDeluxe\obj\Debug\net8.0\SignatureEquipmentDeluxe.AssemblyInfoInputs.cache
 C:\Users\ggxrc\Documents\My Games\Terraria\tModLoader\ModSources\SignatureEquipmentDeluxe\obj\Debug\net8.0\SignatureEquipmentDeluxe.AssemblyInfo.cs
 C:\Users\ggxrc\Documents\My Games\Terraria\tModLoader\ModSources\SignatureEquipmentDeluxe\obj\Debug\net8.0\SignatureEquipmentDeluxe.csproj.CoreCompileInputs.cache
+C:\Users\ggxrc\Documents\My Games\Terraria\tModLoader\ModSources\SignatureEquipmentDeluxe\obj\Debug\net8.0\SignatureEquipmentDeluxe.sourcelink.json
 C:\Users\ggxrc\Documents\My Games\Terraria\tModLoader\ModSources\SignatureEquipmentDeluxe\obj\Debug\net8.0\Signatur.BD3992FC.Up2Date
 C:\Users\ggxrc\Documents\My Games\Terraria\tModLoader\ModSources\SignatureEquipmentDeluxe\obj\Debug\net8.0\SignatureEquipmentDeluxe.dll
 C:\Users\ggxrc\Documents\My Games\Terraria\tModLoader\ModSources\SignatureEquipmentDeluxe\obj\Debug\net8.0\refint\SignatureEquipmentDeluxe.dll

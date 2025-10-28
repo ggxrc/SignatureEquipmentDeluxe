@@ -27,6 +27,9 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
         public int Level = 0;
         public int Experience = 0;
         
+        // Runas equipadas (máximo 5)
+        public List<Data.EquippedRune> EquippedRunes = new List<Data.EquippedRune>();
+        
         // ==================== CACHE DE CONFIG ====================
         
         private ServerConfig GetServerConfig() => ModContent.GetInstance<ServerConfig>();
@@ -348,6 +351,12 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
             {
                 Main.NewText($"[DEBUG] Item: {item.Name}, Level: {Level}, Damage Bonus: +{statDamage} (Base: {config.IncreaseBaseDamage}, Flat: {config.IncreaseFlatDamage}, Mult: {config.IncreaseMultDamage})");
             }
+            
+            // Aplica bônus de dano das runas
+            if (Systems.RuneSystem.CanHaveRunes(item) && EquippedRunes.Count > 0)
+            {
+                Systems.RuneSystem.ApplyRuneDamageBonus(EquippedRunes, ref damage);
+            }
         }
         
         public override void ModifyWeaponCrit(Item item, Player player, ref float crit)
@@ -382,6 +391,12 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
             {
                 crit += statCrit;
             }
+            
+            // Aplica bônus de crit das curses
+            if (Systems.RuneSystem.CanHaveRunes(item) && EquippedRunes.Count > 0)
+            {
+                Systems.RuneSystem.ApplyRuneCritBonus(EquippedRunes, ref crit);
+            }
         }
         
         public override float UseSpeedMultiplier(Item item, Player player)
@@ -413,7 +428,16 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
             }
             
             // Fórmula da referência: 1f - percentValue
-            return 1f - percentValue;
+            float baseMultiplier = 1f - percentValue;
+            
+            // Aplica multiplicador de velocidade das runas
+            if (Systems.RuneSystem.CanHaveRunes(item) && EquippedRunes.Count > 0)
+            {
+                float runeMultiplier = Systems.RuneSystem.GetRuneAttackSpeedMultiplier(EquippedRunes);
+                return baseMultiplier * runeMultiplier;
+            }
+            
+            return baseMultiplier;
         }
         
         public override float UseAnimationMultiplier(Item item, Player player)
@@ -485,7 +509,20 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
         
         public override void HoldItem(Item item, Player player)
         {
-            // Hook mantido mas vazio - lógica movida para ModifyItemScale
+            // Aplica efeitos de runas que não são de combate (LifeRegen, etc)
+            if (Systems.RuneSystem.CanHaveRunes(item) && EquippedRunes.Count > 0)
+            {
+                Systems.RuneSystem.ApplyRunePassiveEffects(EquippedRunes, player);
+            }
+        }
+        
+        public override void MeleeEffects(Item item, Player player, Rectangle hitbox)
+        {
+            // Aplica trail effects das runas elementais
+            if (Systems.RuneSystem.CanHaveRunes(item) && EquippedRunes.Count > 0)
+            {
+                Systems.RuneElementalEffects.ApplyMeleeTrailEffects(player, item, hitbox);
+            }
         }
         
         public override bool CanConsumeAmmo(Item weapon, Item ammo, Player player)
@@ -516,11 +553,51 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
                 chance = GetAmmoConsumptionReductionCapped(weapon);
             }
             
-            // Checa se não consome
             if (chance > Main.rand.Next(100))
-                return false;
+                return false; // Não consome munição
             
-            return true;
+            return true; // Consome munição
+        }
+        
+        // Intercepta cliques no inventário para aplicação de runas
+        public override bool CanRightClick(Item item)
+        {
+            // Verifica se uma runa está selecionada
+            if (Content.Items.Runes.BaseRuneItem.HasSelectedRune(out int runeItemType, out var runeType))
+            {
+                // Se clicar em uma arma válida, aplica a runa
+                if (Systems.RuneSystem.CanHaveRunes(item))
+                {
+                    var player = Main.LocalPlayer;
+                    Content.Items.Runes.BaseRuneItem.TryApplyRune(player, item, runeItemType, runeType);
+                }
+                else
+                {
+                    Main.NewText("This item cannot have runes!", Color.Red);
+                    Content.Items.Runes.BaseRuneItem.CancelSelection();
+                }
+                
+                return false; // Não abre menu de consumo
+            }
+            
+            // Verifica se o removedor de runas está selecionado
+            if (Content.Items.Runes.RuneRemover.IsSelected())
+            {
+                if (Systems.RuneSystem.CanHaveRunes(item))
+                {
+                    var player = Main.LocalPlayer;
+                    Content.Items.Runes.RuneRemover.TryRemoveRunes(player, item);
+                }
+                else
+                {
+                    Main.NewText("This item cannot have runes!", Color.Red);
+                    Content.Items.Runes.RuneRemover.CancelSelection();
+                }
+                
+                return false; // Não abre menu de consumo
+            }
+            
+            return base.CanRightClick(item);
         }
         
         public override void ModifyManaCost(Item item, Player player, ref float reduce, ref float mult)
@@ -802,6 +879,9 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
                     if (defenseBonus > 0)
                         AddStatTooltip(tooltips, "Defense", defenseBonus, clientConfig);
                 }
+                
+                // RUNE TOOLTIPS - mostra runas equipadas
+                AddRuneTooltips(tooltips);
             }
         }
         
@@ -826,6 +906,104 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
             {
                 OverrideColor = config.TooltipStatColor
             });
+        }
+        
+        /// <summary>
+        /// Adiciona tooltips de runas equipadas
+        /// </summary>
+        private void AddRuneTooltips(List<TooltipLine> tooltips)
+        {
+            var serverConfig = GetServerConfig();
+            if (!serverConfig.EnableRuneSystem)
+                return;
+            
+            // Só mostra para armas que podem ter runas
+            if (Level <= 0)
+                return;
+            
+            int maxSlots = Systems.RuneSystem.GetMaxRuneSlots(Level);
+            
+            // Se não tem slots desbloqueados, não mostra nada
+            if (maxSlots == 0)
+                return;
+            
+            var clientConfig = GetClientConfig();
+            
+            // Separador para runas
+            tooltips.Add(new TooltipLine(Mod, "RunesSeparator", "―――――― Runes ――――――")
+            {
+                OverrideColor = new Color(150, 100, 200)
+            });
+            
+            // Mostra cada runa equipada
+            if (EquippedRunes.Count > 0)
+            {
+                foreach (var rune in EquippedRunes)
+                {
+                    string runeName = Data.RuneDefinitions.GetName(rune.Type);
+                    Color runeColor = Data.RuneDefinitions.GetColor(rune.Type);
+                    
+                    string levelText = $"[Lv.{rune.Level}] ";
+                    string text = $"  {(rune.IsCurse() ? "⚠ " : "✦ ")}{levelText}{runeName}";
+                    
+                    tooltips.Add(new TooltipLine(Mod, $"Rune{rune.Type}", text)
+                    {
+                        OverrideColor = runeColor
+                    });
+                    
+                    // Mostra XP da runa se config habilitada
+                    if (clientConfig.ShowItemExperience && rune.Level < rune.MaxLevel)
+                    {
+                        int runeXP = rune.Experience;
+                        int runeRequired = rune.GetXPForNextLevel();
+                        float runePercent = (float)runeXP / runeRequired * 100f;
+                        
+                        string xpText = $"    XP: {runeXP}/{runeRequired} ({runePercent:F0}%)";
+                        tooltips.Add(new TooltipLine(Mod, $"RuneXP{rune.Type}", xpText)
+                        {
+                            OverrideColor = new Color(180, 180, 180)
+                        });
+                    }
+                }
+            }
+            
+            // SEMPRE mostra slots disponíveis (mesmo sem runas equipadas)
+            int usedSlots = EquippedRunes.Count;
+            int freeSlots = maxSlots - usedSlots;
+            
+            if (freeSlots > 0)
+            {
+                tooltips.Add(new TooltipLine(Mod, "RuneSlots", $"  {freeSlots} Rune Slot(s) Available")
+                {
+                    OverrideColor = Color.Lime
+                });
+            }
+            else
+            {
+                tooltips.Add(new TooltipLine(Mod, "RuneSlots", $"  Slots: {usedSlots}/{maxSlots} (Full)")
+                {
+                    OverrideColor = Color.Gray
+                });
+            }
+            
+            // Se não tem todos os slots, mostra quando desbloqueia o próximo
+            if (maxSlots < 5)
+            {
+                int nextSlotLevel = 0;
+                if (maxSlots == 0) nextSlotLevel = serverConfig.RuneSlot1Level;
+                else if (maxSlots == 1) nextSlotLevel = serverConfig.RuneSlot2Level;
+                else if (maxSlots == 2) nextSlotLevel = serverConfig.RuneSlot3Level;
+                else if (maxSlots == 3) nextSlotLevel = serverConfig.RuneSlot4Level;
+                else if (maxSlots == 4) nextSlotLevel = serverConfig.RuneSlot5Level;
+                
+                if (nextSlotLevel > Level)
+                {
+                    tooltips.Add(new TooltipLine(Mod, "NextRuneSlot", $"  Next slot at Level {nextSlotLevel}")
+                    {
+                        OverrideColor = Color.Gray
+                    });
+                }
+            }
         }
         
         // ==================== OUTLINE VISUAL ====================
@@ -898,12 +1076,34 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
                 tag["Level"] = Level;
                 tag["Experience"] = Experience;
             }
+            
+            // Salva runas equipadas
+            if (EquippedRunes.Count > 0)
+            {
+                tag["RuneCount"] = EquippedRunes.Count;
+                for (int i = 0; i < EquippedRunes.Count; i++)
+                {
+                    tag[$"Rune{i}"] = EquippedRunes[i].Save();
+                }
+            }
         }
         
         public override void LoadData(Item item, TagCompound tag)
         {
             Level = tag.GetInt("Level");
             Experience = tag.GetInt("Experience");
+            
+            // Carrega runas equipadas
+            EquippedRunes.Clear();
+            int runeCount = tag.GetInt("RuneCount");
+            for (int i = 0; i < runeCount; i++)
+            {
+                if (tag.ContainsKey($"Rune{i}"))
+                {
+                    var runeData = tag.Get<TagCompound>($"Rune{i}");
+                    EquippedRunes.Add(Data.EquippedRune.Load(runeData));
+                }
+            }
         }
         
         // ==================== UTILIDADES ====================

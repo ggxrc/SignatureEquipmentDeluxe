@@ -7,6 +7,17 @@ Mods: {
 		ItemName: {
 			SignatureManagementTome: Tomo de Gerenciamento de Assinaturas
 			XPBooster: Impulsionador de XP
+			// FireRune: Fire Rune
+			// IceRune: Ice Rune
+			// PoisonRune: Poison Rune
+			// LightningRune: Lightning Rune
+			// AttackSpeedRune: Attack Speed Rune
+			// LifeRegenRune: Life Regeneration Rune
+			// LifestealRune: Lifesteal Rune
+			// BerserkerCurse: Berserker's Curse
+			// GlassCurse: Glass Cannon Curse
+			// AnnihilationCurse: Annihilation Curse
+			// RuneRemover: Rune Remover
 		}
 
 		ItemTooltip: {
@@ -20,6 +31,69 @@ Mods: {
 				Aumenta permanentemente o ganho de XP em 10%
 				O efeito acumula com múltiplos usos
 				'''
+			/* FireRune:
+				'''
+				Adds fire damage to your weapon
+				Ignites enemies on hit
+				Damage scales with rune level
+				''' */
+			/* IceRune:
+				'''
+				Adds ice damage to your weapon
+				Slows and freezes enemies
+				Damage scales with rune level
+				''' */
+			/* PoisonRune:
+				'''
+				Adds poison damage to your weapon
+				Inflicts deadly poison on enemies
+				Damage scales with rune level
+				''' */
+			/* LightningRune:
+				'''
+				Adds lightning damage to your weapon
+				Shocks enemies with electricity
+				Damage scales with rune level
+				''' */
+			/* AttackSpeedRune:
+				'''
+				Increases weapon attack speed
+				Effect scales with rune level
+				''' */
+			/* LifeRegenRune:
+				'''
+				Regenerates life while holding the weapon
+				Effect scales with rune level
+				''' */
+			/* LifestealRune:
+				'''
+				Converts damage dealt into healing
+				Effect scales with rune level
+				''' */
+			/* BerserkerCurse:
+				'''
+				⚠ CURSE: +50% Damage, -30% Defense
+				Grants bonus XP to the weapon
+				Risk: May drop weapon on death
+				''' */
+			/* GlassCurse:
+				'''
+				⚠ CURSE: +100% Critical Chance, -50% Max Life
+				Grants bonus XP to the weapon
+				Risk: May drop weapon on death
+				''' */
+			/* AnnihilationCurse:
+				'''
+				⚠ CURSE: +150% Damage, -35% Max Life, ZERO Defense
+				Grants massive bonus XP to the weapon
+				High risk: Higher drop chance on death
+				''' */
+			/* RuneRemover:
+				'''
+				Removes ALL runes from a weapon
+				⚠ Removing curses may cause level loss
+				Right-click while holding a weapon
+				''' */
 		}
 
 		Common: {
@@ -98,6 +172,61 @@ Items: {
 
 	XPBooster: {
 		// DisplayName: X P Booster
+		// Tooltip: ""
+	}
+
+	AnnihilationCurse: {
+		// DisplayName: Annihilation Curse
+		// Tooltip: ""
+	}
+
+	AttackSpeedRune: {
+		// DisplayName: Attack Speed Rune
+		// Tooltip: ""
+	}
+
+	BerserkerCurse: {
+		// DisplayName: Berserker Curse
+		// Tooltip: ""
+	}
+
+	FireRune: {
+		// DisplayName: Fire Rune
+		// Tooltip: ""
+	}
+
+	GlassCurse: {
+		// DisplayName: Glass Curse
+		// Tooltip: ""
+	}
+
+	IceRune: {
+		// DisplayName: Ice Rune
+		// Tooltip: ""
+	}
+
+	LifeRegenRune: {
+		// DisplayName: Life Regen Rune
+		// Tooltip: ""
+	}
+
+	LifestealRune: {
+		// DisplayName: Lifesteal Rune
+		// Tooltip: ""
+	}
+
+	LightningRune: {
+		// DisplayName: Lightning Rune
+		// Tooltip: ""
+	}
+
+	PoisonRune: {
+		// DisplayName: Poison Rune
+		// Tooltip: ""
+	}
+
+	RuneRemover: {
+		// DisplayName: Rune Remover
 		// Tooltip: ""
 	}
 }
@@ -272,6 +401,10 @@ Config: {
 		// ExpPriceHeader: Start Price Header
 		// ComboSystemHeader: Enable Combo System Header
 		// KillStreakSystemHeader: Enable Kill Streak System Header
+		// RuneSystemHeader: Enable Rune System Header
+		// CurseSystemHeader: Enable Curse System Header
+		// LeveledEnemyHeader: Enable Leveled Enemies Header
+		// ElementalRuneEffectsHeader: Elemental Rune Visual & DoT Effects
 	}
 
 	ClientConfig: {
@@ -1462,6 +1595,151 @@ Configs: {
 
 		StreakXPBonusMax: {
 			// Label: Streak X P Bonus Max
+			// Tooltip: ""
+		}
+
+		EnableRuneSystem: {
+			// Label: Enable Rune System
+			// Tooltip: ""
+		}
+
+		RuneSlot1Level: {
+			// Label: Rune Slot1 Level
+			// Tooltip: ""
+		}
+
+		RuneSlot2Level: {
+			// Label: Rune Slot2 Level
+			// Tooltip: ""
+		}
+
+		RuneSlot3Level: {
+			// Label: Rune Slot3 Level
+			// Tooltip: ""
+		}
+
+		RuneSlot4Level: {
+			// Label: Rune Slot4 Level
+			// Tooltip: ""
+		}
+
+		RuneSlot5Level: {
+			// Label: Rune Slot5 Level
+			// Tooltip: ""
+		}
+
+		RuneXPPerHitMultiplier: {
+			// Label: Rune X P Per Hit Multiplier
+			// Tooltip: ""
+		}
+
+		RuneXPPerKillMultiplier: {
+			// Label: Rune X P Per Kill Multiplier
+			// Tooltip: ""
+		}
+
+		EnableCurseSystem: {
+			// Label: Enable Curse System
+			// Tooltip: ""
+		}
+
+		CurseXPBonusPerHit: {
+			// Label: Curse X P Bonus Per Hit
+			// Tooltip: ""
+		}
+
+		CurseXPBonusPerKill: {
+			// Label: Curse X P Bonus Per Kill
+			// Tooltip: ""
+		}
+
+		CurseDropChancePerCurse: {
+			// Label: Curse Drop Chance Per Curse
+			// Tooltip: ""
+		}
+
+		CurseRemovalLevelLossChance: {
+			// Label: Curse Removal Level Loss Chance
+			// Tooltip: ""
+		}
+
+		CurseRemovalLevelLossFraction: {
+			// Label: Curse Removal Level Loss Fraction
+			// Tooltip: ""
+		}
+
+		EnableLeveledEnemies: {
+			// Label: Enable Leveled Enemies
+			// Tooltip: ""
+		}
+
+		RadioactiveZoneRadius: {
+			// Label: Radioactive Zone Radius
+			// Tooltip: ""
+		}
+
+		RadioactiveZoneDurationMinutes: {
+			// Label: Radioactive Zone Duration Minutes
+			// Tooltip: ""
+		}
+
+		LeveledEnemySpawnChance: {
+			// Label: Leveled Enemy Spawn Chance
+			// Tooltip: ""
+		}
+
+		LeveledEnemyXPBonusPerLevel: {
+			// Label: Leveled Enemy X P Bonus Per Level
+			// Tooltip: ""
+		}
+
+		EnableElementalTrailEffects: {
+			// Label: Enable Elemental Trail Effects
+			// Tooltip: ""
+		}
+
+		EnableElementalDoTEffects: {
+			// Label: Enable Elemental Do T Effects
+			// Tooltip: ""
+		}
+
+		FireDoTDamagePerLevel: {
+			// Label: Fire Do T Damage Per Level
+			// Tooltip: ""
+		}
+
+		IceDoTDamagePerLevel: {
+			// Label: Ice Do T Damage Per Level
+			// Tooltip: ""
+		}
+
+		PoisonDoTDamagePerLevel: {
+			// Label: Poison Do T Damage Per Level
+			// Tooltip: ""
+		}
+
+		LightningDoTDamagePerLevel: {
+			// Label: Lightning Do T Damage Per Level
+			// Tooltip: ""
+		}
+
+		FireDoTDuration: {
+			// Label: Fire Do T Duration
+			// Tooltip: ""
+		}
+
+		IceDoTDuration: {
+			// Label: Ice Do T Duration
+			// Tooltip: ""
+		}
+
+		PoisonDoTDuration: {
+			// Label: Poison Do T Duration
+			// Tooltip: ""
+		}
+
+		LightningDoTDuration: {
+			// Label: Lightning Do T Duration
 			// Tooltip: ""
 		}
 	}
