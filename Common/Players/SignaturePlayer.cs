@@ -15,12 +15,18 @@ namespace SignatureEquipmentDeluxe.Common.Players
         private int cacheFrameCount = 0;
         private List<GameEventType> previousActiveEvents = new List<GameEventType>();
 
+        // Tracking para idle aura animation
+        private int idleFrameCounter = 0;
+        private const int IDLE_THRESHOLD = 600; // 10 segundos (60 fps * 10)
+        public bool IsIdleForAura => idleFrameCounter >= IDLE_THRESHOLD;
+
         public override void Initialize()
         {
             xpMultiplier = 1f;
             cachedEventsMultiplier = 1f;
             cacheFrameCount = 0;
             previousActiveEvents.Clear();
+            idleFrameCounter = 0;
         }
 
         public void IncreaseXPMultiplier(float amount)
@@ -33,10 +39,31 @@ namespace SignatureEquipmentDeluxe.Common.Players
         /// </summary>
         public override void PostUpdate()
         {
+            // Tracking de movimento para idle aura
+            bool isMoving = Player.velocity.LengthSquared() > 0.01f;
+            if (isMoving)
+            {
+                idleFrameCounter = 0; // Reset quando está se movendo
+            }
+            else
+            {
+                idleFrameCounter++; // Incrementa quando está parado
+            }
+            
             // Atualiza tracking de eventos a cada 60 frames (1 segundo)
             if (Main.GameUpdateCount % 60 == 0)
             {
                 UpdateEventTracking();
+            }
+            
+            // Atualiza efeitos visuais (client-side apenas)
+            if (Main.netMode != Terraria.ID.NetmodeID.Server)
+            {
+                Visual.AuraEffect.UpdatePlayerAura(Player);
+                Visual.EventVisualEffect.UpdateEventVisuals(Player);
+                Visual.EventVisualEffect.UpdatePenaltyVisuals(Player);
+                Visual.LevelUpStatsAnimation.Update(); // Atualiza animações de stats
+                Visual.XPNotificationSystem.Update(); // Atualiza notificações de XP consolidadas
             }
         }
         
@@ -190,6 +217,13 @@ namespace SignatureEquipmentDeluxe.Common.Players
             var config = ModContent.GetInstance<Configs.ServerConfig>();
             if (!config.AllowStatueXP && target.SpawnedFromStatue) return;
             
+            // Adiciona hit ao combo system
+            var comboSystem = Player.GetModPlayer<Systems.ComboSystem>();
+            if (comboSystem != null)
+            {
+                comboSystem.AddComboHit(target.Center);
+            }
+            
             Item heldItem = Player.HeldItem;
             if (heldItem != null && !heldItem.IsAir)
             {
@@ -199,6 +233,13 @@ namespace SignatureEquipmentDeluxe.Common.Players
                     DistributeHitXP(heldItem, globalItem, target, damageDone);
                     if (target.life <= 0)
                     {
+                        // Adiciona kill ao streak
+                        var killStreakSystem = Player.GetModPlayer<Systems.KillStreakSystem>();
+                        if (killStreakSystem != null)
+                        {
+                            killStreakSystem.AddKill(target.Center, target.lifeMax);
+                        }
+                        
                         DistributeKillXP(heldItem, globalItem, target);
                     }
                 }
@@ -235,7 +276,7 @@ namespace SignatureEquipmentDeluxe.Common.Players
             
             if (xpGain > 0)
             {
-                globalItem.AddExperience((int)xpGain, armorPiece);
+                globalItem.AddExperience((int)xpGain, armorPiece, isArmor: true);
             }
         }
 
@@ -244,9 +285,15 @@ namespace SignatureEquipmentDeluxe.Common.Players
             var config = ModContent.GetInstance<Configs.ServerConfig>();
             float xpGain = config.WeaponBaseXPPerHit + (damageDone * config.WeaponXPPerDamageDealt);
             
-            // Aplica multiplicadores: config, player, eventos
+            // Aplica multiplicadores: config, player, eventos, combo
             xpGain *= config.GlobalExpMultiplier * config.WeaponExpMultiplier * xpMultiplier;
             xpGain *= GetActiveEventsMultiplier();
+            
+            var comboSystem = Player.GetModPlayer<Systems.ComboSystem>();
+            if (comboSystem != null)
+            {
+                xpGain *= comboSystem.GetComboXPMultiplier();
+            }
             
             globalItem.AddExperience((int)xpGain, item);
         }
@@ -256,11 +303,31 @@ namespace SignatureEquipmentDeluxe.Common.Players
             var config = ModContent.GetInstance<Configs.ServerConfig>();
             float xpGain = config.WeaponBaseXPPerKill + (target.lifeMax * config.WeaponXPPerEnemyMaxHP);
             
-            // Aplica multiplicadores: config, player, eventos
+            // Aplica multiplicadores: config, player, eventos, combo, kill streak
             xpGain *= config.GlobalExpMultiplier * config.WeaponExpMultiplier * xpMultiplier;
             xpGain *= GetActiveEventsMultiplier();
             
+            var comboSystem = Player.GetModPlayer<Systems.ComboSystem>();
+            if (comboSystem != null)
+            {
+                xpGain *= comboSystem.GetComboXPMultiplier();
+            }
+            
+            var killStreakSystem = Player.GetModPlayer<Systems.KillStreakSystem>();
+            if (killStreakSystem != null)
+            {
+                xpGain *= killStreakSystem.GetStreakXPMultiplier();
+            }
+            
             globalItem.AddExperience((int)xpGain, item);
+        }
+        
+        /// <summary>
+        /// Obtém o EventTracker para acesso aos visuais
+        /// </summary>
+        public EventTracker GetEventTracker()
+        {
+            return EventTracker.Instance;
         }
     }
 }

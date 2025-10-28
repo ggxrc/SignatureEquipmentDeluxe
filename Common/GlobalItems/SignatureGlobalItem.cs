@@ -700,21 +700,21 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
                             AddStatTooltip(tooltips, "Crit Chance", critBonus, clientConfig, "%");
                     }
                     
-                    // Use Time
-                    if (serverConfig.UseTimeIncrement)
-                    {
-                        float useTime = GetUseTimeCapped(item);
-                        if (useTime > 0)
-                            AddStatTooltip(tooltips, "Attack Speed (Use Time)", useTime, clientConfig, "%", false);
-                    }
+                    // Use Time - DESABILITADO: tracking não está sólido o suficiente
+                    // if (serverConfig.UseTimeIncrement)
+                    // {
+                    //     float useTime = GetUseTimeCapped(item);
+                    //     if (useTime > 0)
+                    //         AddStatTooltip(tooltips, "Attack Speed (Use Time)", useTime, clientConfig, "%", false);
+                    // }
                     
-                    // Use Animation
-                    if (serverConfig.UseAnimationIncrement)
-                    {
-                        float useAnim = GetUseAnimationCapped(item);
-                        if (useAnim > 0)
-                            AddStatTooltip(tooltips, "Attack Speed (Animation)", useAnim, clientConfig, "%", false);
-                    }
+                    // Use Animation - DESABILITADO: tracking não está sólido o suficiente
+                    // if (serverConfig.UseAnimationIncrement)
+                    // {
+                    //     float useAnim = GetUseAnimationCapped(item);
+                    //     if (useAnim > 0)
+                    //         AddStatTooltip(tooltips, "Attack Speed (Animation)", useAnim, clientConfig, "%", false);
+                    // }
                     
                     // Melee Size - APENAS para melee (e não noMelee)
                     if (isMelee && !item.noMelee && serverConfig.MeleeWeaponSizeIncrement)
@@ -875,6 +875,20 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
             return config.OutlineColor_Level101Plus;
         }
         
+        public override void PostDrawInInventory(Item item, SpriteBatch spriteBatch, Vector2 position, 
+            Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)
+        {
+            var clientConfig = GetClientConfig();
+            
+            if (!clientConfig.EnableInventoryGlow || !clientConfig.EnableGlowEffects)
+                return;
+            
+            if (Level < clientConfig.InventoryGlowMinLevel)
+                return;
+            
+            Visual.InventoryGlowEffect.DrawGlow(item, spriteBatch, position, frame, origin, scale, Level, GetOutlineColor(Level, clientConfig));
+        }
+        
         // ==================== SAVE/LOAD ====================
         
         public override void SaveData(Item item, TagCompound tag)
@@ -897,7 +911,7 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
         /// <summary>
         /// Adiciona experiência ao item
         /// </summary>
-        public void AddExperience(int amount, Item item = null)
+        public void AddExperience(int amount, Item item = null, bool isArmor = false)
         {
             if (amount <= 0) return;
             
@@ -919,7 +933,14 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
             // Mostra XP ganho se habilitado
             if (clientConfig.ShowExpGainNotification && Main.netMode != NetmodeID.Server)
             {
-                CombatText.NewText(Main.LocalPlayer.getRect(), clientConfig.TooltipExpColor, $"+{amount} XP");
+                // Posição base do jogador
+                Vector2 position = Main.LocalPlayer.Center;
+                
+                // Cor baseada no tipo: azul para armadura, verde para armas
+                Color xpColor = isArmor ? new Color(100, 150, 255) : clientConfig.TooltipExpColor;
+                
+                // Usa sistema consolidado de notificações
+                Visual.XPNotificationSystem.AddXPNotification(amount, position, xpColor, isArmor);
             }
             
             // Verifica level up
@@ -927,6 +948,14 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
             bool hasMaxLevel = maxLevel > 0;
             while (Experience >= requiredXP && (!hasMaxLevel || Level < maxLevel))
             {
+                // Captura stats ANTES do level up para animação
+                int levelBefore = Level;
+                Dictionary<string, float> statsBefore = null;
+                if (Main.netMode != NetmodeID.Server && clientConfig.ShowLevelUpNotification && item != null)
+                {
+                    statsBefore = CaptureItemStats(item);
+                }
+                
                 Experience -= requiredXP;
                 Level++;
                 requiredXP = GetRequiredXP(Level);
@@ -940,10 +969,30 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
                 // Notificação de level up
                 if (Main.netMode != NetmodeID.Server && clientConfig.ShowLevelUpNotification)
                 {
-                    CombatText.NewText(Main.LocalPlayer.getRect(), Color.Gold, $"Level Up! ({Level})", dramatic: true);
+                    // Check if this is a milestone level
+                    bool isMilestone = Visual.MilestoneEffect.IsMilestoneLevel(Level);
                     
-                    // Efeitos visuais
-                    if (clientConfig.EnableParticleEffects)
+                    if (isMilestone)
+                    {
+                        // Milestone-specific effects
+                        Visual.MilestoneEffect.SpawnMilestoneText(Main.LocalPlayer, Level);
+                        Visual.MilestoneEffect.SpawnMilestoneEffect(Main.LocalPlayer, Level);
+                    }
+                    else
+                    {
+                        // Normal level up text
+                        CombatText.NewText(Main.LocalPlayer.getRect(), Color.Gold, $"Level Up! ({Level})", dramatic: true);
+                    }
+                    
+                    // Captura stats DEPOIS e cria animações
+                    if (item != null && statsBefore != null)
+                    {
+                        Dictionary<string, float> statsAfter = CaptureItemStats(item);
+                        QueueStatAnimations(statsBefore, statsAfter);
+                    }
+                    
+                    // Efeitos visuais normais (apenas se não for milestone ou em conjunto)
+                    if (clientConfig.EnableParticleEffects && !isMilestone)
                     {
                         for (int i = 0; i < 30; i++)
                         {
@@ -1005,6 +1054,75 @@ namespace SignatureEquipmentDeluxe.Common.GlobalItems
             double expMultiplier = Math.Pow(multiPrice, level - 1);
             
             return (int)(basePrice * percentMultiplier * expMultiplier);
+        }
+        
+        /// <summary>
+        /// Captura os stats atuais de um item para compara��o
+        /// </summary>
+        private Dictionary<string, float> CaptureItemStats(Item item)
+        {
+            var stats = new Dictionary<string, float>();
+            var config = GetServerConfig();
+            
+            // Captura apenas os stats que s�o increment�veis
+            if (item.damage > 0)
+            {
+                float damageBonus = GetDamageCapped(item);
+                if (damageBonus > 0)
+                    stats["Damage"] = damageBonus;
+            }
+            
+            if (item.defense > 0)
+            {
+                float defenseBonus = GetDefenceCapped(item);
+                if (defenseBonus > 0)
+                    stats["Defense"] = defenseBonus;
+            }
+            
+            float critBonus = GetCritChanceCapped(item);
+            if (critBonus > 0)
+                stats["Crit"] = critBonus;
+            
+            bool isMelee = item.DamageType == DamageClass.Melee || item.DamageType == DamageClass.MeleeNoSpeed;
+            if (isMelee && !item.noMelee && config.MeleeWeaponSizeIncrement)
+            {
+                float sizeBonus = GetMeleeSizeCapped(item);
+                if (sizeBonus > 0)
+                    stats["Size"] = sizeBonus;
+            }
+            
+            return stats;
+        }
+        
+        /// <summary>
+        /// Adiciona anima��es para cada stat que aumentou
+        /// </summary>
+        private void QueueStatAnimations(Dictionary<string, float> statsBefore, Dictionary<string, float> statsAfter)
+        {
+            // Inicia a sequência com delay inicial (para dar tempo do "Level Up!" desaparecer)
+            Visual.LevelUpStatsAnimation.StartLevelUpSequence();
+            
+            // Cores para cada tipo de stat
+            var statColors = new Dictionary<string, Color>
+            {
+                ["Damage"] = new Color(255, 100, 100),
+                ["Defense"] = new Color(150, 150, 255),
+                ["Crit"] = new Color(255, 200, 100),
+                ["Size"] = new Color(100, 255, 100)
+            };
+            
+            foreach (var kvp in statsAfter)
+            {
+                string statName = kvp.Key;
+                float newValue = kvp.Value;
+                float oldValue = statsBefore.ContainsKey(statName) ? statsBefore[statName] : 0f;
+                
+                if (Math.Abs(newValue - oldValue) > 0.01f)
+                {
+                    Color color = statColors.ContainsKey(statName) ? statColors[statName] : Color.White;
+                    Visual.LevelUpStatsAnimation.AddStatIncrease(statName, oldValue, newValue, color);
+                }
+            }
         }
     }
 }

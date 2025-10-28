@@ -270,6 +270,8 @@ Config: {
 		AdditionalProjectilesHeader: Additional Projectile Chance Increment Header
 		ProjectileIncrementsHeader: Projectile Size Increment Header
 		ExpPriceHeader: Start Price Header
+		ComboSystemHeader: Enable Combo System Header
+		KillStreakSystemHeader: Enable Kill Streak System Header
 	}
 
 	ClientConfig: {
@@ -467,6 +469,8 @@ Config: {
 			Label: Log Stat Changes
 			Tooltip: Write stat changes to the log file for debugging
 		}
+
+		VisualEffectsHeader: Enable Aura Effects Header
 	}
 }
 
@@ -658,6 +662,201 @@ Configs: {
 
 		LogStatChanges: {
 			Label: Log Stat Changes
+			Tooltip: ""
+		}
+
+		EnableAuraEffects: {
+			Label: Enable Aura Effects
+			Tooltip: ""
+		}
+
+		AuraStyle: {
+			Label: Aura Style
+			Tooltip: ""
+		}
+
+		AuraLevel_Weak: {
+			Label: Aura Level_ Weak
+			Tooltip: ""
+		}
+
+		AuraLevel_Medium: {
+			Label: Aura Level_ Medium
+			Tooltip: ""
+		}
+
+		AuraLevel_Strong: {
+			Label: Aura Level_ Strong
+			Tooltip: ""
+		}
+
+		AuraLevel_Intense: {
+			Label: Aura Level_ Intense
+			Tooltip: ""
+		}
+
+		EnableProjectileTrails: {
+			Label: Enable Projectile Trails
+			Tooltip: ""
+		}
+
+		TrailPersistTime: {
+			Label: Trail Persist Time
+			Tooltip: ""
+		}
+
+		TrailIntensity: {
+			Label: Trail Intensity
+			Tooltip: ""
+		}
+
+		EnableInventoryGlow: {
+			Label: Enable Inventory Glow
+			Tooltip: ""
+		}
+
+		InventoryGlowMinLevel: {
+			Label: Inventory Glow Min Level
+			Tooltip: ""
+		}
+
+		ShowEventVisuals: {
+			Label: Show Event Visuals
+			Tooltip: ""
+		}
+
+		ShowEventStacking: {
+			Label: Show Event Stacking
+			Tooltip: ""
+		}
+
+		ShowMilestoneEffects: {
+			Label: Show Milestone Effects
+			Tooltip: ""
+		}
+
+		EnableProjectileHitEffects: {
+			Label: Enable Projectile Hit Effects
+			Tooltip: ""
+		}
+
+		HitEffectsMinLevel: {
+			Label: Hit Effects Min Level
+			Tooltip: ""
+		}
+
+		HitEffectsIntensity: {
+			Label: Hit Effects Intensity
+			Tooltip: ""
+		}
+
+		EnableComboSystem: {
+			Label: Enable Combo System
+			Tooltip: ""
+		}
+
+		ComboVisualInterval: {
+			Label: Combo Visual Interval
+			Tooltip: ""
+		}
+
+		EnableComboSounds: {
+			Label: Enable Combo Sounds
+			Tooltip: ""
+		}
+
+		EnableComboParticles: {
+			Label: Enable Combo Particles
+			Tooltip: ""
+		}
+
+		EnableComboXPBonus: {
+			Label: Enable Combo X P Bonus
+			Tooltip: ""
+		}
+
+		ComboXPBonusPerHit: {
+			Label: Combo X P Bonus Per Hit
+			Tooltip: ""
+		}
+
+		ComboXPBonusMax: {
+			Label: Combo X P Bonus Max
+			Tooltip: ""
+		}
+
+		EnableComboDamageBonus: {
+			Label: Enable Combo Damage Bonus
+			Tooltip: ""
+		}
+
+		ComboDamageBonusPerHit: {
+			Label: Combo Damage Bonus Per Hit
+			Tooltip: ""
+		}
+
+		ComboDamageBonusMax: {
+			Label: Combo Damage Bonus Max
+			Tooltip: ""
+		}
+
+		EnableKillStreakSystem: {
+			Label: Enable Kill Streak System
+			Tooltip: ""
+		}
+
+		KillStreakVisualInterval: {
+			Label: Kill Streak Visual Interval
+			Tooltip: ""
+		}
+
+		ShowStreakEndNotification: {
+			Label: Show Streak End Notification
+			Tooltip: ""
+		}
+
+		EnableKillStreakSounds: {
+			Label: Enable Kill Streak Sounds
+			Tooltip: ""
+		}
+
+		EnableKillStreakParticles: {
+			Label: Enable Kill Streak Particles
+			Tooltip: ""
+		}
+
+		EnableStreakXPBonus: {
+			Label: Enable Streak X P Bonus
+			Tooltip: ""
+		}
+
+		StreakXPBonusPerKill: {
+			Label: Streak X P Bonus Per Kill
+			Tooltip: ""
+		}
+
+		StreakXPBonusMax: {
+			Label: Streak X P Bonus Max
+			Tooltip: ""
+		}
+
+		AuraIntensityMultiplier: {
+			Label: Aura Intensity Multiplier
+			Tooltip: ""
+		}
+
+		ShowKillStreakHUD: {
+			Label: Show Kill Streak H U D
+			Tooltip: ""
+		}
+
+		ShowKillStreakTimer: {
+			Label: Show Kill Streak Timer
+			Tooltip: ""
+		}
+
+		KillStreakHUDOffset: {
+			Label: Kill Streak H U D Offset
 			Tooltip: ""
 		}
 	}
@@ -1210,6 +1409,61 @@ Configs: {
 			Label: Enable Special Penalty
 			Tooltip: ""
 		}
+
+		EnableComboSystem: {
+			Label: Enable Combo System
+			Tooltip: ""
+		}
+
+		EnableComboXPBonus: {
+			Label: Enable Combo X P Bonus
+			Tooltip: ""
+		}
+
+		ComboXPBonusPerHit: {
+			Label: Combo X P Bonus Per Hit
+			Tooltip: ""
+		}
+
+		ComboXPBonusMax: {
+			Label: Combo X P Bonus Max
+			Tooltip: ""
+		}
+
+		EnableComboDamageBonus: {
+			Label: Enable Combo Damage Bonus
+			Tooltip: ""
+		}
+
+		ComboDamageBonusPerHit: {
+			Label: Combo Damage Bonus Per Hit
+			Tooltip: ""
+		}
+
+		ComboDamageBonusMax: {
+			Label: Combo Damage Bonus Max
+			Tooltip: ""
+		}
+
+		EnableKillStreakSystem: {
+			Label: Enable Kill Streak System
+			Tooltip: ""
+		}
+
+		EnableStreakXPBonus: {
+			Label: Enable Streak X P Bonus
+			Tooltip: ""
+		}
+
+		StreakXPBonusPerKill: {
+			Label: Streak X P Bonus Per Kill
+			Tooltip: ""
+		}
+
+		StreakXPBonusMax: {
+			Label: Streak X P Bonus Max
+			Tooltip: ""
+		}
 	}
 
 	ItemStatInt: {
@@ -1610,5 +1864,15 @@ Configs: {
 		High.Label: High
 		VeryHigh.Label: Very High
 		Extreme.Label: Extreme
+	}
+
+	AuraStyle: {
+		Tooltip: ""
+		Magic.Label: Magic
+		Fire.Label: Fire
+		Electric.Label: Electric
+		Rainbow.Label: Rainbow
+		Shadow.Label: Shadow
+		Holy.Label: Holy
 	}
 }

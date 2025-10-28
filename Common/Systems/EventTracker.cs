@@ -26,6 +26,14 @@ namespace SignatureEquipmentDeluxe.Common.Systems
         // Controle de multi-boss (2+ bosses simultâneos)
         private bool multiBossPenaltyActive = false;
         
+        // Propriedades públicas para visual effects
+        public bool IsAnyBossActive => currentActiveEvents.Any(e => IsBossEvent(e));
+        public bool IsAnyMoonEventActive => currentActiveEvents.Any(e => IsMoonEvent(e));
+        public bool IsAnyInvasionActive => currentActiveEvents.Any(e => IsInvasionEvent(e));
+        public bool IsWeatherEventActive => currentActiveEvents.Any(e => IsWeatherEvent(e));
+        public bool IsAntiGrindPenaltyActive => consecutiveCount.Values.Any(count => count > 1);
+        public float CurrentExpMultiplier => GetLowestPenaltyMultiplier();
+        
         /// <summary>
         /// Atualiza o tracker com os eventos ativos no momento
         /// </summary>
@@ -117,6 +125,68 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                 GameEventType.MoonLord => true,
                 _ => false
             };
+        }
+        
+        /// <summary>
+        /// Verifica se um evento é de lua (moon events)
+        /// </summary>
+        private bool IsMoonEvent(GameEventType eventType)
+        {
+            return eventType switch
+            {
+                GameEventType.BloodMoon => true,
+                GameEventType.PumpkinMoon => true,
+                GameEventType.FrostMoon => true,
+                _ => false
+            };
+        }
+        
+        /// <summary>
+        /// Verifica se um evento é invasão
+        /// </summary>
+        private bool IsInvasionEvent(GameEventType eventType)
+        {
+            return eventType switch
+            {
+                GameEventType.GoblinArmy => true,
+                GameEventType.PirateInvasion => true,
+                GameEventType.FrostLegion => true,
+                GameEventType.MartianMadness => true,
+                GameEventType.LunarEvent => true,
+                _ => false
+            };
+        }
+        
+        /// <summary>
+        /// Verifica se um evento é de clima
+        /// </summary>
+        private bool IsWeatherEvent(GameEventType eventType)
+        {
+            return eventType switch
+            {
+                GameEventType.Rain => true,
+                GameEventType.Sandstorm => true,
+                GameEventType.Blizzard => true,
+                _ => false
+            };
+        }
+        
+        /// <summary>
+        /// Obtém o menor multiplicador de penalidade atual (mais severo)
+        /// </summary>
+        private float GetLowestPenaltyMultiplier()
+        {
+            if (consecutiveCount.Count == 0)
+                return 1f;
+            
+            float lowestMultiplier = 1f;
+            foreach (var kvp in consecutiveCount)
+            {
+                float multiplier = GetPenaltyMultiplier(kvp.Key);
+                if (multiplier < lowestMultiplier)
+                    lowestMultiplier = multiplier;
+            }
+            return lowestMultiplier;
         }
         
         /// <summary>

@@ -2,6 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 
@@ -305,6 +306,45 @@ namespace SignatureEquipmentDeluxe.Common.Projectiles
             public float SpeedMultiplier { get; set; } = 1f;
             public int AddedLifeTime { get; set; }
             public int AddedPenetration { get; set; }
+        }
+        
+        /// <summary>
+        /// Desenha trail do projétil antes do projétil normal
+        /// </summary>
+        public override void OnHitNPC(Projectile projectile, NPC target, NPC.HitInfo hit, int damageDone)
+        {
+            // Spawna efeitos visuais de hit apenas se tiver item criador
+            if (Main.netMode != NetmodeID.Server && ProjectileCreatorItem != null && !ProjectileCreatorItem.IsAir)
+            {
+                var globalItem = ProjectileCreatorItem.GetGlobalItem<GlobalItems.SignatureGlobalItem>();
+                if (globalItem != null && globalItem.Level > 0)
+                {
+                    // Usa a cor do outline para o efeito de hit
+                    var clientConfig = ModContent.GetInstance<Configs.ClientConfig>();
+                    Color hitColor = GetOutlineColorForLevel(globalItem.Level, clientConfig);
+                    
+                    Visual.ProjectileHitEffect.SpawnHitEffect(projectile.Center, hitColor, globalItem.Level, damageDone, ProjectileCreatorItem.DamageType);
+                }
+            }
+            
+            base.OnHitNPC(projectile, target, hit, damageDone);
+        }
+        
+        /// <summary>
+        /// Obtém a cor do outline baseado no nível (mesmo sistema do item)
+        /// </summary>
+        private Color GetOutlineColorForLevel(int level, Configs.ClientConfig config)
+        {
+            if (level >= 101)
+                return config.OutlineColor_Level101Plus;
+            if (level >= 76)
+                return config.OutlineColor_Level76_100;
+            if (level >= 51)
+                return config.OutlineColor_Level51_75;
+            if (level >= 26)
+                return config.OutlineColor_Level26_50;
+            
+            return config.OutlineColor_Level1_25;
         }
     }
 }
