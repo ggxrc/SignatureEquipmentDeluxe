@@ -17,21 +17,116 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             if (leveledNPC.EnemyLevel <= 0)
                 return;
             
-            int damageReceived = hurtInfo.Damage;
+            // Usa o dano ORIGINAL do inimigo (npc.damage), não o dano recebido após defesa
+            int originalDamage = npc.damage;
+            if (originalDamage <= 0)
+                originalDamage = hurtInfo.Damage; // Fallback se não tiver damage definido
             
-            // Aplica perda de XP na arma atual
-            ApplyWeaponXPLoss(damageReceived);
-            
-            // Aplica perda de XP em todas as armaduras
-            ApplyArmorXPLoss(damageReceived, Player.armor[0]); // Helmet
-            ApplyArmorXPLoss(damageReceived, Player.armor[1]); // Chestplate
-            ApplyArmorXPLoss(damageReceived, Player.armor[2]); // Leggings
+            // APENAS a arma perde XP (armadura não perde mais)
+            ApplyWeaponXPLoss(originalDamage);
         }
         
         /// <summary>
-        /// Aplica perda de XP na arma equipada (500% do dano)
+        /// Quando o jogador morre, inimigo nivelado pode roubar nível inteiro de arma da hotbar
         /// </summary>
-        private void ApplyWeaponXPLoss(int damage)
+        public override bool PreKill(double damage, int hitDirection, bool pvp, ref bool playSound, ref bool genGore, ref PlayerDeathReason damageSource)
+        {
+            // Verifica se foi morto por um NPC nivelado
+            if (damageSource.SourceNPCIndex >= 0)
+            {
+                NPC killer = Main.npc[damageSource.SourceNPCIndex];
+                if (killer != null && killer.active)
+                {
+                    var leveledNPC = killer.GetGlobalNPC<LeveledEnemyGlobalNPC>();
+                    if (leveledNPC != null && leveledNPC.EnemyLevel > 0)
+                    {
+                        // Procura armas na hotbar (slots 0-9) que têm nível
+                        System.Collections.Generic.List<Item> weaponsWithLevel = new System.Collections.Generic.List<Item>();
+                        
+                        for (int i = 0; i < 10; i++)
+                        {
+                            Item item = Player.inventory[i];
+                            if (item != null && !item.IsAir && item.damage > 0) // Apenas itens de dano
+                            {
+                                var sigItem = item.GetGlobalItem<SignatureGlobalItem>();
+                                if (sigItem != null && sigItem.Level > 0)
+                                {
+                                    weaponsWithLevel.Add(item);
+                                }
+                            }
+                        }
+                        
+                        // Se tem armas com nível, rouba uma aleatória
+                        if (weaponsWithLevel.Count > 0)
+                        {
+                            Item targetWeapon = weaponsWithLevel[Main.rand.Next(weaponsWithLevel.Count)];
+                            var targetSigItem = targetWeapon.GetGlobalItem<SignatureGlobalItem>();
+                            
+                            int stolenLevel = targetSigItem.Level;
+                            
+                            // Remove TODOS os níveis da arma
+                            targetSigItem.Level = 0;
+                            targetSigItem.Experience = 0;
+                            
+                            // Inimigo ganha os níveis roubados
+                            leveledNPC.EnemyLevel += stolenLevel;
+                            leveledNPC.ApplyLevelScaling(killer);
+                            
+                            // Mensagem épica de roubo
+                            if (Main.netMode != Terraria.ID.NetmodeID.Server)
+                            {
+                                Main.NewText($"{killer.TypeName} stole {stolenLevel} levels from your {targetWeapon.Name}!", Color.Red);
+                                Main.NewText($"{killer.TypeName} is now level {leveledNPC.EnemyLevel}!", Color.Orange);
+                            }
+                            
+                            // Efeito visual ÉPICO
+                            for (int j = 0; j < 80; j++)
+                            {
+                                Vector2 velocity = Main.rand.NextVector2CircularEdge(10f, 10f);
+                                Dust dust = Dust.NewDustPerfect(
+                                    Player.Center,
+                                    Terraria.ID.DustID.GreenTorch,
+                                    velocity,
+                                    0,
+                                    Color.Red,
+                                    2.5f
+                                );
+                                dust.noGravity = true;
+                            }
+                            
+                            // Partículas fluem do jogador para o killer
+                            for (int j = 0; j < 40; j++)
+                            {
+                                Vector2 direction = Vector2.Normalize(killer.Center - Player.Center);
+                                Vector2 velocity = direction * Main.rand.NextFloat(8f, 15f);
+                                Dust flow = Dust.NewDustPerfect(
+                                    Player.Center,
+                                    Terraria.ID.DustID.Electric,
+                                    velocity,
+                                    0,
+                                    Color.Yellow,
+                                    2f
+                                );
+                                flow.noGravity = true;
+                            }
+                            
+                            // Som dramático
+                            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Roar, Player.Center);
+                            
+                            // Combat text no killer
+                            CombatText.NewText(killer.Hitbox, Color.Lime, $"+{stolenLevel} LEVELS!", true, true);
+                        }
+                    }
+                }
+            }
+            
+            return base.PreKill(damage, hitDirection, pvp, ref playSound, ref genGore, ref damageSource);
+        }
+        
+        /// <summary>
+        /// Aplica perda de XP na arma equipada (1625% do dano ORIGINAL do inimigo)
+        /// </summary>
+        private void ApplyWeaponXPLoss(int originalDamage)
         {
             Item weapon = Player.HeldItem;
             if (weapon == null || weapon.IsAir)
@@ -41,28 +136,10 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             if (!sigItem.CanGainExperience(weapon) || sigItem.Level <= 0)
                 return;
             
-            // Perda de 500% do dano
-            int xpLoss = damage * 5;
+            // Perda de 1625% do dano ORIGINAL (225% de aumento: 500% -> 1625%)
+            int xpLoss = (int)(originalDamage * 16.25f);
             
             ApplyXPLoss(sigItem, weapon, xpLoss, Player.Center);
-        }
-        
-        /// <summary>
-        /// Aplica perda de XP em peça de armadura (500% do dano)
-        /// </summary>
-        private void ApplyArmorXPLoss(int damage, Item armorPiece)
-        {
-            if (armorPiece == null || armorPiece.IsAir)
-                return;
-            
-            var sigItem = armorPiece.GetGlobalItem<SignatureGlobalItem>();
-            if (sigItem.Level <= 0)
-                return;
-            
-            // Perda de 500% do dano
-            int xpLoss = damage * 5;
-            
-            ApplyXPLoss(sigItem, armorPiece, xpLoss, Player.Center);
         }
         
         /// <summary>

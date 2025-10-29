@@ -51,27 +51,33 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             if (sigItem.Level <= 0 || sigItem.EquippedRunes.Count == 0)
                 return;
             
-            float dropChance = RuneSystem.GetCurseDropChance(sigItem.EquippedRunes);
-            if (dropChance <= 0)
+            // Verifica se tem pelo menos uma maldição
+            bool hasCurse = false;
+            foreach (var rune in sigItem.EquippedRunes)
+            {
+                if (rune.IsCurse())
+                {
+                    hasCurse = true;
+                    break;
+                }
+            }
+            
+            if (!hasCurse)
                 return;
             
-            // Roll de chance (FORÇADO 100% PARA TESTE)
-            dropChance = 1.0f; // TESTE: Sempre dropa
-            if (Main.rand.NextFloat() < dropChance)
-            {
-                DropWeaponAndCreateRadioactiveZone(item, sigItem.Level, killerNPC, sigItem.EquippedRunes);
-                
-                // Remove o item do inventário
-                item.TurnToAir();
-                
-                // Mensagem para o jogador
-                Main.NewText($"Your cursed {item.Name} was dropped and created a radioactive zone!", 
-                    new Color(255, 100, 100));
-            }
+            // SEMPRE DROPA (100% de chance, não configurável)
+            DropWeaponAndCreateRadioactiveZone(item, sigItem.Level, killerNPC, sigItem.EquippedRunes);
+            
+            // Remove o item do inventário
+            item.TurnToAir();
+            
+            // Mensagem para o jogador
+            Main.NewText($"Your cursed {item.Name} was dropped and created a radioactive zone!", 
+                new Color(255, 100, 100));
         }
         
         /// <summary>
-        /// Dropa a arma e cria zona radioativa
+        /// Dropa a arma e cria/aumenta zona radioativa
         /// </summary>
         private void DropWeaponAndCreateRadioactiveZone(Item item, int weaponLevel, NPC killerNPC, System.Collections.Generic.List<Data.EquippedRune> runes)
         {
@@ -84,8 +90,33 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             // Dropa o item no chão usando o método seguro do jogador
             Player.QuickSpawnItem(Player.GetSource_Death(), item.type, 1);
             
-            // Cria zona radioativa
-            LeveledEnemySystem.AddRadioactiveZone(Player.Center, weaponLevel);
+            // Verifica se já está em zona radioativa
+            bool isInExistingZone = LeveledEnemySystem.IsInRadioactiveZone(Player.Center, out int existingMaxLevel, out Vector2 zoneCenter, out float zoneRadius);
+            
+            if (isInExistingZone)
+            {
+                // AUMENTA O NÍVEL DE PERIGO DA ZONA EXISTENTE ao invés de criar nova
+                IncreaseZoneDangerLevel(Player.Center, weaponLevel, item.type);
+            }
+            else
+            {
+                // Cria nova zona com animação épica
+                if (Main.netMode != Terraria.ID.NetmodeID.MultiplayerClient)
+                {
+                    int projectile = Projectile.NewProjectile(
+                        Player.GetSource_Death(),
+                        Player.Center,
+                        Vector2.Zero,
+                        ModContent.ProjectileType<Content.Projectiles.WeaponAscensionProjectile>(),
+                        0,
+                        0f,
+                        Player.whoAmI,
+                        0f, // ai[0] = flag de inicialização
+                        weaponLevel, // ai[1] = nível da arma
+                        item.type // ai[2] = tipo do item para desenhar sprite correto
+                    );
+                }
+            }
             
             // Se foi morto por um NPC, ele herda poderes
             if (killerNPC != null && killerNPC.active)
@@ -98,6 +129,100 @@ namespace SignatureEquipmentDeluxe.Common.Systems
         }
         
         /// <summary>
+        /// Aumenta o nível de perigo de uma zona existente
+        /// </summary>
+        private void IncreaseZoneDangerLevel(Vector2 position, int weaponLevel, int itemType)
+        {
+            // Encontra a zona
+            foreach (var zone in LeveledEnemySystem.radioactiveZones)
+            {
+                float distance = Vector2.Distance(position, zone.Position);
+                if (distance <= zone.Radius)
+                {
+                    // Aumenta o nível máximo da zona (adiciona 50% do nível da arma)
+                    int levelIncrease = System.Math.Max(1, weaponLevel / 2);
+                    zone.MaxEnemyLevel += levelIncrease;
+                    
+                    // Força atualização do danger level
+                    zone.UpdateDangerLevel();
+                    
+                    // ANIMAÇÃO ÉPICA DE UPGRADE DA ZONA
+                    SpawnZoneUpgradeAnimation(zone.Position, zone.Radius, itemType);
+                    
+                    // Mensagem dramática
+                    if (Main.netMode != Terraria.ID.NetmodeID.Server)
+                    {
+                        Main.NewText($"☢ The zone's power increases! New level: {zone.MaxEnemyLevel} ☢", Color.Red);
+                    }
+                    
+                    // Som épico
+                    Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Roar, position);
+                    
+                    break; // Só aumenta a primeira zona encontrada
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Animação épica quando a zona aumenta de poder
+        /// </summary>
+        private void SpawnZoneUpgradeAnimation(Vector2 zoneCenter, float zoneRadius, int itemType)
+        {
+            // Onda de choque expandindo do centro
+            for (int ring = 0; ring < 5; ring++)
+            {
+                int particlesInRing = 60;
+                float ringRadius = zoneRadius * (0.2f + ring * 0.2f);
+                
+                for (int i = 0; i < particlesInRing; i++)
+                {
+                    float angle = (i / (float)particlesInRing) * MathHelper.TwoPi;
+                    Vector2 pos = zoneCenter + new Vector2(
+                        (float)System.Math.Cos(angle) * ringRadius,
+                        (float)System.Math.Sin(angle) * ringRadius
+                    );
+                    
+                    Dust shockwave = Dust.NewDustPerfect(pos, Terraria.ID.DustID.Electric, Vector2.Zero, 0, Color.Red, 2.5f);
+                    shockwave.noGravity = true;
+                }
+            }
+            
+            // Explosão central massiva
+            for (int i = 0; i < 150; i++)
+            {
+                Vector2 velocity = Main.rand.NextVector2CircularEdge(12f, 12f);
+                Dust explosion = Dust.NewDustPerfect(
+                    zoneCenter,
+                    Terraria.ID.DustID.CursedTorch,
+                    velocity,
+                    0,
+                    Color.OrangeRed,
+                    Main.rand.NextFloat(2f, 3.5f)
+                );
+                explosion.noGravity = true;
+            }
+            
+            // Spawn a arma levitando no centro temporariamente (5 segundos)
+            if (Main.netMode != Terraria.ID.NetmodeID.MultiplayerClient)
+            {
+                int projectile = Projectile.NewProjectile(
+                    Main.LocalPlayer.GetSource_FromThis(),
+                    zoneCenter,
+                    Vector2.Zero,
+                    ModContent.ProjectileType<Content.Projectiles.ZoneUpgradeVisual>(),
+                    0,
+                    0f,
+                    Main.myPlayer,
+                    0f,
+                    itemType // ai[1] = tipo do item
+                );
+            }
+            
+            // Som de poder crescente
+            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.DD2_BetsyScream, zoneCenter);
+        }
+        
+        /// <summary>
         /// Potencializa o NPC que matou o jogador
         /// </summary>
         private void PowerUpKillerNPC(NPC killer, int weaponLevel, System.Collections.Generic.List<Data.EquippedRune> runes)
@@ -106,7 +231,7 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             
             // Dobro do nível da arma perdida
             int newLevel = weaponLevel * 2;
-            leveledNPC.SetLevelDirectly(newLevel);
+            leveledNPC.SetLevelDirectly(newLevel, killer); // Passa o NPC para aplicar scaling
             
             // Herda efeitos de runas elementais
             foreach (var rune in runes)

@@ -2154,3 +2154,8 @@ Configs: {
 		// Holy.Label: Holy
 	}
 }
+
+Projectiles: {
+	// WeaponAscensionProjectile.DisplayName: Weapon Ascension Projectile
+	// ZoneUpgradeVisual.DisplayName: Zone Upgrade Visual
+}
