@@ -15,6 +15,32 @@ namespace SignatureEquipmentDeluxe.Common.Systems
         // Lista de zonas radioativas (onde armas foram dropadas)
         public static List<RadioactiveZone> radioactiveZones = new List<RadioactiveZone>();
         
+        // Sistema de agendamento de ações atrasadas
+        private static List<DelayedAction> delayedActions = new List<DelayedAction>();
+        
+        /// <summary>
+        /// Ação atrasada para agendamento
+        /// </summary>
+        private class DelayedAction
+        {
+            public System.Action Action { get; set; }
+            public int Delay { get; set; }
+            public int Timer { get; set; }
+        }
+        
+        /// <summary>
+        /// Agenda uma ação para ser executada após um delay
+        /// </summary>
+        public static void ScheduleDelayedAction(System.Action action, int delayTicks)
+        {
+            delayedActions.Add(new DelayedAction
+            {
+                Action = action,
+                Delay = delayTicks,
+                Timer = 0
+            });
+        }
+        
         /// <summary>
         /// Adiciona uma zona radioativa onde inimigos podem ganhar nível
         /// </summary>
@@ -26,7 +52,7 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             var config = ModContent.GetInstance<Configs.ServerConfig>();
             float baseRadius = (config?.RadioactiveZoneRadius ?? 150);
             float radius = baseRadius * 2.5f * 16f; // 150% maior = 2.5x, tiles para pixels
-            int duration = 10 * 60 * 60; // 10 minutos fixos
+            int duration = 10 * 60 * 60; // 10 minutos (mas passando 5x mais rápido para testes)
             
             radioactiveZones.Add(new RadioactiveZone
             {
@@ -92,13 +118,24 @@ namespace SignatureEquipmentDeluxe.Common.Systems
         {
             for (int i = radioactiveZones.Count - 1; i >= 0; i--)
             {
-                radioactiveZones[i].TimeLeft--;
+                radioactiveZones[i].TimeLeft -= 5; // 5x mais rápido para testes
                 radioactiveZones[i].UpdateDangerLevel(); // Atualiza nível de perigo
                 
                 if (radioactiveZones[i].TimeLeft <= 0)
                 {
                     radioactiveZones[i].TriggerFinalExplosion();
                     radioactiveZones.RemoveAt(i);
+                }
+            }
+            
+            // Atualiza ações atrasadas
+            for (int i = delayedActions.Count - 1; i >= 0; i--)
+            {
+                delayedActions[i].Timer += 5; // 5x mais rápido para testes
+                if (delayedActions[i].Timer >= delayedActions[i].Delay)
+                {
+                    delayedActions[i].Action?.Invoke();
+                    delayedActions.RemoveAt(i);
                 }
             }
         }
@@ -155,8 +192,8 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                 // Aplica modificadores baseado no danger level
                 ApplyDangerModifiers();
                 
-                // Check for final countdown
-                if (TimeLeft <= 600 && !isFinalCountdown)
+                // Check for final countdown (10 segundos, ajustado para velocidade 5x)
+                if (TimeLeft <= 3000 && !isFinalCountdown)
                 {
                     isFinalCountdown = true;
                     if (Main.netMode != Terraria.ID.NetmodeID.Server)
@@ -300,85 +337,315 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             /// </summary>
             public void TriggerFinalExplosion()
             {
-                // Efeitos visuais massivos
+                // === EXPLOSÃO FINAL ABSURDA COM FLASHBANG ===
+                // Milhares de partículas se dispersam causando cegueira temporária
+
                 if (Main.netMode != Terraria.ID.NetmodeID.Server)
                 {
-                    // Explosão central gigante
-                    for (int i = 0; i < 200; i++)
+                    // === FLASHBANG VISUAL: MILHARES DE PARTÍCULAS BRANCAS ===
+                    // Cria efeito de tela branca temporária como Moon Lord
+                    for (int i = 0; i < 2000; i++) // 2000 partículas brancas para flash
                     {
-                        Vector2 velocity = Main.rand.NextVector2CircularEdge(15f, 15f);
-                        Dust explosion = Dust.NewDustPerfect(Position, Terraria.ID.DustID.CursedTorch, velocity, 0, Color.Red, 3f);
-                        explosion.noGravity = true;
+                        // Posição aleatória ao redor do jogador para efeito de tela cheia
+                        Vector2 flashPos = Position + Main.rand.NextVector2Circular(Radius * 2f, Radius * 2f);
+                        
+                        // Velocidade radial rápida para dispersão
+                        Vector2 flashVelocity = Main.rand.NextVector2Circular(15f, 15f);
+                        
+                        // Partículas brancas pequenas para efeito de flash
+                        Dust flashParticle = Dust.NewDustPerfect(flashPos, Terraria.ID.DustID.SilverFlame, flashVelocity, 0, Color.White, 2f);
+                        flashParticle.noGravity = true;
+                        flashParticle.fadeIn = 5f;
+                        flashParticle.alpha = 0; // Totalmente opaco inicialmente
+                        
+                        // Luz branca intensa em cada partícula
+                        Lighting.AddLight(flashPos, 5f, 5f, 5f);
                     }
                     
-                    // Onda de choque visual
-                    for (int i = 0; i < 50; i++)
+                    // === FLASHBANG: EFEITO DE CEGUEIRA TEMPORÁRIA ===
+                    // Luz branca intensa que cega o jogador por alguns segundos (como Moon Lord)
+                    Lighting.AddLight(Position, 50f, 50f, 50f); // Luz branca ULTRA máxima
+                    
+                    // Efeito de flash na tela do jogador (se estiver próximo)
+                    foreach (Player player in Main.player)
                     {
-                        float angle = MathHelper.TwoPi * i / 50f;
-                        Vector2 velocity = new Vector2((float)System.Math.Cos(angle), (float)System.Math.Sin(angle)) * 20f;
-                        Dust shockwave = Dust.NewDustPerfect(Position, Terraria.ID.DustID.Electric, velocity, 0, Color.White, 4f);
-                        shockwave.noGravity = true;
-                    }
-                }
-                
-                // Som apocalíptico
-                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.DD2_BetsyDeath, Position);
-                
-                // Mata NPCs inimigos na zona (exceto se estão em casas)
-                foreach (NPC npc in Main.npc)
-                {
-                    if (npc.active && !npc.friendly && !npc.townNPC && Vector2.Distance(npc.Center, Position) <= Radius)
-                    {
-                        // Verifica se está "em uma casa" - se há townNPC próximo (50 tiles)
-                        bool isInHouse = false;
-                        foreach (NPC townNpc in Main.npc)
+                        if (player.active && Vector2.Distance(player.Center, Position) <= Radius * 1.5f)
                         {
-                            if (townNpc.active && townNpc.townNPC && Vector2.Distance(npc.Center, townNpc.Center) < 50 * 16f) // 50 tiles
-                            {
-                                isInHouse = true;
-                                break;
-                            }
+                            // Flashbang estilo Moon Lord: confusão temporária
+                            player.AddBuff(Terraria.ID.BuffID.Confused, 60); // 1 segundo de confusão
+                            // Adiciona efeito de luz extra no jogador para simular flash
+                            Lighting.AddLight(player.Center, 20f, 20f, 20f);
                         }
+                    }
+
+                    // === EXPLOSÃO MASSIVA: MILHARES DE PARTÍCULAS SE DISPERSANDO ===
+                    int totalParticles = 5000 + DangerLevel * 2000; // 5000-9000+ partículas
+                    
+                    for (int i = 0; i < totalParticles; i++)
+                    {
+                        // Posição aleatória dentro da zona
+                        Vector2 particlePos = Position + Main.rand.NextVector2Circular(Radius, Radius);
                         
-                        if (!isInHouse)
+                        // Velocidade radial para fora (explosão)
+                        Vector2 direction = Vector2.Normalize(particlePos - Position);
+                        float speed = Main.rand.NextFloat(5f, 25f) + DangerLevel * 5f; // Velocidade aumenta com danger
+                        Vector2 velocity = direction * speed;
+                        
+                        // Tipo de partícula aleatório para variedade absurda
+                        int dustType = Main.rand.Next(new int[] {
+                            Terraria.ID.DustID.CursedTorch, Terraria.ID.DustID.GreenTorch, Terraria.ID.DustID.Electric, Terraria.ID.DustID.Torch, 
+                            Terraria.ID.DustID.Smoke, Terraria.ID.DustID.Stone, Terraria.ID.DustID.Dirt, Terraria.ID.DustID.WoodFurniture,
+                            Terraria.ID.DustID.Ice, Terraria.ID.DustID.Snow, Terraria.ID.DustID.MagicMirror, Terraria.ID.DustID.CrystalPulse
+                        });
+                        
+                        // Tamanho aleatório massivo
+                        float scale = Main.rand.NextFloat(0.5f, 5f) + DangerLevel * 0.5f;
+                        
+                        // Cor aleatória caótica
+                        Color particleColor = Main.rand.Next(new Color[] {
+                            Color.White, Color.Red, Color.Orange, Color.Yellow, 
+                            Color.Green, Color.Cyan, Color.Blue, Color.Purple,
+                            Color.Pink, Color.Lime, Color.Teal, Color.Magenta
+                        });
+                        
+                        // Spawn da partícula
+                        Dust particle = Dust.NewDustPerfect(particlePos, dustType, velocity, 0, particleColor, scale);
+                        particle.noGravity = Main.rand.NextBool(); // Metade com gravidade, metade sem
+                        particle.fadeIn = Main.rand.NextFloat(1f, 3f);
+                        
+                        // Efeito especial: algumas partículas brilham
+                        if (Main.rand.NextBool(10)) // 10% chance
                         {
-                            // Mata instantaneamente
-                            npc.life = 0;
-                            npc.checkDead();
+                            particle.color = Color.White;
+                            particle.scale *= 2f;
+                            Lighting.AddLight(particlePos, 0.5f, 0.5f, 0.5f);
                         }
                     }
+                    
+                    // === ONDAS DE CHOQUE VISUAIS ===
+                    for (int wave = 0; wave < 10; wave++)
+                    {
+                        float waveRadius = wave * 50f;
+                        int particlesInWave = 100;
+                        
+                        for (int i = 0; i < particlesInWave; i++)
+                        {
+                            float angle = MathHelper.TwoPi * i / particlesInWave;
+                            Vector2 wavePos = Position + new Vector2((float)System.Math.Cos(angle), (float)System.Math.Sin(angle)) * waveRadius;
+                            Vector2 waveVelocity = new Vector2((float)System.Math.Cos(angle), (float)System.Math.Sin(angle)) * 15f;
+                            
+                            Dust shockwave = Dust.NewDustPerfect(wavePos, Terraria.ID.DustID.Electric, waveVelocity, 0, Color.White, 3f);
+                            shockwave.noGravity = true;
+                            shockwave.fadeIn = 4f;
+                        }
+                    }
+                    
+                    // === EFEITO DE TERREMOTO VISUAL ===
+                    for (int i = 0; i < 200; i++)
+                    {
+                        Vector2 debrisPos = Position + Main.rand.NextVector2Circular(Radius * 0.8f, Radius * 0.8f);
+                        Vector2 debrisVelocity = Main.rand.NextVector2Circular(20f, 20f);
+                        
+                        Dust debris = Dust.NewDustPerfect(debrisPos, Terraria.ID.DustID.Stone, debrisVelocity, 0, Color.Gray, Main.rand.NextFloat(2f, 4f));
+                        debris.noGravity = false; // Cai no chão
+                        debris.fadeIn = 1f;
+                    }
+                    
+                    // === NUVEM DE FUMAÇA MASSIVA ===
+                    for (int i = 0; i < 1000; i++)
+                    {
+                        Vector2 smokePos = Position + Main.rand.NextVector2Circular(Radius, Radius);
+                        Vector2 smokeVelocity = Main.rand.NextVector2Circular(10f, 10f);
+                        
+                        Dust smoke = Dust.NewDustPerfect(smokePos, Terraria.ID.DustID.Smoke, smokeVelocity, 0, Color.DarkGray, Main.rand.NextFloat(3f, 8f));
+                        smoke.noGravity = false;
+                        smoke.alpha = Main.rand.Next(50, 150);
+                        smoke.fadeIn = Main.rand.NextFloat(2f, 4f);
+                    }
                 }
+
+                // === SISTEMA DE EXPLOSÃO ZONA-AMPLA ===
+                // Agenda explosões em anéis concêntricos para cobrir toda a zona
+                ScheduleZoneWideExplosions();
+
+                // === SONS APOCALÍPTICOS ===
+                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.DD2_BetsyDeath, Position);
+                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.NPCDeath59, Position);
+                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Item14, Position); // Explosão adicional
                 
-                // Para players: dano massivo se não estão em casa
+                // Screen shake para todos os jogadores próximos
                 foreach (Player player in Main.player)
                 {
-                    if (player.active && Vector2.Distance(player.Center, Position) <= Radius)
+                    if (player.active && Vector2.Distance(player.Center, Position) <= Radius * 2f)
                     {
-                        // Verifica se está em casa - townNPC próximo
-                        bool isInHouse = false;
-                        foreach (NPC townNpc in Main.npc)
-                        {
-                            if (townNpc.active && townNpc.townNPC && Vector2.Distance(player.Center, townNpc.Center) < 50 * 16f)
-                            {
-                                isInHouse = true;
-                                break;
-                            }
-                        }
-                        
-                        if (!isInHouse)
-                        {
-                            // Dano massivo (99% da vida)
-                            int damage = (int)(player.statLifeMax2 * 0.99f);
-                            player.Hurt(Terraria.DataStructures.PlayerDeathReason.ByCustomReason(Terraria.Localization.NetworkText.FromLiteral($"{player.name} was obliterated by the radioactive explosion!")), damage, 0);
-                        }
+                        // Efeito de terremoto na tela
+                        Main.screenPosition += Main.rand.NextVector2Circular(20f, 20f);
                     }
                 }
-                
+
                 // Mensagem final
                 if (Main.netMode != Terraria.ID.NetmodeID.Server)
                 {
-                    Main.NewText("☢☢ THE ZONE HAS DETONATED! ☢☢", Color.Red);
+                    Main.NewText("☢☢☢ NUCLEAR DETONATION! ☢☢☢", Color.White);
+                    Main.NewText("The radioactive zone has unleashed hell!", Color.Red);
                 }
+            }            /// <summary>
+            /// Agenda explosões em anéis concêntricos para cobrir toda a zona
+            /// </summary>
+            private void ScheduleZoneWideExplosions()
+            {
+                // Divide a zona em 5 anéis concêntricos
+                int ringCount = 5;
+                float ringStep = Radius / ringCount;
+
+                for (int ring = 0; ring < ringCount; ring++)
+                {
+                    float ringRadius = ringStep * (ring + 1);
+                    int delay = ring * 15; // 15 ticks de delay entre anéis (0.25s)
+
+                    // Agenda a explosão do anel
+                    ScheduleDelayedAction(() =>
+                    {
+                        TriggerRingExplosion(ringRadius);
+                    }, delay);
+                }
+            }
+
+            /// <summary>
+            /// Gatilha explosão em um anel específico da zona
+            /// </summary>
+            private void TriggerRingExplosion(float ringRadius)
+            {
+                // Cria múltiplas explosões ao longo do perímetro do anel
+                int explosionCount = 8 + DangerLevel * 2; // Mais explosões com danger alto
+                float angleStep = MathHelper.TwoPi / explosionCount;
+
+                for (int i = 0; i < explosionCount; i++)
+                {
+                    float angle = angleStep * i;
+                    Vector2 explosionPos = Position + new Vector2((float)System.Math.Cos(angle), (float)System.Math.Sin(angle)) * ringRadius;
+
+                    // Efeitos visuais da explosão do anel
+                    if (Main.netMode != Terraria.ID.NetmodeID.Server)
+                    {
+                        // Partículas da explosão
+                        for (int p = 0; p < 20; p++)
+                        {
+                            Vector2 velocity = Main.rand.NextVector2CircularEdge(6f, 6f);
+                            Dust explosion = Dust.NewDustPerfect(explosionPos, Terraria.ID.DustID.CursedTorch, velocity, 0, Color.Red, 1.5f);
+                            explosion.noGravity = true;
+                            explosion.fadeIn = 1.0f;
+                        }
+
+                        // Luz da explosão
+                        Lighting.AddLight(explosionPos, 1.5f, 0.3f, 0f);
+                    }
+
+                    // Dano aos NPCs e players na área da explosão
+                    float explosionRadius = 80f + DangerLevel * 20f; // Raio de dano da explosão
+
+                    // Dano aos NPCs
+                    foreach (NPC npc in Main.npc)
+                    {
+                        if (npc.active && !npc.friendly && !npc.townNPC &&
+                            Vector2.Distance(npc.Center, explosionPos) <= explosionRadius)
+                        {
+                            if (!IsNPCProtected(npc))
+                            {
+                                // Dano massivo
+                                int damage = 100 + DangerLevel * 50;
+                                var hitInfo = new Terraria.NPC.HitInfo
+                                {
+                                    Damage = damage,
+                                    Knockback = 0f,
+                                    HitDirection = 0,
+                                    Crit = false
+                                };
+                                npc.StrikeNPC(hitInfo);
+                            }
+                        }
+                    }
+
+                    // Dano aos players
+                    foreach (Player player in Main.player)
+                    {
+                        if (player.active && Vector2.Distance(player.Center, explosionPos) <= explosionRadius)
+                        {
+                            if (!IsPlayerProtected(player))
+                            {
+                                // Dano letal
+                                int damage = (int)(player.statLifeMax2 * 0.5f) + DangerLevel * 100;
+                                player.Hurt(Terraria.DataStructures.PlayerDeathReason.ByCustomReason(
+                                    Terraria.Localization.NetworkText.FromLiteral($"{player.name} was caught in the radioactive blast!")), damage, 0);
+                            }
+                        }
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Verifica se um NPC está protegido da explosão (atrás de paredes sólidas)
+            /// </summary>
+            private bool IsNPCProtected(NPC npc)
+            {
+                // Verifica se há tiles sólidos entre o NPC e o centro da zona
+                Vector2 directionToCenter = Vector2.Normalize(Position - npc.Center);
+                float distance = Vector2.Distance(Position, npc.Center);
+
+                for (float t = 0; t < distance; t += 16f) // Verifica a cada tile
+                {
+                    Vector2 checkPos = npc.Center + directionToCenter * t;
+                    int tileX = (int)(checkPos.X / 16f);
+                    int tileY = (int)(checkPos.Y / 16f);
+
+                    if (tileX >= 0 && tileX < Main.maxTilesX && tileY >= 0 && tileY < Main.maxTilesY)
+                    {
+                        Tile tile = Main.tile[tileX, tileY];
+                        if (tile.HasTile && Main.tileSolid[tile.TileType])
+                        {
+                            return true; // Há uma parede sólida no caminho
+                        }
+                    }
+                }
+
+                return false;
+            }
+
+            /// <summary>
+            /// Verifica se um player está protegido da explosão (atrás de paredes sólidas ou em casa)
+            /// </summary>
+            private bool IsPlayerProtected(Player player)
+            {
+                // Primeiro verifica se está em casa (townNPC próximo)
+                foreach (NPC townNpc in Main.npc)
+                {
+                    if (townNpc.active && townNpc.townNPC && Vector2.Distance(player.Center, townNpc.Center) < 50 * 16f)
+                    {
+                        return true; // Está em casa
+                    }
+                }
+
+                // Verifica se há tiles sólidos entre o player e o centro da zona
+                Vector2 directionToCenter = Vector2.Normalize(Position - player.Center);
+                float distance = Vector2.Distance(Position, player.Center);
+
+                for (float t = 0; t < distance; t += 16f) // Verifica a cada tile
+                {
+                    Vector2 checkPos = player.Center + directionToCenter * t;
+                    int tileX = (int)(checkPos.X / 16f);
+                    int tileY = (int)(checkPos.Y / 16f);
+
+                    if (tileX >= 0 && tileX < Main.maxTilesX && tileY >= 0 && tileY < Main.maxTilesY)
+                    {
+                        Tile tile = Main.tile[tileX, tileY];
+                        if (tile.HasTile && Main.tileSolid[tile.TileType])
+                        {
+                            return true; // Há uma parede sólida no caminho
+                        }
+                    }
+                }
+
+                return false;
             }
         }
     }
@@ -677,7 +944,7 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             if (EnemyLevel > 0 && hasSpawnedInRadioactiveZone)
             {
                 // Drop normal de runas
-                DropRunesOnDeath(npc);
+                DropRandomRune(npc);
                 
                 // Verifica se foi morto por player
                 if (npc.lastInteraction != 255)
@@ -733,7 +1000,7 @@ namespace SignatureEquipmentDeluxe.Common.Systems
         /// <summary>
         /// Drop de runas ao morrer (quando morto por player)
         /// </summary>
-        private void DropRunesOnDeath(NPC npc)
+        private void DropRunasOnDeath(NPC npc)
         {
             // Chance de dropar runa baseado no nível
             float dropChance = 0.05f + (EnemyLevel * 0.002f); // 5% base + 0.2% por nível

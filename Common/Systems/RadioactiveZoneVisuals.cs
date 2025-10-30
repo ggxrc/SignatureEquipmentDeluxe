@@ -29,8 +29,8 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                 // Spawn partículas verdes ao redor da zona
                 SpawnRadioactiveParticles(zone);
                 
-                // NOVO: Spawn partículas caóticas extras
-                if (chaosTimer % 3 == 0) // Mais frequente
+                // Partículas caóticas reduzidas (menos frequência)
+                if (chaosTimer % 8 == 0) // Menos frequente
                 {
                     SpawnChaoticParticles(zone);
                 }
@@ -39,8 +39,8 @@ namespace SignatureEquipmentDeluxe.Common.Systems
         
         /// <summary>
         /// Spawn partículas verdes ao redor da zona radioativa
-        /// Partículas aumentam de 50% na borda até 600% no centro
-        /// Danger level aumenta partículas em 50% por tier
+        /// Partículas aumentam gradualmente do centro para a borda
+        /// Danger level aumenta a intensidade das cores
         /// </summary>
         private void SpawnRadioactiveParticles(LeveledEnemySystem.RadioactiveZone zone)
         {
@@ -51,14 +51,12 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             float radius = zone.Radius;
             Vector2 center = zone.Position;
             
-            // MULTIPLICADOR DE PERIGO: +50% partículas por tier
+            // MULTIPLICADOR DE PERIGO: aumenta brilho e quantidade
             float dangerMultiplier = zone.GetParticleMultiplier();
             Color dangerColor = zone.GetDangerColor();
             
-            // Spawn partículas em anéis do centro até a borda
-            // Borda: pouquíssimas partículas
-            // Centro: CAÓTICO - partículas ultra densas e agressivas
-            int ringCount = 5; // 5 anéis de partículas
+            // Spawn partículas em anéis concêntricos mais organizados
+            int ringCount = 4; // Menos anéis para menos caos
             
             for (int ring = 0; ring < ringCount; ring++)
             {
@@ -66,32 +64,21 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                 float normalizedDistance = (ring + 1) / (float)ringCount;
                 float ringRadius = radius * normalizedDistance;
                 
-                // Densidade de partículas baseada na distância do centro
-                // MEGA AUMENTO: 50% na borda até 600% no centro!
-                // Centro (0.0): 6.0x multiplicador base + 5.5x bonus = 11.5x total (aprox 600% comparado ao original)
-                // Meio (0.5): 6.0x + 2.75x = 8.75x
-                // Borda (1.0): 6.0x + 0x = 6.0x (aprox 300% do original, mas vamos ajustar para 50%)
-                
-                // Calculamos o multiplicador exponencial para mais caos no centro
+                // Densidade aumenta gradualmente da borda para o centro
+                // Centro: mais partículas, borda: menos
                 float distanceFromCenter = 1f - normalizedDistance; // 1.0 no centro, 0.0 na borda
-                float exponentialFactor = distanceFromCenter * distanceFromCenter; // Exponencial para mais contraste
+                float densityMultiplier = 1.0f + (distanceFromCenter * 2.0f); // 1x na borda, 3x no centro
+                densityMultiplier *= dangerMultiplier; // Aplica multiplicador de perigo
                 
-                // Base mais alta para borda (50% do original 2.0 = 1.0, mas queremos 50% MAIOR = 3.0)
-                float baseDensity = 3.0f; // 50% maior que original
-                // Bonus massivo no centro (até 600%)
-                float centerBonus = 33f * exponentialFactor; // Exponencial para mega caos no centro
-                float densityMultiplier = (baseDensity + centerBonus) * dangerMultiplier; // APLICA DANGER MULTIPLIER
-                
-                // Base: 4-8 partículas por anel (dobrado)
-                int baseParticles = Main.rand.Next(4, 9);
+                // Partículas por anel (reduzido para menos caos)
+                int baseParticles = ring == 0 ? 12 : 8; // Menos partículas
                 int particleCount = (int)(baseParticles * densityMultiplier);
                 
                 for (int i = 0; i < particleCount; i++)
                 {
-                    // Posição aleatória ao redor do anel
+                    // Posição mais organizada ao redor do anel
                     float angle = Main.rand.NextFloat(0f, MathHelper.TwoPi);
-                    // Mais variação perto do centro (mais caos)
-                    float distanceVariation = 0.9f + (0.2f * (1f - normalizedDistance)); // Mais caos no centro
+                    float distanceVariation = 0.85f + (0.15f * distanceFromCenter); // Menos variação
                     float distance = ringRadius * Main.rand.NextFloat(0.9f, distanceVariation);
                     
                     Vector2 particlePos = center + new Vector2(
@@ -99,71 +86,173 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                         (float)System.Math.Sin(angle) * distance
                     );
                     
-                    // Partículas MUITO mais brilhantes e maiores perto do centro
-                    float scale = 1.0f + (1f - normalizedDistance) * 1.5f; // Era 0.8f, agora 1.5f
+                    // Tamanho aumenta no centro
+                    float scale = 0.8f + (distanceFromCenter * 0.7f); // 0.8x na borda, 1.5x no centro
                     
-                    // Usa cor de perigo baseado no danger level
-                    Color particleColor = Color.Lerp(Color.Green, dangerColor, 0.6f);
+                    // Cor baseada no danger level
+                    Color particleColor = Color.Lerp(Color.Green, dangerColor, distanceFromCenter * 0.7f);
                     
-                    // Spawn dust verde (CursedTorch)
-                    Dust dust = Dust.NewDustPerfect(particlePos, DustID.CursedTorch, Vector2.Zero, 0, particleColor, scale);
+                    // Velocity DIRECIONADA AO CENTRO COM FORÇA CRESCENTE
+                    Vector2 directionToCenter = Vector2.Normalize(center - particlePos);
+                    
+                    // FORÇA DE ATRACÃO CRESCENTE: aumenta com o tempo e danger level
+                    float basePullStrength = 0.3f + (distanceFromCenter * 0.7f); // Mais força na borda
+                    float timeMultiplier = 1f + (zone.TimeLeft / 36000f) * 2f; // Aumenta com o tempo (era 10min = 36000 ticks)
+                    float dangerMultiplierPull = 1f + (zone.DangerLevel * 0.3f); // Danger level aumenta atração
+                    
+                    float pullStrength = basePullStrength * timeMultiplier * dangerMultiplierPull;
+                    
+                    // NOS SEGUNDOS FINAIS: TODAS as partículas são puxadas com força extrema
+                    if (zone.IsFinalCountdown)
+                    {
+                        pullStrength *= 3f; // 3x mais força nos segundos finais para TODAS as partículas
+                    }
+                    
+                    Vector2 velocity = directionToCenter * pullStrength;
+                    
+                    // Spawn dust e modificar cor
+                    Dust dust = Dust.NewDustPerfect(particlePos, DustID.CursedTorch, velocity, 0, default(Color), scale);
+                    dust.color = particleColor; // Define cor customizada
                     dust.noGravity = true;
                     
-                    // FINAL COUNTDOWN: Partículas atraídas para o centro
-                    if (zone.IsFinalCountdown)
-                    {
-                        Vector2 directionToCenter = Vector2.Normalize(center - particlePos);
-                        dust.velocity = directionToCenter * 3f; // Velocidade de atração
-                        dust.scale *= 1.5f; // Maiores durante countdown
-                    }
-                    else
-                    {
-                        dust.velocity = Vector2.Zero;
-                    }
-                    
-                    dust.fadeIn = 0.8f + (1f - normalizedDistance) * 0.5f;
+                    dust.fadeIn = 0.5f + (distanceFromCenter * 0.5f);
                 }
             }
             
-            // Spawn EXPLOSÃO de partículas no centro a cada 30 frames
-            if (visualTimer % 30 == 0)
-            {
-                // +50% = 60 partículas, multiplicado por danger
-                int centerParticles = (int)(60 * dangerMultiplier);
-                
-                // FINAL COUNTDOWN: Mais partículas
-                if (zone.IsFinalCountdown)
-                {
-                    centerParticles = (int)(centerParticles * 2f);
-                }
-                
-                for (int i = 0; i < centerParticles; i++)
-                {
-                    Vector2 velocity = Main.rand.NextVector2Circular(3f, 3f); // Velocidade aumentada
-                    
-                    // FINAL COUNTDOWN: Atração ao centro ao invés de expansão
-                    if (zone.IsFinalCountdown)
-                    {
-                        velocity = Main.rand.NextVector2CircularEdge(2f, 2f); // Direção aleatória para centro
-                        velocity = -velocity; // Inverter para ir para dentro
-                    }
-                    
-                    Dust centerDust = Dust.NewDustPerfect(center, DustID.CursedTorch, velocity, 0, dangerColor, 2.2f); // Usa cor de perigo
-                    centerDust.noGravity = true;
-                    centerDust.fadeIn = 2.0f; // FadeIn aumentado
-                    
-                    // FINAL COUNTDOWN: Maiores
-                    if (zone.IsFinalCountdown)
-                    {
-                        centerDust.scale *= 1.5f;
-                    }
-                }
-            }
+            // EFEITOS CENTRAIS MAIS ORGANIZADOS
+            SpawnCenterEffects(zone, center, dangerMultiplier, dangerColor);
             
-            // EFEITOS ESPECIAIS POR DANGER LEVEL
-            SpawnDangerEffects(zone, center, radius);
+            // PARTÍCULAS ALEATÓRIAS NO CAMPO DE VISÃO DO JOGADOR
+            SpawnScreenParticles(zone, dangerMultiplier, dangerColor);
         }
         
+        /// <summary>
+        /// Efeitos visuais organizados no centro da zona
+        /// Substitui a "bola de partículas" caótica por indicadores mais claros
+        /// </summary>
+        private void SpawnCenterEffects(LeveledEnemySystem.RadioactiveZone zone, Vector2 center, float dangerMultiplier, Color dangerColor)
+        {
+            // PULSAÇÃO CENTRAL: Anéis pulsantes indicando o centro perigoso
+            if (visualTimer % 20 == 0)
+            {
+                float pulseRadius = 30f + (float)System.Math.Sin(visualTimer * 0.1f) * 10f;
+                int particlesInPulse = (int)(16 * dangerMultiplier);
+                
+                for (int i = 0; i < particlesInPulse; i++)
+                {
+                    float angle = MathHelper.TwoPi * i / particlesInPulse;
+                    Vector2 pos = center + new Vector2((float)System.Math.Cos(angle) * pulseRadius, (float)System.Math.Sin(angle) * pulseRadius);
+                    
+                    Dust pulse = Dust.NewDustPerfect(pos, DustID.CursedTorch, Vector2.Zero, 0, dangerColor, 1.2f);
+                    pulse.noGravity = true;
+                    pulse.fadeIn = 1.5f;
+                }
+            }
+            
+            // INDICADOR DE PERIGO: Partículas subindo do centro
+            if (visualTimer % 15 == 0)
+            {
+                int risingParticles = (int)(8 * dangerMultiplier);
+                for (int i = 0; i < risingParticles; i++)
+                {
+                    Vector2 startPos = center + Main.rand.NextVector2Circular(20f, 20f);
+                    Vector2 velocity = new Vector2(Main.rand.NextFloat(-1f, 1f), Main.rand.NextFloat(-3f, -1f)); // Para cima
+                    
+                    Dust rising = Dust.NewDustPerfect(startPos, DustID.CursedTorch, velocity, 0, dangerColor, 0.8f);
+                    rising.noGravity = true;
+                    rising.fadeIn = 1.0f;
+                }
+            }
+            
+            // FINAL COUNTDOWN: Efeitos mais intensos no centro
+            if (zone.IsFinalCountdown)
+            {
+                if (visualTimer % 10 == 0)
+                {
+                    // Anéis concêntricos se contraindo
+                    for (int ring = 0; ring < 3; ring++)
+                    {
+                        float contractRadius = 40f - ring * 10f;
+                        int particlesInRing = 12;
+                        
+                        for (int i = 0; i < particlesInRing; i++)
+                        {
+                            float angle = MathHelper.TwoPi * i / particlesInRing + visualTimer * 0.1f; // Rotação
+                            Vector2 pos = center + new Vector2((float)System.Math.Cos(angle) * contractRadius, (float)System.Math.Sin(angle) * contractRadius);
+                            
+                            Dust contract = Dust.NewDustPerfect(pos, DustID.Electric, Vector2.Zero, 0, default(Color), 1.5f);
+                            contract.color = Color.Red; // Define cor customizada
+                            contract.noGravity = true;
+                            contract.fadeIn = 2.0f;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Spawn partículas aleatórias no campo de visão do jogador para otimização
+        /// Só spawna quando o jogador está próximo da zona
+        /// </summary>
+        private void SpawnScreenParticles(LeveledEnemySystem.RadioactiveZone zone, float dangerMultiplier, Color dangerColor)
+        {
+            // Só spawna se o jogador estiver próximo da zona (otimização)
+            Vector2 playerCenter = Main.LocalPlayer.Center;
+            float distanceToZone = Vector2.Distance(playerCenter, zone.Position);
+            
+            if (distanceToZone > zone.Radius * 1.5f) return; // Jogador muito longe
+            
+            // Spawn partículas aleatórias na tela do jogador
+            if (visualTimer % 15 == 0) // Menos frequente que os anéis
+            {
+                int screenParticles = (int)(3 * dangerMultiplier);
+                
+                for (int i = 0; i < screenParticles; i++)
+                {
+                    // Posição aleatória dentro da tela do jogador, mas próxima da zona
+                    Vector2 screenCenter = Main.screenPosition + new Vector2(Main.screenWidth / 2f, Main.screenHeight / 2f);
+                    Vector2 randomOffset = Main.rand.NextVector2Circular(Main.screenWidth / 3f, Main.screenHeight / 3f);
+                    Vector2 particlePos = screenCenter + randomOffset;
+                    
+                    // Garante que está dentro da zona (aproximadamente)
+                    float distanceFromZoneCenter = Vector2.Distance(particlePos, zone.Position);
+                    if (distanceFromZoneCenter > zone.Radius * 0.8f) continue; // Fora da zona
+                    
+                    // Tipo de partícula baseado no tier
+                    int dustType = zone.DangerLevel switch
+                    {
+                        1 => DustID.CursedTorch,
+                        2 => DustID.GreenTorch,
+                        3 => DustID.Electric,
+                        4 => DustID.Shadowflame,
+                        5 => DustID.InfernoFork,
+                        _ => DustID.CursedTorch
+                    };
+                    
+                    // Velocidade direcionada ao centro com variação
+                    Vector2 directionToCenter = Vector2.Normalize(zone.Position - particlePos);
+                    Vector2 baseVelocity = directionToCenter * 0.8f; // Componente direcionada
+                    Vector2 randomVelocity = Main.rand.NextVector2Circular(0.3f, 0.3f); // Variação aleatória
+                    Vector2 velocity = baseVelocity + randomVelocity;
+                    
+                    // Tamanho pequeno
+                    float scale = Main.rand.NextFloat(0.3f, 0.8f);
+                    
+                    Dust screenDust = Dust.NewDustPerfect(particlePos, dustType, velocity, 0, default(Color), scale);
+                    screenDust.color = dangerColor;
+                    screenDust.noGravity = true;
+                    screenDust.fadeIn = Main.rand.NextFloat(0.5f, 1.5f);
+                    
+                    // Partículas de tier alto têm mais brilho
+                    if (zone.DangerLevel >= 4)
+                    {
+                        screenDust.scale *= 1.2f;
+                        screenDust.fadeIn *= 1.5f;
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Spawn partículas caóticas aleatórias pela zona inteira
         /// NÃO mexe no anel visual, apenas adiciona mais caos
@@ -175,8 +264,8 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             float dangerMultiplier = zone.GetParticleMultiplier();
             Color dangerColor = zone.GetDangerColor();
             
-            // Quantidade base de partículas caóticas (multiplicado por danger)
-            int baseParticles = 8; // Base: 8 partículas por frame
+            // Quantidade base de partículas caóticas (reduzida)
+            int baseParticles = 4; // Era 8, reduzido
             int particleCount = (int)(baseParticles * dangerMultiplier);
             
             for (int i = 0; i < particleCount; i++)
@@ -193,8 +282,26 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                     DustID.Electric      // Amarelo elétrico
                 });
                 
-                // Velocidade aleatória (partículas mais lentas = mais caóticas)
-                Vector2 velocity = Main.rand.NextVector2Circular(1.5f, 1.5f);
+                // Velocidade DIRECIONADA AO CENTRO COM FORÇA CRESCENTE
+                Vector2 directionToCenter = Vector2.Normalize(center - particlePos);
+                
+                // FORÇA DE ATRACÃO CRESCENTE: mesma lógica das outras partículas
+                float distanceFromCenter = Vector2.Distance(particlePos, center) / radius;
+                float basePullStrength = 0.8f + (distanceFromCenter * 1.2f); // Mais força na borda
+                float timeMultiplier = 1f + (zone.TimeLeft / 36000f) * 2f; // Aumenta com o tempo
+                float dangerMultiplierPull = 1f + (zone.DangerLevel * 0.3f); // Danger level aumenta atração
+                
+                float pullStrength = basePullStrength * timeMultiplier * dangerMultiplierPull;
+                
+                // NOS SEGUNDOS FINAIS: TODAS as partículas caóticas também são puxadas
+                if (zone.IsFinalCountdown)
+                {
+                    pullStrength *= 4f; // 4x mais força nos segundos finais para TODAS as partículas caóticas
+                }
+                
+                Vector2 baseVelocity = directionToCenter * pullStrength;
+                Vector2 chaoticVelocity = Main.rand.NextVector2Circular(0.3f, 0.3f); // Caos reduzido
+                Vector2 velocity = baseVelocity + chaoticVelocity;
                 
                 // Tamanho aleatório
                 float scale = Main.rand.NextFloat(1f, 2.5f);
@@ -202,17 +309,9 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                 // Cor mista entre verde e cor de perigo
                 Color particleColor = Main.rand.NextBool() ? Color.LimeGreen : dangerColor;
                 
-                Dust chaos = Dust.NewDustPerfect(particlePos, dustType, velocity, 0, particleColor, scale);
+                Dust chaos = Dust.NewDustPerfect(particlePos, dustType, velocity, 0, default(Color), scale);
+                chaos.color = particleColor; // Define cor customizada
                 chaos.noGravity = Main.rand.NextBool(3); // 66% sem gravidade, 33% com gravidade (mais variedade)
-                
-                // FINAL COUNTDOWN: Atração para o centro
-                if (zone.IsFinalCountdown)
-                {
-                    Vector2 directionToCenter = Vector2.Normalize(center - particlePos);
-                    chaos.velocity = directionToCenter * 2f; // Atração mais lenta para caos
-                    chaos.noGravity = true; // Todas sem gravidade durante countdown
-                    chaos.scale *= 1.2f; // Maiores
-                }
                 
                 chaos.fadeIn = Main.rand.NextFloat(0.5f, 1.5f);
             }
@@ -224,7 +323,8 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                 for (int i = 0; i < smokeParticles; i++)
                 {
                     Vector2 randomPos = center + Main.rand.NextVector2Circular(radius * 0.8f, radius * 0.8f);
-                    Dust smoke = Dust.NewDustPerfect(randomPos, DustID.Smoke, new Vector2(0, -Main.rand.NextFloat(0.5f, 2f)), 0, Color.DarkGreen, Main.rand.NextFloat(1.5f, 2.5f));
+                    Dust smoke = Dust.NewDustPerfect(randomPos, DustID.Smoke, new Vector2(0, -Main.rand.NextFloat(0.5f, 2f)), 0, default(Color), Main.rand.NextFloat(1.5f, 2.5f));
+                    smoke.color = Color.DarkGreen; // Define cor customizada
                     smoke.noGravity = true;
                     smoke.alpha = 100;
                 }
@@ -293,7 +393,8 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                             (float)System.Math.Sin(angle) * pulseRadius
                         );
                         
-                        Dust apocalypse = Dust.NewDustPerfect(pos, DustID.Torch, Vector2.Zero, 0, Color.DarkRed, 2.5f);
+                        Dust apocalypse = Dust.NewDustPerfect(pos, DustID.Torch, Vector2.Zero, 0, default(Color), 2.5f);
+                        apocalypse.color = Color.DarkRed; // Define cor customizada
                         apocalypse.noGravity = true;
                         apocalypse.fadeIn = 2.5f;
                     }
@@ -456,9 +557,10 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                     1.2f  // Aumentado de 1f para 1.2f (texto maior)
                 );
                 
-                // Desenha tempo restante abaixo
-                int minutesLeft = zone.TimeLeft / 3600; // 60 FPS * 60 segundos
-                int secondsLeft = (zone.TimeLeft / 60) % 60;
+                // Desenha tempo restante abaixo (ajustado para velocidade 5x)
+                int effectiveTimeLeft = zone.TimeLeft / 5; // Converte de volta para tempo "normal"
+                int minutesLeft = effectiveTimeLeft / 3600; // 60 FPS * 60 segundos
+                int secondsLeft = (effectiveTimeLeft / 60) % 60;
                 string timeText = $"{minutesLeft:D2}:{secondsLeft:D2}";
                 
                 Vector2 timeSize = Terraria.GameContent.FontAssets.MouseText.Value.MeasureString(timeText);

@@ -318,7 +318,7 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
             
             var zone = new LeveledEnemySystem.RadioactiveZone
             {
-                Position = startPosition, // Usa posição inicial (chão)
+                Position = Projectile.Center, // Usa posição atual (onde a arma cai após explosão)
                 Radius = finalRadius * 16f, // Converte para pixels
                 MaxEnemyLevel = weaponLevel,
                 TimeLeft = totalDuration // 30 minutos

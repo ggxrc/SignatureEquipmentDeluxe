@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ggxrc\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\SignatureEquipmentDeluxe\\SignatureEquipmentDeluxe.csproj": {}
+    "C:\\Users\\Aluno Publico\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\SignatureEquipmentDeluxe\\SignatureEquipmentDeluxe.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ggxrc\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\SignatureEquipmentDeluxe\\SignatureEquipmentDeluxe.csproj": {
+    "C:\\Users\\Aluno Publico\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\SignatureEquipmentDeluxe\\SignatureEquipmentDeluxe.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ggxrc\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\SignatureEquipmentDeluxe\\SignatureEquipmentDeluxe.csproj",
+        "projectUniqueName": "C:\\Users\\Aluno Publico\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\SignatureEquipmentDeluxe\\SignatureEquipmentDeluxe.csproj",
         "projectName": "SignatureEquipmentDeluxe",
-        "projectPath": "C:\\Users\\ggxrc\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\SignatureEquipmentDeluxe\\SignatureEquipmentDeluxe.csproj",
-        "packagesPath": "C:\\Users\\ggxrc\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ggxrc\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\SignatureEquipmentDeluxe\\obj\\",
+        "projectPath": "C:\\Users\\Aluno Publico\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\SignatureEquipmentDeluxe\\SignatureEquipmentDeluxe.csproj",
+        "packagesPath": "C:\\Users\\Aluno Publico\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Aluno Publico\\Documents\\My Games\\Terraria\\tModLoader\\ModSources\\SignatureEquipmentDeluxe\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\ggxrc\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Aluno Publico\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -65,7 +65,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.200/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -20,6 +20,11 @@ namespace SignatureEquipmentDeluxe
 			SignaturePrestige
 		}
 
+		public override void Load()
+		{
+			// Registrar sistemas automaticamente
+		}
+
 		public override void HandlePacket(BinaryReader reader, int whoAmI)
 		{
 			MessageType msgType = (MessageType)reader.ReadByte();

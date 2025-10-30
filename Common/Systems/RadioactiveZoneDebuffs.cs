@@ -23,96 +23,96 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             // Verifica se está em zona radioativa
             if (LeveledEnemySystem.IsInRadioactiveZone(Player.Center, out int maxLevel, out Vector2 zoneCenter, out float zoneRadius))
             {
+                // DEBUG: Mostrar que está na zona
+                if (Main.rand.NextBool(10)) // Só mostra às vezes para não spam
+                {
+                    Main.NewText($"DEBUG: In radioactive zone! Level: {maxLevel}, Distance: {Vector2.Distance(Player.Center, zoneCenter):F0}/{zoneRadius:F0}", Color.Yellow);
+                }
+                
                 float distanceFromCenter = Vector2.Distance(Player.Center, zoneCenter);
                 float normalizedDistance = MathHelper.Clamp(distanceFromCenter / zoneRadius, 0f, 1f);
                 
-                // Inverso: 1.0 no centro, 0.0 na borda
-                float centerIntensity = 1f - normalizedDistance;
-                
-                ApplyCenterDebuffs(centerIntensity, maxLevel);
+                // Aplicar debuffs baseados em anéis concêntricos
+                ApplyRingBasedDebuffs(normalizedDistance, maxLevel);
             }
         }
         
         /// <summary>
-        /// Aplica debuffs baseados no tier da zona e proximidade do centro
+        /// Aplica debuffs baseados em anéis concêntricos da zona
+        /// Cada tier ativa debuffs em anéis específicos (dentro do anel)
         /// </summary>
-        private void ApplyCenterDebuffs(float intensity, int zoneLevel)
+        private void ApplyRingBasedDebuffs(float normalizedDistance, int zoneLevel)
         {
-            // Debuffs baseados no tier da zona
-            switch (zoneLevel)
+            // Sistema de anéis: 0.0 = centro, 1.0 = borda
+            // Tier 1: Anel externo (0.6-1.0)
+            // Tier 2: Dois anéis (0.3-1.0) 
+            // Tier 3: Três anéis (0.0-1.0)
+            // etc.
+            
+            // Tier 1: Anel mais externo - debuffs leves
+            if (zoneLevel >= 1 && normalizedDistance >= 0.6f)
             {
-                case 1: // Tier 1: debuffs fraquíssimos, calmos
-                    if (intensity >= 0.5f) // Apenas no centro
-                    {
-                        Player.AddBuff(BuffID.Weak, 5 * 60); // Fraquíssimo
-                    }
-                    break;
-                    
-                case 2: // Tier 2: adiciona ichor
-                    if (intensity >= 0.4f)
-                    {
-                        Player.AddBuff(BuffID.Ichor, 5 * 60);
-                        Player.AddBuff(BuffID.Weak, 5 * 60);
-                    }
-                    break;
-                    
-                case 3: // Tier 3: adiciona fogo amaldiçoado no epicentro
-                    if (intensity >= 0.3f)
-                    {
-                        Player.AddBuff(BuffID.Ichor, 5 * 60);
-                        Player.AddBuff(BuffID.Weak, 5 * 60);
-                        Player.AddBuff(BuffID.Slow, 5 * 60);
-                    }
-                    if (intensity >= 0.9f) // Epicentro
-                    {
-                        Player.AddBuff(BuffID.CursedInferno, 5 * 60);
-                    }
-                    break;
-                    
-                case 4: // Tier 4: adiciona fogo sombrio antes do epicentro
-                    if (intensity >= 0.3f)
-                    {
-                        Player.AddBuff(BuffID.Ichor, 5 * 60);
-                        Player.AddBuff(BuffID.Weak, 5 * 60);
-                        Player.AddBuff(BuffID.Slow, 5 * 60);
-                        Player.AddBuff(BuffID.Bleeding, 5 * 60);
-                    }
-                    if (intensity >= 0.7f) // Antes do epicentro
-                    {
-                        Player.AddBuff(BuffID.ShadowFlame, 5 * 60);
-                    }
-                    break;
-                    
-                case 5: // Tier 5: caos e morte, dois anéis de fogo antes do epicentro
-                    if (intensity >= 0.2f)
-                    {
-                        Player.AddBuff(BuffID.Ichor, 5 * 60);
-                        Player.AddBuff(BuffID.Weak, 5 * 60);
-                        Player.AddBuff(BuffID.Slow, 5 * 60);
-                        Player.AddBuff(BuffID.Bleeding, 5 * 60);
-                        Player.AddBuff(BuffID.Darkness, 5 * 60);
-                        Player.lifeRegen -= 5;
-                        Player.moveSpeed *= 0.9f;
-                    }
-                    if (intensity >= 0.6f) // Dois anéis
-                    {
-                        Player.AddBuff(BuffID.ShadowFlame, 5 * 60);
-                        Player.AddBuff(BuffID.CursedInferno, 5 * 60);
-                    }
-                    if (intensity >= 0.9f) // Epicentro
-                    {
-                        Player.Hurt(Terraria.DataStructures.PlayerDeathReason.ByCustomReason(Terraria.Localization.NetworkText.FromLiteral("was consumed by radioactive chaos")), 10, 0, false, false, -1, false);
-                    }
-                    break;
+                Player.AddBuff(BuffID.Weak, 5 * 60); // Fraqueza
             }
             
-            // Efeitos visuais baseados na intensidade
-            if (intensity >= 0.5f)
+            // Tier 2: Dois anéis externos - adiciona ichor
+            if (zoneLevel >= 2 && normalizedDistance >= 0.3f)
             {
-                if (Main.rand.NextBool(10))
+                Player.AddBuff(BuffID.Ichor, 5 * 60);
+                Player.AddBuff(BuffID.Weak, 5 * 60);
+            }
+            
+            // Tier 3: Toda a zona - adiciona lentidão
+            if (zoneLevel >= 3)
+            {
+                Player.AddBuff(BuffID.Ichor, 5 * 60);
+                Player.AddBuff(BuffID.Weak, 5 * 60);
+                Player.AddBuff(BuffID.Slow, 5 * 60);
+                
+                // Anel interno (0.0-0.3): Fogo amaldiçoado
+                if (normalizedDistance < 0.3f)
                 {
-                    Dust dust = Dust.NewDustDirect(Player.position, Player.width, Player.height, DustID.CursedTorch);
-                    dust.noGravity = true;
+                    Player.AddBuff(BuffID.CursedInferno, 5 * 60);
+                }
+            }
+            
+            // Tier 4: Toda a zona + sangramento
+            if (zoneLevel >= 4)
+            {
+                Player.AddBuff(BuffID.Ichor, 5 * 60);
+                Player.AddBuff(BuffID.Weak, 5 * 60);
+                Player.AddBuff(BuffID.Slow, 5 * 60);
+                Player.AddBuff(BuffID.Bleeding, 5 * 60);
+                
+                // Anel interno (0.0-0.3): Fogo sombrio
+                if (normalizedDistance < 0.3f)
+                {
+                    Player.AddBuff(BuffID.ShadowFlame, 5 * 60);
+                }
+            }
+            
+            // Tier 5: CAOS TOTAL
+            if (zoneLevel >= 5)
+            {
+                Player.AddBuff(BuffID.Ichor, 5 * 60);
+                Player.AddBuff(BuffID.Weak, 5 * 60);
+                Player.AddBuff(BuffID.Slow, 5 * 60);
+                Player.AddBuff(BuffID.Bleeding, 5 * 60);
+                Player.AddBuff(BuffID.Darkness, 5 * 60);
+                Player.lifeRegen -= 5;
+                Player.moveSpeed *= 0.9f;
+                
+                // Anéis internos: múltiplos efeitos
+                if (normalizedDistance < 0.2f) // Centro
+                {
+                    Player.AddBuff(BuffID.ShadowFlame, 5 * 60);
+                    Player.AddBuff(BuffID.CursedInferno, 5 * 60);
+                    // Dano contínuo no centro
+                    Player.Hurt(Terraria.DataStructures.PlayerDeathReason.ByCustomReason(Terraria.Localization.NetworkText.FromLiteral("was consumed by radioactive chaos")), 5, 0, false, false, -1, false);
+                }
+                else if (normalizedDistance < 0.4f) // Anel médio
+                {
+                    Player.AddBuff(BuffID.ShadowFlame, 5 * 60);
                 }
             }
         }
