@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SignatureEquipmentDeluxe")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+66f878b2709d24c164d2557237f333297791164c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dc9ce8a3093a3fc5c24656dd495004408ad505bd")]
 [assembly: System.Reflection.AssemblyProductAttribute("SignatureEquipmentDeluxe")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SignatureEquipmentDeluxe")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
