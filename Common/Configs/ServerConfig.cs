@@ -143,47 +143,6 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         [DefaultValue(false)]
         public bool AllowStatueXP { get; set; }
         
-        // ==================== COMBO SYSTEM ====================
-        
-        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.ComboSystemHeader")]
-        
-        [BackgroundColor(60, 40, 60)]
-        [DefaultValue(true)]
-        [ReloadRequired]
-        public bool EnableComboSystem { get; set; }
-        
-        [BackgroundColor(60, 40, 60)]
-        [DefaultValue(true)]
-        public bool EnableComboXPBonus { get; set; }
-        
-        [BackgroundColor(60, 40, 60)]
-        [Range(0.5f, 5f)]
-        [Increment(0.5f)]
-        [DefaultValue(2f)]
-        public float ComboXPBonusPerHit { get; set; }
-        
-        [BackgroundColor(60, 40, 60)]
-        [Range(10f, 200f)]
-        [Increment(10f)]
-        [DefaultValue(50f)]
-        public float ComboXPBonusMax { get; set; }
-        
-        [BackgroundColor(60, 40, 60)]
-        [DefaultValue(false)]
-        public bool EnableComboDamageBonus { get; set; }
-        
-        [BackgroundColor(60, 40, 60)]
-        [Range(0.5f, 3f)]
-        [Increment(0.5f)]
-        [DefaultValue(1f)]
-        public float ComboDamageBonusPerHit { get; set; }
-        
-        [BackgroundColor(60, 40, 60)]
-        [Range(10f, 100f)]
-        [Increment(10f)]
-        [DefaultValue(30f)]
-        public float ComboDamageBonusMax { get; set; }
-        
         // ==================== KILL STREAK SYSTEM ====================
         
         [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.KillStreakSystemHeader")]

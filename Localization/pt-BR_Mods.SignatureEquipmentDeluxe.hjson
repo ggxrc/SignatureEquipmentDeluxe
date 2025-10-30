@@ -399,7 +399,6 @@ Config: {
 		// AdditionalProjectilesHeader: Additional Projectile Chance Increment Header
 		// ProjectileIncrementsHeader: Projectile Size Increment Header
 		// ExpPriceHeader: Start Price Header
-		// ComboSystemHeader: Enable Combo System Header
 		// KillStreakSystemHeader: Enable Kill Streak System Header
 		// RuneSystemHeader: Enable Rune System Header
 		// CurseSystemHeader: Enable Curse System Header
@@ -883,56 +882,6 @@ Configs: {
 			// Tooltip: ""
 		}
 
-		EnableComboSystem: {
-			// Label: Enable Combo System
-			// Tooltip: ""
-		}
-
-		ComboVisualInterval: {
-			// Label: Combo Visual Interval
-			// Tooltip: ""
-		}
-
-		EnableComboSounds: {
-			// Label: Enable Combo Sounds
-			// Tooltip: ""
-		}
-
-		EnableComboParticles: {
-			// Label: Enable Combo Particles
-			// Tooltip: ""
-		}
-
-		EnableComboXPBonus: {
-			// Label: Enable Combo X P Bonus
-			// Tooltip: ""
-		}
-
-		ComboXPBonusPerHit: {
-			// Label: Combo X P Bonus Per Hit
-			// Tooltip: ""
-		}
-
-		ComboXPBonusMax: {
-			// Label: Combo X P Bonus Max
-			// Tooltip: ""
-		}
-
-		EnableComboDamageBonus: {
-			// Label: Enable Combo Damage Bonus
-			// Tooltip: ""
-		}
-
-		ComboDamageBonusPerHit: {
-			// Label: Combo Damage Bonus Per Hit
-			// Tooltip: ""
-		}
-
-		ComboDamageBonusMax: {
-			// Label: Combo Damage Bonus Max
-			// Tooltip: ""
-		}
-
 		EnableKillStreakSystem: {
 			// Label: Enable Kill Streak System
 			// Tooltip: ""
@@ -991,6 +940,21 @@ Configs: {
 		KillStreakHUDOffset: {
 			// Label: Kill Streak H U D Offset
 			// Tooltip: ""
+		}
+
+		EnableComboParticles: {
+			// Tooltip: ""
+			// Label: Enable Combo Particles
+		}
+
+		EnableComboSounds: {
+			// Tooltip: ""
+			// Label: Enable Combo Sounds
+		}
+
+		ComboVisualInterval: {
+			// Tooltip: ""
+			// Label: Combo Visual Interval
 		}
 	}
 
@@ -1540,41 +1504,6 @@ Configs: {
 
 		EnableSpecialPenalty: {
 			// Label: Enable Special Penalty
-			// Tooltip: ""
-		}
-
-		EnableComboSystem: {
-			// Label: Enable Combo System
-			// Tooltip: ""
-		}
-
-		EnableComboXPBonus: {
-			// Label: Enable Combo X P Bonus
-			// Tooltip: ""
-		}
-
-		ComboXPBonusPerHit: {
-			// Label: Combo X P Bonus Per Hit
-			// Tooltip: ""
-		}
-
-		ComboXPBonusMax: {
-			// Label: Combo X P Bonus Max
-			// Tooltip: ""
-		}
-
-		EnableComboDamageBonus: {
-			// Label: Enable Combo Damage Bonus
-			// Tooltip: ""
-		}
-
-		ComboDamageBonusPerHit: {
-			// Label: Combo Damage Bonus Per Hit
-			// Tooltip: ""
-		}
-
-		ComboDamageBonusMax: {
-			// Label: Combo Damage Bonus Max
 			// Tooltip: ""
 		}
 

@@ -34,117 +34,85 @@ namespace SignatureEquipmentDeluxe.Common.Systems
         }
         
         /// <summary>
-        /// Aplica debuffs baseados na proximidade do centro
+        /// Aplica debuffs baseados no tier da zona e proximidade do centro
         /// </summary>
         private void ApplyCenterDebuffs(float intensity, int zoneLevel)
         {
-            // ZONA 1: Borda (0% - 25% do raio) - Sem efeitos
-            if (intensity < 0.25f)
-                return;
-            
-            // ZONA 2: Média (25% - 50% do raio) - Debuffs leves
-            if (intensity >= 0.25f && intensity < 0.50f)
+            // Debuffs baseados no tier da zona
+            switch (zoneLevel)
             {
-                // Poisoned por 5 segundos
-                Player.AddBuff(BuffID.Poisoned, 5 * 60);
-                
-                // Visual: partículas verdes ocasionais
-                if (Main.rand.NextBool(10))
-                {
-                    Dust.NewDustDirect(Player.position, Player.width, Player.height, DustID.Poisoned);
-                }
+                case 1: // Tier 1: debuffs fraquíssimos, calmos
+                    if (intensity >= 0.5f) // Apenas no centro
+                    {
+                        Player.AddBuff(BuffID.Weak, 5 * 60); // Fraquíssimo
+                    }
+                    break;
+                    
+                case 2: // Tier 2: adiciona ichor
+                    if (intensity >= 0.4f)
+                    {
+                        Player.AddBuff(BuffID.Ichor, 5 * 60);
+                        Player.AddBuff(BuffID.Weak, 5 * 60);
+                    }
+                    break;
+                    
+                case 3: // Tier 3: adiciona fogo amaldiçoado no epicentro
+                    if (intensity >= 0.3f)
+                    {
+                        Player.AddBuff(BuffID.Ichor, 5 * 60);
+                        Player.AddBuff(BuffID.Weak, 5 * 60);
+                        Player.AddBuff(BuffID.Slow, 5 * 60);
+                    }
+                    if (intensity >= 0.9f) // Epicentro
+                    {
+                        Player.AddBuff(BuffID.CursedInferno, 5 * 60);
+                    }
+                    break;
+                    
+                case 4: // Tier 4: adiciona fogo sombrio antes do epicentro
+                    if (intensity >= 0.3f)
+                    {
+                        Player.AddBuff(BuffID.Ichor, 5 * 60);
+                        Player.AddBuff(BuffID.Weak, 5 * 60);
+                        Player.AddBuff(BuffID.Slow, 5 * 60);
+                        Player.AddBuff(BuffID.Bleeding, 5 * 60);
+                    }
+                    if (intensity >= 0.7f) // Antes do epicentro
+                    {
+                        Player.AddBuff(BuffID.ShadowFlame, 5 * 60);
+                    }
+                    break;
+                    
+                case 5: // Tier 5: caos e morte, dois anéis de fogo antes do epicentro
+                    if (intensity >= 0.2f)
+                    {
+                        Player.AddBuff(BuffID.Ichor, 5 * 60);
+                        Player.AddBuff(BuffID.Weak, 5 * 60);
+                        Player.AddBuff(BuffID.Slow, 5 * 60);
+                        Player.AddBuff(BuffID.Bleeding, 5 * 60);
+                        Player.AddBuff(BuffID.Darkness, 5 * 60);
+                        Player.lifeRegen -= 5;
+                        Player.moveSpeed *= 0.9f;
+                    }
+                    if (intensity >= 0.6f) // Dois anéis
+                    {
+                        Player.AddBuff(BuffID.ShadowFlame, 5 * 60);
+                        Player.AddBuff(BuffID.CursedInferno, 5 * 60);
+                    }
+                    if (intensity >= 0.9f) // Epicentro
+                    {
+                        Player.Hurt(Terraria.DataStructures.PlayerDeathReason.ByCustomReason(Terraria.Localization.NetworkText.FromLiteral("was consumed by radioactive chaos")), 10, 0, false, false, -1, false);
+                    }
+                    break;
             }
             
-            // ZONA 3: Próximo (50% - 75% do raio) - Debuffs médios
-            else if (intensity >= 0.50f && intensity < 0.75f)
+            // Efeitos visuais baseados na intensidade
+            if (intensity >= 0.5f)
             {
-                // Poisoned + Weak por 5 segundos
-                Player.AddBuff(BuffID.Poisoned, 5 * 60);
-                Player.AddBuff(BuffID.Weak, 5 * 60);
-                
-                // Redução de regeneração de vida
-                Player.lifeRegen -= 2;
-                
-                // Visual: mais partículas
-                if (Main.rand.NextBool(5))
+                if (Main.rand.NextBool(10))
                 {
                     Dust dust = Dust.NewDustDirect(Player.position, Player.width, Player.height, DustID.CursedTorch);
                     dust.noGravity = true;
-                }
-            }
-            
-            // ZONA 4: Muito Próximo (75% - 90% do raio) - Debuffs pesados
-            else if (intensity >= 0.75f && intensity < 0.90f)
-            {
-                // Poisoned + Weak + Slow por 5 segundos
-                Player.AddBuff(BuffID.Poisoned, 5 * 60);
-                Player.AddBuff(BuffID.Weak, 5 * 60);
-                Player.AddBuff(BuffID.Slow, 5 * 60);
-                
-                // Redução severa de regeneração
-                Player.lifeRegen -= 5;
-                
-                // Redução de velocidade de movimento
-                Player.moveSpeed *= 0.85f;
-                
-                // Visual: muitas partículas
-                if (Main.rand.NextBool(3))
-                {
-                    for (int i = 0; i < 2; i++)
-                    {
-                        Dust dust = Dust.NewDustDirect(Player.position, Player.width, Player.height, DustID.CursedTorch, 0f, 0f, 100, Color.LimeGreen, 1.5f);
-                        dust.noGravity = true;
-                    }
-                }
-                
-                // Mensagem de aviso
-                if (Main.rand.NextBool(600)) // ~1 vez a cada 10 segundos
-                {
-                    Main.NewText("You are dangerously close to the zone's epicenter!", Color.Orange);
-                }
-            }
-            
-            // ZONA 5: EPICENTRO (90% - 100% do raio) - APOCALIPSE
-            else // intensity >= 0.90f
-            {
-                // TODOS os debuffs anteriores + extras
-                Player.AddBuff(BuffID.Poisoned, 5 * 60);
-                Player.AddBuff(BuffID.Weak, 5 * 60);
-                Player.AddBuff(BuffID.Slow, 5 * 60);
-                Player.AddBuff(BuffID.Bleeding, 5 * 60);
-                Player.AddBuff(BuffID.Cursed, 5 * 60); // Não pode usar itens
-                Player.AddBuff(BuffID.Darkness, 5 * 60); // Visão reduzida
-                
-                // Dano constante (baseado no nível da zona)
-                int damagePerTick = 5 + (zoneLevel / 10); // 5 base + nível/10
-                Player.Hurt(Terraria.DataStructures.PlayerDeathReason.ByCustomReason($"{Player.name} was consumed by radioactive energy"), damagePerTick, 0, false, false, -1, false);
-                
-                // Regeneração extremamente negativa
-                Player.lifeRegen -= 10;
-                
-                // Movimento muito lento
-                Player.moveSpeed *= 0.60f;
-                
-                // Visual: partículas MASSIVAS
-                if (Main.rand.NextBool(2))
-                {
-                    for (int i = 0; i < 4; i++)
-                    {
-                        Dust dust = Dust.NewDustDirect(Player.position, Player.width, Player.height, DustID.CursedTorch, Main.rand.NextFloat(-2f, 2f), Main.rand.NextFloat(-2f, 2f), 100, Color.Red, 2f);
-                        dust.noGravity = true;
-                    }
-                }
-                
-                // Screen shake
-                if (Main.rand.NextBool(30))
-                {
-                    Main.LocalPlayer.GetModPlayer<ScreenShakePlayer>()?.AddShake(5, 0.3f);
-                }
-                
-                // Mensagem de PERIGO EXTREMO
-                if (Main.rand.NextBool(300)) // ~1 vez a cada 5 segundos
-                {
-                    Main.NewText("☢ DANGER! YOU ARE IN THE EPICENTER! ☢", Color.Red);
                 }
             }
         }

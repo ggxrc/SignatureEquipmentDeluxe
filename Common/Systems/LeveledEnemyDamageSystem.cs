@@ -69,6 +69,7 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                             targetSigItem.Experience = 0;
                             
                             // Inimigo ganha os níveis roubados
+                            leveledNPC.ResetScaling(killer);
                             leveledNPC.EnemyLevel += stolenLevel;
                             leveledNPC.ApplyLevelScaling(killer);
                             

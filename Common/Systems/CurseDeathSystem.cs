@@ -20,6 +20,13 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             if (!config.EnableCurseSystem || !config.EnableLeveledEnemies)
                 return;
             
+            // Verifica se morreu por dano de queda - não dropa arma
+            if (damageSource.SourceOtherIndex == 0 && damageSource.SourcePlayerIndex == Player.whoAmI)
+            {
+                // Dano de queda (SourceOtherIndex == 0 significa dano genérico, e SourcePlayerIndex == player significa auto-dano)
+                return;
+            }
+            
             // Identifica o killer (se foi NPC)
             NPC killerNPC = null;
             if (damageSource.SourceNPCIndex >= 0 && damageSource.SourceNPCIndex < Main.maxNPCs)
@@ -87,8 +94,7 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             int savedExp = originalSig.Experience;
             var savedRunes = new System.Collections.Generic.List<Data.EquippedRune>(originalSig.EquippedRunes);
             
-            // Dropa o item no chão usando o método seguro do jogador
-            Player.QuickSpawnItem(Player.GetSource_Death(), item.type, 1);
+            // NÃO dropa o item no chão - a animação fará isso
             
             // Verifica se já está em zona radioativa
             bool isInExistingZone = LeveledEnemySystem.IsInRadioactiveZone(Player.Center, out int existingMaxLevel, out Vector2 zoneCenter, out float zoneRadius);
@@ -126,6 +132,9 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             
             // Efeito visual dramático
             SpawnRadioactiveExplosion(Player.Center);
+            
+            // Remove o item do inventário APÓS criar a zona
+            item.TurnToAir();
         }
         
         /// <summary>

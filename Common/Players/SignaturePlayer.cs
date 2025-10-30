@@ -1,5 +1,6 @@
-using Terraria;
+Ôªøusing Terraria;
 using Terraria.ModLoader;
+using Terraria.GameInput;
 using SignatureEquipmentDeluxe.Common.Systems;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +36,19 @@ namespace SignatureEquipmentDeluxe.Common.Players
         }
         
         /// <summary>
+        /// Detecta tecla ESC para cancelar sele√ß√£o de runas
+        /// </summary>
+        public override void ProcessTriggers(TriggersSet triggersSet)
+        {
+            // Verifica se pressionou ESC (via IsKeyDown ou qualquer outro m√©todo)
+            if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape))
+            {
+                Content.Items.Runes.BaseRuneItem.CancelSelection();
+                Content.Items.Runes.RuneRemover.CancelSelection();
+            }
+        }
+        
+        /// <summary>
         /// Atualiza o sistema de eventos a cada frame
         /// </summary>
         public override void PostUpdate()
@@ -43,11 +57,11 @@ namespace SignatureEquipmentDeluxe.Common.Players
             bool isMoving = Player.velocity.LengthSquared() > 0.01f;
             if (isMoving)
             {
-                idleFrameCounter = 0; // Reset quando est· se movendo
+                idleFrameCounter = 0; // Reset quando est√° se movendo
             }
             else
             {
-                idleFrameCounter++; // Incrementa quando est· parado
+                idleFrameCounter++; // Incrementa quando est√° parado
             }
             
             // Atualiza tracking de eventos a cada 60 frames (1 segundo)
@@ -62,26 +76,26 @@ namespace SignatureEquipmentDeluxe.Common.Players
                 Visual.AuraEffect.UpdatePlayerAura(Player);
                 Visual.EventVisualEffect.UpdateEventVisuals(Player);
                 Visual.EventVisualEffect.UpdatePenaltyVisuals(Player);
-                Visual.LevelUpStatsAnimation.Update(); // Atualiza animaÁıes de stats
-                Visual.XPNotificationSystem.Update(); // Atualiza notificaÁıes de XP consolidadas
+                Visual.LevelUpStatsAnimation.Update(); // Atualiza anima√ß√µes de stats
+                Visual.XPNotificationSystem.Update(); // Atualiza notifica√ß√µes de XP consolidadas
             }
         }
         
         /// <summary>
-        /// Atualiza o tracking e notificaÁıes de eventos
+        /// Atualiza o tracking e notifica√ß√µes de eventos
         /// </summary>
         private void UpdateEventTracking()
         {
             var config = ModContent.GetInstance<Configs.ServerConfig>();
             var activeEvents = EventDetector.GetActiveEvents();
             
-            // Detecta eventos que comeÁaram
+            // Detecta eventos que come√ßaram
             var startedEvents = activeEvents.Except(previousActiveEvents).ToList();
             
             // Detecta eventos que terminaram
             var endedEvents = previousActiveEvents.Except(activeEvents).ToList();
             
-            // Atualiza tracker (isso dispara notificaÁıes de reset internamente)
+            // Atualiza tracker (isso dispara notifica√ß√µes de reset internamente)
             EventTracker.Instance.Update(activeEvents);
             
             // Calcula multiplicador atual
@@ -95,7 +109,7 @@ namespace SignatureEquipmentDeluxe.Common.Players
                 {
                     float baseMultiplier = eventConfig.GetBaseMultiplier();
                     
-                    // Verifica se penalidade est· habilitada para esta categoria
+                    // Verifica se penalidade est√° habilitada para esta categoria
                     bool penaltyEnabled = IsPenaltyEnabledForCategory(eventConfig.Category, config);
                     float penalty = penaltyEnabled ? EventTracker.Instance.GetPenaltyMultiplier(eventType) : 1f;
                     
@@ -106,7 +120,7 @@ namespace SignatureEquipmentDeluxe.Common.Players
                 }
             }
             
-            // Notifica stack de eventos (se m˙ltiplos ativos)
+            // Notifica stack de eventos (se m√∫ltiplos ativos)
             if (activeEvents.Count > 1 && startedEvents.Count > 0)
             {
                 EventNotificationSystem.NotifyEventsStacked(activeEvents, newMultiplier);
@@ -124,7 +138,7 @@ namespace SignatureEquipmentDeluxe.Common.Players
         }
         
         /// <summary>
-        /// ObtÈm a configuraÁ„o de um evento especÌfico
+        /// Obt√©m a configura√ß√£o de um evento espec√≠fico
         /// </summary>
         private EventMultiplier GetEventConfig(GameEventType eventType)
         {
@@ -159,16 +173,16 @@ namespace SignatureEquipmentDeluxe.Common.Players
                 var eventConfig = GetEventConfig(eventType);
                 if (eventConfig != null && eventConfig.Enabled)
                 {
-                    // Multiplicador base da configuraÁ„o
+                    // Multiplicador base da configura√ß√£o
                     float baseMultiplier = eventConfig.GetBaseMultiplier();
                     
                     // Verifica se esta categoria tem penalidade ativada
                     bool penaltyEnabled = IsPenaltyEnabledForCategory(eventConfig.Category, config);
                     
-                    // Penalidade por repetiÁ„o (se habilitada para esta categoria)
+                    // Penalidade por repeti√ß√£o (se habilitada para esta categoria)
                     float penalty = penaltyEnabled ? EventTracker.Instance.GetPenaltyMultiplier(eventType) : 1f;
                     
-                    // Aplica penalidade: se base È 1.5x (+50%) e penalidade È 50%, resultado È 1.25x (+25%)
+                    // Aplica penalidade: se base √© 1.5x (+50%) e penalidade √© 50%, resultado √© 1.25x (+25%)
                     float bonusPercent = (baseMultiplier - 1f) * penalty;
                     
                     totalMultiplier += bonusPercent;
@@ -179,7 +193,7 @@ namespace SignatureEquipmentDeluxe.Common.Players
         }
         
         /// <summary>
-        /// Verifica se a penalidade est· habilitada para uma categoria especÌfica
+        /// Verifica se a penalidade est√° habilitada para uma categoria espec√≠fica
         /// </summary>
         private bool IsPenaltyEnabledForCategory(EventCategory category, Configs.ServerConfig config)
         {
@@ -201,7 +215,7 @@ namespace SignatureEquipmentDeluxe.Common.Players
         /// </summary>
         private float GetActiveEventsMultiplier()
         {
-            // Se cache est· desatualizado (mais de 1 segundo), recalcula
+            // Se cache est√° desatualizado (mais de 1 segundo), recalcula
             if (Main.GameUpdateCount - cacheFrameCount > 60)
             {
                 var activeEvents = EventDetector.GetActiveEvents();
@@ -217,12 +231,7 @@ namespace SignatureEquipmentDeluxe.Common.Players
             var config = ModContent.GetInstance<Configs.ServerConfig>();
             if (!config.AllowStatueXP && target.SpawnedFromStatue) return;
             
-            // Adiciona hit ao combo system
-            var comboSystem = Player.GetModPlayer<Systems.ComboSystem>();
-            if (comboSystem != null)
-            {
-                comboSystem.AddComboHit(target.Center);
-            }
+            // Sistema de combo removido
             
             Item heldItem = Player.HeldItem;
             if (heldItem != null && !heldItem.IsAir)
@@ -231,6 +240,10 @@ namespace SignatureEquipmentDeluxe.Common.Players
                 if (globalItem != null && globalItem.CanGainExperience(heldItem))
                 {
                     DistributeHitXP(heldItem, globalItem, target, damageDone);
+                    
+                    // Aplica efeitos elementais das runas
+                    Systems.RuneElementalEffects.ApplyElementalDoT(target, Player, heldItem, damageDone);
+                    
                     if (target.life <= 0)
                     {
                         // Adiciona kill ao streak
@@ -285,17 +298,13 @@ namespace SignatureEquipmentDeluxe.Common.Players
             var config = ModContent.GetInstance<Configs.ServerConfig>();
             float xpGain = config.WeaponBaseXPPerHit + (damageDone * config.WeaponXPPerDamageDealt);
             
-            // Aplica multiplicadores: config, player, eventos, combo
+            // Aplica multiplicadores: config, player, eventos
             xpGain *= config.GlobalExpMultiplier * config.WeaponExpMultiplier * xpMultiplier;
             xpGain *= GetActiveEventsMultiplier();
             
-            var comboSystem = Player.GetModPlayer<Systems.ComboSystem>();
-            if (comboSystem != null)
-            {
-                xpGain *= comboSystem.GetComboXPMultiplier();
-            }
+            // Sistema de combo removido
             
-            // Aplica multiplicador de maldiÁıes
+            // Aplica multiplicador de maldi√ß√µes
             if (globalItem.EquippedRunes.Count > 0)
             {
                 xpGain *= Systems.RuneSystem.GetCurseXPMultiplier(globalItem.EquippedRunes, false);
@@ -303,7 +312,7 @@ namespace SignatureEquipmentDeluxe.Common.Players
             
             globalItem.AddExperience((int)xpGain, item);
             
-            // Adiciona XP ‡s runas equipadas (25% do XP por hit)
+            // Adiciona XP √†s runas equipadas (25% do XP por hit)
             if (globalItem.EquippedRunes.Count > 0)
             {
                 int maxLevel = config.WeaponMaxLevel > 0 ? config.WeaponMaxLevel : 100;
@@ -322,15 +331,11 @@ namespace SignatureEquipmentDeluxe.Common.Players
             var config = ModContent.GetInstance<Configs.ServerConfig>();
             float xpGain = config.WeaponBaseXPPerKill + (target.lifeMax * config.WeaponXPPerEnemyMaxHP);
             
-            // Aplica multiplicadores: config, player, eventos, combo, kill streak
+            // Aplica multiplicadores: config, player, eventos, kill streak
             xpGain *= config.GlobalExpMultiplier * config.WeaponExpMultiplier * xpMultiplier;
             xpGain *= GetActiveEventsMultiplier();
             
-            var comboSystem = Player.GetModPlayer<Systems.ComboSystem>();
-            if (comboSystem != null)
-            {
-                xpGain *= comboSystem.GetComboXPMultiplier();
-            }
+            // Sistema de combo removido
             
             var killStreakSystem = Player.GetModPlayer<Systems.KillStreakSystem>();
             if (killStreakSystem != null)
@@ -338,13 +343,13 @@ namespace SignatureEquipmentDeluxe.Common.Players
                 xpGain *= killStreakSystem.GetStreakXPMultiplier();
             }
             
-            // Aplica multiplicador de maldiÁıes
+            // Aplica multiplicador de maldi√ß√µes
             if (globalItem.EquippedRunes.Count > 0)
             {
                 xpGain *= Systems.RuneSystem.GetCurseXPMultiplier(globalItem.EquippedRunes, true);
             }
             
-            // Aplica bÙnus de inimigo com nÌvel
+            // Aplica b√¥nus de inimigo com n√≠vel
             var leveledEnemy = target.GetGlobalNPC<Systems.LeveledEnemyGlobalNPC>();
             if (leveledEnemy != null && leveledEnemy.EnemyLevel > 0)
             {
@@ -353,7 +358,7 @@ namespace SignatureEquipmentDeluxe.Common.Players
             
             globalItem.AddExperience((int)xpGain, item);
             
-            // Adiciona XP ‡s runas equipadas (50% do XP por kill)
+            // Adiciona XP √†s runas equipadas (50% do XP por kill)
             if (globalItem.EquippedRunes.Count > 0)
             {
                 int maxLevel = config.WeaponMaxLevel > 0 ? config.WeaponMaxLevel : 100;
@@ -362,7 +367,7 @@ namespace SignatureEquipmentDeluxe.Common.Players
         }
         
         /// <summary>
-        /// ObtÈm o EventTracker para acesso aos visuais
+        /// Obt√©m o EventTracker para acesso aos visuais
         /// </summary>
         public EventTracker GetEventTracker()
         {

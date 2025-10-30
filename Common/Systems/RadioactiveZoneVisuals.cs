@@ -108,7 +108,19 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                     // Spawn dust verde (CursedTorch)
                     Dust dust = Dust.NewDustPerfect(particlePos, DustID.CursedTorch, Vector2.Zero, 0, particleColor, scale);
                     dust.noGravity = true;
-                    dust.velocity = Vector2.Zero;
+                    
+                    // FINAL COUNTDOWN: Partículas atraídas para o centro
+                    if (zone.IsFinalCountdown)
+                    {
+                        Vector2 directionToCenter = Vector2.Normalize(center - particlePos);
+                        dust.velocity = directionToCenter * 3f; // Velocidade de atração
+                        dust.scale *= 1.5f; // Maiores durante countdown
+                    }
+                    else
+                    {
+                        dust.velocity = Vector2.Zero;
+                    }
+                    
                     dust.fadeIn = 0.8f + (1f - normalizedDistance) * 0.5f;
                 }
             }
@@ -118,12 +130,33 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             {
                 // +50% = 60 partículas, multiplicado por danger
                 int centerParticles = (int)(60 * dangerMultiplier);
+                
+                // FINAL COUNTDOWN: Mais partículas
+                if (zone.IsFinalCountdown)
+                {
+                    centerParticles = (int)(centerParticles * 2f);
+                }
+                
                 for (int i = 0; i < centerParticles; i++)
                 {
                     Vector2 velocity = Main.rand.NextVector2Circular(3f, 3f); // Velocidade aumentada
+                    
+                    // FINAL COUNTDOWN: Atração ao centro ao invés de expansão
+                    if (zone.IsFinalCountdown)
+                    {
+                        velocity = Main.rand.NextVector2CircularEdge(2f, 2f); // Direção aleatória para centro
+                        velocity = -velocity; // Inverter para ir para dentro
+                    }
+                    
                     Dust centerDust = Dust.NewDustPerfect(center, DustID.CursedTorch, velocity, 0, dangerColor, 2.2f); // Usa cor de perigo
                     centerDust.noGravity = true;
                     centerDust.fadeIn = 2.0f; // FadeIn aumentado
+                    
+                    // FINAL COUNTDOWN: Maiores
+                    if (zone.IsFinalCountdown)
+                    {
+                        centerDust.scale *= 1.5f;
+                    }
                 }
             }
             
@@ -171,6 +204,16 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                 
                 Dust chaos = Dust.NewDustPerfect(particlePos, dustType, velocity, 0, particleColor, scale);
                 chaos.noGravity = Main.rand.NextBool(3); // 66% sem gravidade, 33% com gravidade (mais variedade)
+                
+                // FINAL COUNTDOWN: Atração para o centro
+                if (zone.IsFinalCountdown)
+                {
+                    Vector2 directionToCenter = Vector2.Normalize(center - particlePos);
+                    chaos.velocity = directionToCenter * 2f; // Atração mais lenta para caos
+                    chaos.noGravity = true; // Todas sem gravidade durante countdown
+                    chaos.scale *= 1.2f; // Maiores
+                }
+                
                 chaos.fadeIn = Main.rand.NextFloat(0.5f, 1.5f);
             }
             
@@ -253,6 +296,104 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                         Dust apocalypse = Dust.NewDustPerfect(pos, DustID.Torch, Vector2.Zero, 0, Color.DarkRed, 2.5f);
                         apocalypse.noGravity = true;
                         apocalypse.fadeIn = 2.5f;
+                    }
+                }
+            }
+            
+            // SPAWNS DE FOGO BASEADOS NO TIER
+            SpawnFireEffects(zone, center, radius);
+        }
+        
+        /// <summary>
+        /// Spawn efeitos de fogo baseados no tier
+        /// </summary>
+        private void SpawnFireEffects(LeveledEnemySystem.RadioactiveZone zone, Vector2 center, float radius)
+        {
+            // Tier 3: Cursed fire at epicenter
+            if (zone.DangerLevel >= 3 && visualTimer % 120 == 0) // A cada 2 segundos
+            {
+                // Spawn cursed flame projectile no epicentro
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Projectile.NewProjectile(
+                        Main.LocalPlayer.GetSource_FromThis(),
+                        center,
+                        Vector2.Zero,
+                        ProjectileID.CursedFlameHostile, // Cursed flame hostile
+                        20, // Damage
+                        0f,
+                        Main.myPlayer
+                    );
+                }
+            }
+            
+            // Tier 4: Shadow flame before epicenter
+            if (zone.DangerLevel >= 4 && visualTimer % 100 == 0) // A cada ~1.67 segundos
+            {
+                float flameRadius = radius * 0.7f; // Antes do epicentro
+                for (int i = 0; i < 4; i++) // 4 projéteis
+                {
+                    float angle = (i / 4f) * MathHelper.TwoPi + Main.rand.NextFloat(-0.2f, 0.2f);
+                    Vector2 pos = center + new Vector2((float)System.Math.Cos(angle) * flameRadius, (float)System.Math.Sin(angle) * flameRadius);
+                    
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        Projectile.NewProjectile(
+                            Main.LocalPlayer.GetSource_FromThis(),
+                            pos,
+                            Vector2.Zero,
+                            ProjectileID.ShadowFlame, // Shadow flame
+                            25, // Damage
+                            0f,
+                            Main.myPlayer
+                        );
+                    }
+                }
+            }
+            
+            // Tier 5: Two fire rings before epicenter
+            if (zone.DangerLevel >= 5 && visualTimer % 80 == 0) // A cada ~1.33 segundos
+            {
+                float innerRadius = radius * 0.5f;
+                float outerRadius = radius * 0.8f;
+                
+                // Inner ring: Cursed fire
+                for (int i = 0; i < 6; i++)
+                {
+                    float angle = (i / 6f) * MathHelper.TwoPi;
+                    Vector2 pos = center + new Vector2((float)System.Math.Cos(angle) * innerRadius, (float)System.Math.Sin(angle) * innerRadius);
+                    
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        Projectile.NewProjectile(
+                            Main.LocalPlayer.GetSource_FromThis(),
+                            pos,
+                            Vector2.Zero,
+                            ProjectileID.CursedFlameHostile,
+                            30, // Damage
+                            0f,
+                            Main.myPlayer
+                        );
+                    }
+                }
+                
+                // Outer ring: Shadow flame
+                for (int i = 0; i < 8; i++)
+                {
+                    float angle = (i / 8f) * MathHelper.TwoPi + MathHelper.Pi / 8f; // Offset
+                    Vector2 pos = center + new Vector2((float)System.Math.Cos(angle) * outerRadius, (float)System.Math.Sin(angle) * outerRadius);
+                    
+                    if (Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        Projectile.NewProjectile(
+                            Main.LocalPlayer.GetSource_FromThis(),
+                            pos,
+                            Vector2.Zero,
+                            ProjectileID.ShadowFlame,
+                            35, // Damage
+                            0f,
+                            Main.myPlayer
+                        );
                     }
                 }
             }

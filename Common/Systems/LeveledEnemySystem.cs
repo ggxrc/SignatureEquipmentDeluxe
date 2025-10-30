@@ -26,7 +26,7 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             var config = ModContent.GetInstance<Configs.ServerConfig>();
             float baseRadius = (config?.RadioactiveZoneRadius ?? 150);
             float radius = baseRadius * 2.5f * 16f; // 150% maior = 2.5x, tiles para pixels
-            int duration = (config?.RadioactiveZoneDurationMinutes ?? 30) * 60 * 60; // minutos para frames
+            int duration = 10 * 60 * 60; // 10 minutos fixos
             
             radioactiveZones.Add(new RadioactiveZone
             {
@@ -97,6 +97,7 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                 
                 if (radioactiveZones[i].TimeLeft <= 0)
                 {
+                    radioactiveZones[i].TriggerFinalExplosion();
                     radioactiveZones.RemoveAt(i);
                 }
             }
@@ -119,71 +120,50 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             public float Radius { get; set; }
             public int MaxEnemyLevel { get; set; }
             public int TimeLeft { get; set; }
-            public int DangerLevel { get; set; } = 0; // 0-5, calculado dinamicamente
-            private int dangerUpdateTimer = 0;
-            private int previousDangerLevel = 0; // Para detectar mudanças
+            public int DangerLevel { get; set; } = 1; // Começa no tier 1
+            public bool IsFinalCountdown => isFinalCountdown;
+            public float InitialRadius { get; set; }
+            private int initialTime = 10 * 60 * 60; // 10 minutos
+            private int previousDangerLevel = 1; // Para detectar mudanças
+            private bool isFinalCountdown = false;
             
             /// <summary>
-            /// Atualiza o nível de perigo baseado em quantos inimigos fortes existem
+            /// Atualiza o nível de perigo baseado no tempo decorrido
             /// </summary>
             public void UpdateDangerLevel()
             {
-                dangerUpdateTimer++;
-                if (dangerUpdateTimer < 300) return; // Atualiza a cada 5 segundos
-                dangerUpdateTimer = 0;
+                // Calcula tier baseado no tempo: a cada 2 minutos sobe 1 tier
+                int elapsed = initialTime - TimeLeft;
+                int newDangerLevel = 1 + (elapsed / (2 * 60 * 60));
+                newDangerLevel = System.Math.Min(newDangerLevel, 5); // Máximo tier 5 // 2 min = 7200 frames
                 
-                // Salva o nível anterior para detectar mudanças
-                int oldDangerLevel = DangerLevel;
-                
-                // Conta quantos NPCs nivelados e fortes estão na zona
-                int strongEnemyCount = 0;
-                float threshold = MaxEnemyLevel * 0.5f; // 50% do nível máximo da zona
-                
-                for (int i = 0; i < Main.maxNPCs; i++)
+                // Se o tier AUMENTOU, toca efeitos
+                if (newDangerLevel > DangerLevel)
                 {
-                    NPC npc = Main.npc[i];
-                    if (!npc.active || npc.friendly) continue;
-                    
-                    // Verifica se está na zona
-                    float distance = Vector2.Distance(npc.Center, Position);
-                    if (distance > Radius) continue;
-                    
-                    // Verifica nível
-                    var leveledNPC = npc.GetGlobalNPC<LeveledEnemyGlobalNPC>();
-                    if (leveledNPC != null && leveledNPC.EnemyLevel >= threshold)
-                    {
-                        strongEnemyCount++;
-                    }
+                    int oldLevel = DangerLevel;
+                    DangerLevel = newDangerLevel;
+                    OnDangerLevelIncrease(oldLevel, DangerLevel);
+                }
+                else if (newDangerLevel != DangerLevel)
+                {
+                    DangerLevel = newDangerLevel; // Caso diminua, mas não deve
                 }
                 
-                // Calcula danger level (0-5)
-                // Tier 0: 0 inimigos fortes
-                // Tier 1: 1-2 inimigos fortes
-                // Tier 2: 3-5 inimigos fortes
-                // Tier 3: 6-9 inimigos fortes
-                // Tier 4: 10-14 inimigos fortes
-                // Tier 5: 15+ inimigos fortes (APOCALIPSE)
-                if (strongEnemyCount == 0)
-                    DangerLevel = 0;
-                else if (strongEnemyCount <= 2)
-                    DangerLevel = 1;
-                else if (strongEnemyCount <= 5)
-                    DangerLevel = 2;
-                else if (strongEnemyCount <= 9)
-                    DangerLevel = 3;
-                else if (strongEnemyCount <= 14)
-                    DangerLevel = 4;
-                else
-                    DangerLevel = 5; // MAXIMUM DANGER
-                
-                // Se o danger level AUMENTOU, toca efeitos
-                if (DangerLevel > oldDangerLevel)
-                {
-                    OnDangerLevelIncrease(oldDangerLevel, DangerLevel);
-                }
+                // Ajusta o raio da zona: +10% por tier
+                Radius = InitialRadius * (1f + (DangerLevel - 1) * 0.1f);
                 
                 // Aplica modificadores baseado no danger level
                 ApplyDangerModifiers();
+                
+                // Check for final countdown
+                if (TimeLeft <= 600 && !isFinalCountdown)
+                {
+                    isFinalCountdown = true;
+                    if (Main.netMode != Terraria.ID.NetmodeID.Server)
+                    {
+                        Main.NewText("☢ The zone is becoming unstable! Get out now! ☢", Color.Red);
+                    }
+                }
             }
             
             /// <summary>
@@ -191,7 +171,7 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             /// </summary>
             private void OnDangerLevelIncrease(int oldLevel, int newLevel)
             {
-                // Som crescente de perigo
+                // Efeitos baseados no tier
                 switch (newLevel)
                 {
                     case 1:
@@ -212,7 +192,7 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                         break;
                 }
                 
-                // Efeitos visuais - onda de choque pulsante
+                // Efeitos visuais - onda de choque pulsante, mais intensa em tiers altos
                 int particleIntensity = 30 * newLevel; // Mais partículas em níveis mais altos
                 for (int i = 0; i < particleIntensity; i++)
                 {
@@ -227,12 +207,29 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                     wave.noGravity = true;
                 }
                 
-                // Explosão central
-                for (int i = 0; i < 50; i++)
+                // Explosão central, mais intensa
+                int explosionParticles = 50 + (newLevel * 20); // Mais partículas em tiers altos
+                for (int i = 0; i < explosionParticles; i++)
                 {
                     Vector2 velocity = Main.rand.NextVector2CircularEdge(8f, 8f);
                     Dust explosion = Dust.NewDustPerfect(Position, Terraria.ID.DustID.CursedTorch, velocity, 0, GetDangerColor(), 2.5f);
                     explosion.noGravity = true;
+                }
+                
+                // Efeitos adicionais para tiers altos
+                if (newLevel >= 4)
+                {
+                    // Ondas de choque extras
+                    for (int wave = 0; wave < newLevel - 3; wave++)
+                    {
+                        for (int i = 0; i < 20; i++)
+                        {
+                            float angle = MathHelper.TwoPi * i / 20f;
+                            Vector2 velocity = new Vector2((float)System.Math.Cos(angle), (float)System.Math.Sin(angle)) * (5f + wave * 2f);
+                            Dust shockwave = Dust.NewDustPerfect(Position, Terraria.ID.DustID.Electric, velocity, 0, Color.Red, 2f);
+                            shockwave.noGravity = true;
+                        }
+                    }
                 }
                 
                 // Mensagem dramática
@@ -272,11 +269,7 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             {
                 if (DangerLevel == 0) return;
                 
-                // Cada tier: +40% maxLevel, +10% radius
-                float levelMultiplier = 1f + (DangerLevel * 0.4f);
-                float radiusMultiplier = 1f + (DangerLevel * 0.1f);
-                
-                // Aplica multiplicadores (mas guarda valores originais)
+                // Cada tier: +35% partículas, +10% zona
                 // Isso será usado pelos sistemas de visual e spawn
             }
             
@@ -285,25 +278,107 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             /// </summary>
             public float GetParticleMultiplier()
             {
-                // Cada tier: +50% partículas
-                return 1f + (DangerLevel * 0.5f);
+                // Cada tier: +35% partículas
+                return 1f + (DangerLevel * 0.35f);
             }
             
-            /// <summary>
-            /// Retorna cor de partícula baseada no danger level
-            /// </summary>
             public Color GetDangerColor()
             {
                 return DangerLevel switch
                 {
-                    0 => Color.Green,
-                    1 => Color.LightGreen,
-                    2 => Color.Yellow,
-                    3 => Color.Orange,
-                    4 => Color.OrangeRed,
-                    5 => Color.Red,
+                    1 => Color.Green, // Tier 1: verdes
+                    2 => Color.Yellow, // Tier 2: amarelas
+                    3 => Color.Blue, // Tier 3: azuis e laranjas (mistura)
+                    4 => Color.Purple, // Tier 4: roxas/vermelha clara
+                    5 => Color.Crimson, // Tier 5: vermelho carmesim
                     _ => Color.Green
                 };
+            }
+            
+            /// <summary>
+            /// Gatilho da explosão final quando a zona expira
+            /// </summary>
+            public void TriggerFinalExplosion()
+            {
+                // Efeitos visuais massivos
+                if (Main.netMode != Terraria.ID.NetmodeID.Server)
+                {
+                    // Explosão central gigante
+                    for (int i = 0; i < 200; i++)
+                    {
+                        Vector2 velocity = Main.rand.NextVector2CircularEdge(15f, 15f);
+                        Dust explosion = Dust.NewDustPerfect(Position, Terraria.ID.DustID.CursedTorch, velocity, 0, Color.Red, 3f);
+                        explosion.noGravity = true;
+                    }
+                    
+                    // Onda de choque visual
+                    for (int i = 0; i < 50; i++)
+                    {
+                        float angle = MathHelper.TwoPi * i / 50f;
+                        Vector2 velocity = new Vector2((float)System.Math.Cos(angle), (float)System.Math.Sin(angle)) * 20f;
+                        Dust shockwave = Dust.NewDustPerfect(Position, Terraria.ID.DustID.Electric, velocity, 0, Color.White, 4f);
+                        shockwave.noGravity = true;
+                    }
+                }
+                
+                // Som apocalíptico
+                Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.DD2_BetsyDeath, Position);
+                
+                // Mata NPCs inimigos na zona (exceto se estão em casas)
+                foreach (NPC npc in Main.npc)
+                {
+                    if (npc.active && !npc.friendly && !npc.townNPC && Vector2.Distance(npc.Center, Position) <= Radius)
+                    {
+                        // Verifica se está "em uma casa" - se há townNPC próximo (50 tiles)
+                        bool isInHouse = false;
+                        foreach (NPC townNpc in Main.npc)
+                        {
+                            if (townNpc.active && townNpc.townNPC && Vector2.Distance(npc.Center, townNpc.Center) < 50 * 16f) // 50 tiles
+                            {
+                                isInHouse = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!isInHouse)
+                        {
+                            // Mata instantaneamente
+                            npc.life = 0;
+                            npc.checkDead();
+                        }
+                    }
+                }
+                
+                // Para players: dano massivo se não estão em casa
+                foreach (Player player in Main.player)
+                {
+                    if (player.active && Vector2.Distance(player.Center, Position) <= Radius)
+                    {
+                        // Verifica se está em casa - townNPC próximo
+                        bool isInHouse = false;
+                        foreach (NPC townNpc in Main.npc)
+                        {
+                            if (townNpc.active && townNpc.townNPC && Vector2.Distance(player.Center, townNpc.Center) < 50 * 16f)
+                            {
+                                isInHouse = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!isInHouse)
+                        {
+                            // Dano massivo (99% da vida)
+                            int damage = (int)(player.statLifeMax2 * 0.99f);
+                            player.Hurt(Terraria.DataStructures.PlayerDeathReason.ByCustomReason(Terraria.Localization.NetworkText.FromLiteral($"{player.name} was obliterated by the radioactive explosion!")), damage, 0);
+                        }
+                    }
+                }
+                
+                // Mensagem final
+                if (Main.netMode != Terraria.ID.NetmodeID.Server)
+                {
+                    Main.NewText("☢☢ THE ZONE HAS DETONATED! ☢☢", Color.Red);
+                }
             }
         }
     }
@@ -324,6 +399,11 @@ namespace SignatureEquipmentDeluxe.Common.Systems
         public bool isPermanent = false; // Inimigos nivelados não despawnam
         private Vector2 homeZoneCenter = Vector2.Zero;
         private float homeZoneRadius = 0;
+        
+        // Stats base para evitar stacking
+        private int baseLifeMax = -1;
+        private int baseDamage = -1;
+        private int baseDefense = -1;
         
         public override void AI(NPC npc)
         {
@@ -486,16 +566,17 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             if (EnemyLevel <= 0)
                 return;
             
-            // Salva valores originais para referência futura
-            if (npc.defDamage == 0)
-                npc.defDamage = npc.damage;
-            if (npc.defDefense == 0)
-                npc.defDefense = npc.defense;
+            // Salva valores base na primeira vez
+            if (baseLifeMax == -1)
+            {
+                baseLifeMax = npc.lifeMax;
+                baseDamage = npc.damage;
+                baseDefense = npc.defense;
+            }
             
-            // +75% vida por nível (balanceamento: 15% -> 75%)
-            float hpMultiplier = 1f + (EnemyLevel * 0.75f);
-            int originalMaxLife = npc.lifeMax;
-            npc.lifeMax = (int)(npc.lifeMax * hpMultiplier);
+            // +35% vida por nível (balanceamento: 75% -> 35%)
+            float hpMultiplier = 1f + (EnemyLevel * 0.35f);
+            npc.lifeMax = (int)(baseLifeMax * hpMultiplier);
             npc.life = npc.lifeMax;
             
             // Outros stats serão aplicados dinamicamente via hooks
@@ -509,8 +590,8 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             if (EnemyLevel <= 0 || !hasSpawnedInRadioactiveZone)
                 return;
             
-            // +2% dano por nível (dobrado: 1% -> 2%)
-            float damageMultiplier = 1f + (EnemyLevel * 0.02f);
+            // +3% dano por nível (balanceamento: 2% -> 3%)
+            float damageMultiplier = 1f + (EnemyLevel * 0.03f);
             modifiers.SourceDamage *= damageMultiplier;
             
             // NOVO SISTEMA: Penetração baseada em diferença de nível vs armadura do player
@@ -583,8 +664,8 @@ namespace SignatureEquipmentDeluxe.Common.Systems
                 }
             }
             
-            // -1% knockback por nível (dobrado: 0.5% -> 1%)
-            float knockbackReduction = 1f - (EnemyLevel * 0.01f);
+            // -2% knockback por nível (balanceamento: 1% -> 2%), máximo 100%
+            float knockbackReduction = System.Math.Max(0f, 1f - (EnemyLevel * 0.02f));
             modifiers.Knockback *= knockbackReduction;
         }
         
@@ -783,6 +864,9 @@ namespace SignatureEquipmentDeluxe.Common.Systems
         /// </summary>
         public void SetLevelDirectly(int level, NPC npc)
         {
+            // Reseta scaling antes de aplicar novo nível
+            ResetScaling(npc);
+            
             EnemyLevel = level;
             hasSpawnedInRadioactiveZone = true;
             hasCheckedForLevel = true;
@@ -800,6 +884,19 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             
             // CRITICAL: Aplica o scaling de stats
             ApplyLevelScaling(npc);
+        }
+        
+        /// <summary>
+        /// Reseta scaling para stats base
+        /// </summary>
+        public void ResetScaling(NPC npc)
+        {
+            if (baseLifeMax != -1)
+            {
+                npc.lifeMax = baseLifeMax;
+                npc.life = System.Math.Min(npc.life, npc.lifeMax);
+            }
+            // Damage e defense são aplicados dinamicamente, não precisam reset
         }
         
         /// <summary>

@@ -13,7 +13,7 @@ namespace SignatureEquipmentDeluxe.Common.Systems
     public class RadioactiveZoneSpawnNPC : GlobalNPC
     {
         /// <summary>
-        /// Modifica o spawn rate em zonas radioativas (2.5x)
+        /// Modifica o spawn rate em zonas radioativas (1.5x)
         /// </summary>
         public override void EditSpawnRate(Player player, ref int spawnRate, ref int maxSpawns)
         {
@@ -21,15 +21,15 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             if (LeveledEnemySystem.IsInRadioactiveZone(player.Center, out int maxLevel))
             {
                 // Reduz spawn rate = aumenta spawns (menor valor = mais spawns)
-                spawnRate = (int)(spawnRate / 2.5f);
+                spawnRate = (int)(spawnRate / 1.5f);
                 
                 // Aumenta número máximo de spawns
-                maxSpawns = (int)(maxSpawns * 2.5f);
+                maxSpawns = (int)(maxSpawns * 1.5f);
             }
         }
         
         /// <summary>
-        /// 40% de chance extra de inimigos spawnarem com nível em zonas radioativas
+        /// TODO inimigo spawna com nível em zonas radioativas (mais baixos, notificação apenas para altos)
         /// </summary>
         public override void OnSpawn(NPC npc, IEntitySource source)
         {
@@ -44,26 +44,103 @@ namespace SignatureEquipmentDeluxe.Common.Systems
             // Verifica se spawnou em zona radioativa
             if (LeveledEnemySystem.IsInRadioactiveZone(npc.Center, out int maxLevel, out Vector2 zoneCenter, out float zoneRadius))
             {
-                // 40% de chance extra de ter nível (além da chance base de 15%)
-                if (Main.rand.NextFloat() < 0.40f)
+                var leveledSystem = npc.GetGlobalNPC<LeveledEnemyGlobalNPC>();
+                if (leveledSystem != null && leveledSystem.EnemyLevel == 0)
                 {
-                    var leveledSystem = npc.GetGlobalNPC<LeveledEnemyGlobalNPC>();
-                    if (leveledSystem != null && leveledSystem.EnemyLevel == 0)
+                    // TODO inimigo ganha nível (100% chance)
+                    // Distribuição: mais inimigos com nível baixo
+                    float distanceFromCenter = Vector2.Distance(npc.Center, zoneCenter);
+                    float normalizedDistance = MathHelper.Clamp(distanceFromCenter / zoneRadius, 0f, 1f);
+                    
+                    // Distribuição enviesada para níveis baixos
+                    // 70% chance de nível baixo (1-40% do max), 30% chance de nível alto (41%-100% do max)
+                    int level;
+                    if (Main.rand.NextFloat() < 0.7f)
                     {
-                        // Aplica nível baseado na distância do centro
-                        float distanceFromCenter = Vector2.Distance(npc.Center, zoneCenter);
-                        float normalizedDistance = MathHelper.Clamp(distanceFromCenter / zoneRadius, 0f, 1f);
+                        // Nível baixo: 1 até 40% do máximo
+                        int maxLowLevel = (int)(maxLevel * 0.4f);
+                        level = Main.rand.Next(1, Math.Max(2, maxLowLevel + 1));
+                    }
+                    else
+                    {
+                        // Nível alto: 41% até 100% do máximo
+                        int minHighLevel = (int)(maxLevel * 0.41f) + 1;
+                        level = Main.rand.Next(minHighLevel, maxLevel + 1);
+                    }
+                    
+                    // Aplica o nível
+                    leveledSystem.SetLevelDirectly(level, npc);
+                    
+                    // Notificação apenas para níveis altos (60%+ do máximo)
+                    bool shouldNotify = level >= (int)(maxLevel * 0.6f);
+                    if (shouldNotify)
+                    {
+                        // Verifica se está visível na tela para animação dramática
+                        bool isOnScreen = npc.Hitbox.Intersects(new Rectangle(
+                            (int)Main.screenPosition.X,
+                            (int)Main.screenPosition.Y,
+                            Main.screenWidth,
+                            Main.screenHeight
+                        ));
                         
-                        float centerBias = 1f - normalizedDistance;
-                        
-                        int minLevel = (int)(maxLevel * (1f - normalizedDistance) * 0.5f) + 1;
-                        int targetMaxLevel = (int)(maxLevel * (0.3f + centerBias * 0.7f)) + 1;
-                        targetMaxLevel = (int)MathHelper.Clamp(targetMaxLevel, minLevel, maxLevel);
-                        
-                        int level = Main.rand.Next(minLevel, targetMaxLevel + 1);
-                        
-                        // Aplica o nível via SetLevelDirectly
-                        leveledSystem.SetLevelDirectly(level, npc); // Passa NPC para aplicar scaling
+                        if (isOnScreen)
+                        {
+                            // ANIMAÇÃO DRAMÁTICA NA TELA
+                            // Explosão massiva de partículas
+                            for (int i = 0; i < 40; i++)
+                            {
+                                Vector2 velocity = Main.rand.NextVector2CircularEdge(5f, 5f);
+                                Dust dust = Dust.NewDustPerfect(
+                                    npc.Center,
+                                    Terraria.ID.DustID.GreenTorch,
+                                    velocity,
+                                    0,
+                                    new Color(100, 255, 100),
+                                    Main.rand.NextFloat(1.5f, 2.5f)
+                                );
+                                dust.noGravity = true;
+                            }
+                            
+                            // Onda de choque visual
+                            for (int i = 0; i < 20; i++)
+                            {
+                                float angle = MathHelper.TwoPi * i / 20f;
+                                Vector2 velocity = new Vector2(
+                                    (float)System.Math.Cos(angle) * 8f,
+                                    (float)System.Math.Sin(angle) * 8f
+                                );
+                                Dust shockwave = Dust.NewDustPerfect(
+                                    npc.Center,
+                                    Terraria.ID.DustID.Electric,
+                                    velocity,
+                                    0,
+                                    Color.Lime,
+                                    2f
+                                );
+                                shockwave.noGravity = true;
+                            }
+                            
+                            // Som dramático de power-up
+                            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Roar, npc.Center);
+                            
+                            // Texto flutuante
+                            CombatText.NewText(npc.Hitbox, Color.Lime, $"LEVEL {level}!", true, true);
+                        }
+                        else
+                        {
+                            // SOM DE ALERTA FORA DA TELA
+                            // Som sinistro indicando perigo
+                            Terraria.Audio.SoundEngine.PlaySound(Terraria.ID.SoundID.Roar with { 
+                                Volume = 0.5f,
+                                Pitch = -0.5f
+                            });
+                            
+                            // Mensagem de aviso
+                            if (Main.netMode != Terraria.ID.NetmodeID.Server)
+                            {
+                                Main.NewText("A powerful presence awakens nearby...", new Color(100, 255, 100));
+                            }
+                        }
                     }
                 }
             }

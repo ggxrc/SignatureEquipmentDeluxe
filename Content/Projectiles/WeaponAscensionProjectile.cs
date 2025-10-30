@@ -6,6 +6,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using SignatureEquipmentDeluxe.Common.Systems;
 using SignatureEquipmentDeluxe.Common.Configs;
+using Terraria.Graphics.Shaders;
 
 namespace SignatureEquipmentDeluxe.Content.Projectiles
 {
@@ -18,9 +19,9 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
     /// </summary>
     public class WeaponAscensionProjectile : ModProjectile
     {
-        private const float ASCENSION_HEIGHT = 80f; // Altura máxima em tiles (reduzido de 200 para 80)
-        private const int ASCENSION_DURATION = 300; // 5 segundos para subir
-        private const int EXPLOSION_DURATION = 120; // 2 segundos de explosão
+        private const float ASCENSION_HEIGHT = 15f; // 15 tiles de altura
+        private const int ASCENSION_DURATION = 120; // 2 segundos para subir e acelerar giro
+        private const int DECELERATION_DURATION = 240; // 4 segundos para desacelerar
         
         private Vector2 startPosition;
         private int weaponLevel;
@@ -30,6 +31,7 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
         private Texture2D weaponTexture;
         private float zoneRadius;
         private int totalDuration; // Dura até o fim da zona
+        private float currentRotation; // Acumulador para rotação suave
         
         // NÃO precisa de textura própria - usa a textura da arma
         public override string Texture => "Terraria/Images/Item_0";
@@ -45,9 +47,9 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
             Projectile.ignoreWater = true;
             Projectile.alpha = 0;
             
-            // Dura 30 minutos (mesma duração da zona)
+            // Dura 10 minutos (mesma duração da zona)
             var config = ModContent.GetInstance<ServerConfig>();
-            totalDuration = (config?.RadioactiveZoneDurationMinutes ?? 30) * 60 * 60;
+            totalDuration = 10 * 60 * 60;
             Projectile.timeLeft = totalDuration;
         }
         
@@ -78,20 +80,21 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
             
             int elapsedTime = totalDuration - Projectile.timeLeft;
             
-            // === FASE 1: ASCENSÃO (0-300 frames / 5 segundos) ===
+            // === FASE 1: ASCENSÃO (0-120 frames / 2 segundos) ===
             if (elapsedTime < ASCENSION_DURATION)
             {
                 PhaseAscension(elapsedTime);
             }
-            // === FASE 2: EXPLOSÃO (300-420 frames / 2 segundos) ===
-            else if (elapsedTime < ASCENSION_DURATION + EXPLOSION_DURATION)
+            // === FASE 2: DESACELERAÇÃO (120-360 frames / 4 segundos) ===
+            else if (elapsedTime < ASCENSION_DURATION + DECELERATION_DURATION)
             {
-                PhaseExplosion(elapsedTime - ASCENSION_DURATION);
+                PhaseDeceleration(elapsedTime - ASCENSION_DURATION);
             }
-            // === FASE 3: LEVITANDO (resto do tempo até fim da zona) ===
+            // Após desaceleração, dropar arma e sumir
             else
             {
-                PhaseHovering(elapsedTime - ASCENSION_DURATION - EXPLOSION_DURATION);
+                DropWeapon();
+                Projectile.Kill();
             }
         }
         
@@ -111,7 +114,8 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
             // Velocidade inicial: 0.02 rad/frame (muito devagar)
             // Velocidade final: 0.15 rad/frame (rápido)
             float rotationSpeed = 0.02f + (progress * 0.13f);
-            Projectile.rotation += rotationSpeed;
+            currentRotation += rotationSpeed;
+            Projectile.rotation = currentRotation;
             
             // Partículas verdes caindo suavemente
             if (frame % 5 == 0)
@@ -150,131 +154,154 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
             float lightIntensity = progress * 0.8f;
             Lighting.AddLight(Projectile.Center, 0.2f * lightIntensity, 0.8f * lightIntensity, 0.2f * lightIntensity);
             
-            // Som de energia crescente (a cada 2 segundos)
-            if (frame % 120 == 0 && frame > 0)
+            // Som de energia crescente (uma vez no meio)
+            if (frame == ASCENSION_DURATION / 2)
             {
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item8, Projectile.Center);
             }
         }
         
         /// <summary>
-        /// Fase 2: EXPLOSÃO MASSIVA de partículas verdes do tamanho da zona
+        /// Fase 2: Desaceleração do giro até parar, com explosão no frame 90 (3.5s)
         /// </summary>
-        private void PhaseExplosion(int frame)
+        private void PhaseDeceleration(int frame)
         {
-            // Cria a zona no primeiro frame da explosão
-            if (!hasCreatedZone)
+            // Explosão no frame 90 (3.5 segundos)
+            if (frame == 90)
             {
-                CreateRadioactiveZone();
-                hasCreatedZone = true;
-            }
-            
-            // Explosão inicial (frame 0)
-            if (frame == 0 && !hasExploded)
-            {
-                hasExploded = true;
-                
                 // SOM ÉPICO
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item62, Projectile.Center);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.DD2_ExplosiveTrapExplode, Projectile.Center);
                 
-                // Flash de luz
-                Lighting.AddLight(Projectile.Center, 5f, 5f, 5f);
+                // Flash de luz intenso
+                Lighting.AddLight(Projectile.Center, 10f, 10f, 10f);
                 
-                // EXPLOSÃO MASSIVA: Partículas expandem até o tamanho da zona
-                int explosionParticles = 200;
-                for (int i = 0; i < explosionParticles; i++)
+                // Efeito no centro: partículas em forma de estrela indicando o ponto de origem
+                for (int i = 0; i < 8; i++) // 8 direções para estrela
                 {
-                    // Velocidade radial que alcança o raio da zona em ~2 segundos
-                    float targetSpeed = zoneRadius / (EXPLOSION_DURATION * 0.8f); // 80% do tempo de explosão
-                    Vector2 velocity = Main.rand.NextVector2CircularEdge(targetSpeed, targetSpeed);
-                    
-                    Dust explosion = Dust.NewDustPerfect(
-                        Projectile.Center,
+                    float angle = (i / 8f) * MathHelper.TwoPi;
+                    Vector2 starPos = Projectile.Center + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * 20f;
+                    Dust starDust = Dust.NewDustPerfect(
+                        starPos,
                         DustID.CursedTorch,
-                        velocity,
+                        Vector2.Zero,
                         0,
-                        Color.Lime,
-                        Main.rand.NextFloat(2f, 3.5f)
+                        Color.Yellow,
+                        3f
                     );
-                    explosion.noGravity = true;
-                    explosion.fadeIn = 1.5f;
+                    starDust.noGravity = true;
+                    starDust.fadeIn = 2f;
                 }
+                
+                // Cria a zona radioativa
+                CreateRadioactiveZone();
             }
             
-            // Ondas de expansão contínuas
-            float progress = frame / (float)EXPLOSION_DURATION;
-            float expansionRadius = progress * zoneRadius;
-            
-            // Spawn onda de partículas expandindo
-            if (frame % 8 == 0)
+            // Expansão da explosão (120 frames)
+            if (frame >= 90)
             {
-                int waveParticles = 60;
-                for (int i = 0; i < waveParticles; i++)
+                float explosionFrame = frame - 90;
+                float explosionProgress = explosionFrame / 120f;
+                
+                if (explosionProgress <= 1f)
                 {
-                    float angle = (i / (float)waveParticles) * MathHelper.TwoPi;
-                    Vector2 pos = Projectile.Center + new Vector2(
-                        (float)Math.Cos(angle) * expansionRadius,
-                        (float)Math.Sin(angle) * expansionRadius
-                    );
+                    float expansionRadius = explosionProgress * zoneRadius;
                     
-                    Dust wave = Dust.NewDustPerfect(pos, DustID.CursedTorch, Vector2.Zero, 0, Color.Green, 2f);
-                    wave.noGravity = true;
-                    wave.fadeIn = 1.5f;
+                    // Círculo de partículas expandindo
+                    int circleParticles = 100;
+                    for (int i = 0; i < circleParticles; i++)
+                    {
+                        float angle = (i / (float)circleParticles) * MathHelper.TwoPi;
+                        Vector2 circlePos = Projectile.Center + new Vector2(
+                            (float)Math.Cos(angle) * expansionRadius,
+                            (float)Math.Sin(angle) * expansionRadius
+                        );
+                        
+                        Dust circleDust = Dust.NewDustPerfect(
+                            circlePos,
+                            DustID.CursedTorch,
+                            Vector2.Zero,
+                            0,
+                            Color.LimeGreen,
+                            2f
+                        );
+                        circleDust.noGravity = true;
+                        circleDust.fadeIn = 1.5f;
+                        
+                        if (Main.rand.NextBool(3))
+                        {
+                            Vector2 trailPos = circlePos + Main.rand.NextVector2Circular(10f, 10f);
+                            Dust trailDust = Dust.NewDustPerfect(
+                                trailPos,
+                                DustID.CursedTorch,
+                                Vector2.Zero,
+                                0,
+                                Color.Green,
+                                1.5f
+                            );
+                            trailDust.noGravity = true;
+                            trailDust.fadeIn = 1f;
+                        }
+                    }
+                    
+                    if (explosionFrame % 5 == 0)
+                    {
+                        for (int i = 0; i < 50; i++)
+                        {
+                            Vector2 randomPos = Projectile.Center + Main.rand.NextVector2Circular(expansionRadius, expansionRadius);
+                            Dust chaos = Dust.NewDustPerfect(
+                                randomPos,
+                                DustID.CursedTorch,
+                                Vector2.Zero,
+                                0,
+                                Main.rand.NextBool() ? Color.Yellow : Color.LimeGreen,
+                                Main.rand.NextFloat(1.5f, 3f)
+                            );
+                            chaos.noGravity = true;
+                            chaos.fadeIn = Main.rand.NextFloat(1f, 2f);
+                        }
+                    }
                 }
             }
             
-            // Partículas aleatórias dentro da área em expansão
-            if (frame % 3 == 0)
-            {
-                for (int i = 0; i < 15; i++)
-                {
-                    Vector2 randomPos = Projectile.Center + Main.rand.NextVector2Circular(expansionRadius, expansionRadius);
-                    Dust chaos = Dust.NewDustPerfect(randomPos, DustID.CursedTorch, Vector2.Zero, 0, Color.LimeGreen, 1.8f);
-                    chaos.noGravity = true;
-                }
-            }
-            
-            // Arma continua girando rápido
-            Projectile.rotation += 0.15f;
-            
-            // Luz pulsante intensa
-            float lightIntensity = 2f * (1f - progress * 0.5f); // Diminui pela metade
-            Lighting.AddLight(Projectile.Center, 0.5f * lightIntensity, lightIntensity, 0.5f * lightIntensity);
-        }
-        
-        /// <summary>
-        /// Fase 3: Arma levita na posição final até o fim da zona
-        /// </summary>
-        private void PhaseHovering(int frame)
-        {
             // Mantém a posição no topo
             float height = ASCENSION_HEIGHT * 16f;
             Projectile.Center = startPosition - new Vector2(0, height);
             
-            // Gira suavemente (velocidade constante)
-            Projectile.rotation += 0.08f;
+            // Desacelera o giro: começa em 0.15f e vai para 0 em 240 frames
+            float progress = frame / (float)DECELERATION_DURATION;
+            float rotationSpeed = 0.15f * (1f - progress);
+            currentRotation += rotationSpeed;
+            Projectile.rotation = currentRotation;
             
-            // Partículas ocasionais
-            if (frame % 20 == 0)
+            // Partículas ocasionais diminuindo
+            if (frame % (20 + frame / 10) == 0) // Menos partículas com o tempo
             {
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < 2; i++)
                 {
-                    Vector2 offset = Main.rand.NextVector2Circular(20f, 20f);
+                    Vector2 offset = Main.rand.NextVector2Circular(15f, 15f);
                     Dust dust = Dust.NewDustPerfect(
                         Projectile.Center + offset,
                         DustID.CursedTorch,
-                        new Vector2(0, Main.rand.NextFloat(0.3f, 1f)),
+                        new Vector2(0, Main.rand.NextFloat(0.2f, 0.8f)),
                         0,
                         Color.LimeGreen,
-                        1.2f
+                        1f
                     );
                     dust.noGravity = true;
                 }
             }
             
-            // Luz verde constante
-            Lighting.AddLight(Projectile.Center, 0.2f, 0.8f, 0.2f);
+            // Luz diminuindo
+            float lightIntensity = 0.8f * (1f - progress * 0.5f);
+            Lighting.AddLight(Projectile.Center, 0.2f * lightIntensity, 0.8f * lightIntensity, 0.2f * lightIntensity);
+        }
+        private void DropWeapon()
+        {
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                Item.NewItem(Projectile.GetSource_FromThis(), Projectile.Center, itemType);
+            }
         }
         
         /// <summary>
@@ -296,6 +323,8 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
                 MaxEnemyLevel = weaponLevel,
                 TimeLeft = totalDuration // 30 minutos
             };
+            
+            zone.InitialRadius = zone.Radius; // Salva raio inicial
             
             LeveledEnemySystem.radioactiveZones.Add(zone);
             
