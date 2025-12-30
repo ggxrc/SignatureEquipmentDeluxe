@@ -403,7 +403,43 @@ Config: {
 		RuneSystemHeader: Enable Rune System Header
 		CurseSystemHeader: Enable Curse System Header
 		LeveledEnemyHeader: Enable Leveled Enemies Header
+		WorldProgressionHeader: 🌍 World Progression System
 		ElementalRuneEffectsHeader: Elemental Rune Visual & DoT Effects
+
+		WorldLevelMode: {
+			Label: World Level Mode
+			Tooltip:
+				'''
+				BossProgression: Level increases by defeating bosses (with caps per phase)
+				TimeProgression: Level increases +1 per day of gameplay
+				Disabled: Leveled enemies system disabled
+				'''
+		}
+
+		PreHardmodeMaxLevel: {
+			Label: Pre-Hardmode Max Level
+			Tooltip: Maximum world level cap in Pre-Hardmode phase
+		}
+
+		HardmodeMaxLevel: {
+			Label: Hardmode Max Level
+			Tooltip: Additional levels cap for Hardmode phase (cumulative)
+		}
+
+		PostMoonLordMaxLevel: {
+			Label: Post-Moon Lord Max Level
+			Tooltip: Additional levels cap after defeating Moon Lord (cumulative)
+		}
+
+		LevelVariance: {
+			Label: Level Variance
+			Tooltip:
+				'''
+				Random variation in enemy levels (±X)
+				Example: If world is level 20 and variance is 2, enemies spawn between levels 18-22
+				This creates variety in difficulty
+				'''
+		}
 	}
 
 	ClientConfig: {
@@ -603,6 +639,64 @@ Config: {
 		}
 
 		VisualEffectsHeader: Enable Aura Effects Header
+	}
+
+	AdvancedConfig: {
+		BlacklistsHeader: Global Item Blacklist Header
+		IndividualLimitsHeader: Individual Max Level Header
+		PerformanceHeader: Enable Multiplayer Sync Header
+		DebugHeader: Debug Mode Header
+	}
+
+	CombatConfig: {
+		WeaponStatsHeader: Weapon Damage Header
+		ProjectileStatsHeader: Weapon Projectile Size Header
+		ArmorStatsHeader: Armor Defense Header
+		ImmunityHeader: Local Immunity Mode Header
+	}
+
+	EventsConfig: {
+		AntiFarmHeader: Enable Boss Penalty Header
+		BossPreHardmodeHeader: Boss Events Pre Hardmode Header
+		BossHardmodeHeader: Boss Events Hardmode Header
+		MoonEventsHeader: Moon Events Header
+		InvasionEventsHeader: Invasion Events Header
+		TimeEventsHeader: Time Events Header
+		WeatherEventsHeader: Weather Events Header
+		SpecialEventsHeader: Special Events Header
+	}
+
+	GameplayConfig: {
+		LevelCapsHeader: Weapon Max Level Header
+		StatTogglesHeader: Damage Increment Header
+		DamageTypesHeader: Increase Base Damage Header
+		ProjectileTogglesHeader: Projectile Size Increment Header
+		ResourceTogglesHeader: Not Use Ammo Chance Increment Header
+		AdditionalProjectileHeader: Additional Projectile Min Rad Header
+	}
+
+	ProgressionConfig: {
+		GlobalMultipliersHeader: Global Exp Multiplier Header
+		CategoryMultipliersHeader: Weapon Exp Multiplier Header
+		WeaponXPSourcesHeader: Weapon Base X P Per Hit Header
+		ArmorXPSourcesHeader: Armor X P Per Damage Received Header
+		SpecialConditionsHeader: Allow Statue X P Header
+		LevelCostCurveHeader: Start Price Header
+		KillStreakHeader: Enable Kill Streak System Header
+	}
+
+	RuneConfig: {
+		RuneSystemHeader: Enable Rune System Header
+		CurseSystemHeader: Enable Curse System Header
+		ElementalEffectsHeader: Enable Elemental Trail Effects Header
+	}
+
+	WorldConfig: {
+		LeveledEnemyHeader: Enable Leveled Enemies Header
+		WorldProgressionHeader: World Level Mode Header
+		LevelCapsHeader: Pre Hardmode Max Level Header
+		SpawnVarianceHeader: Level Variance Header
+		EnemyRewardsHeader: Leveled Enemy X P Bonus Per Level Header
 	}
 }
 
@@ -960,8 +1054,16 @@ Configs: {
 
 	OutlineMode: {
 		Tooltip: ""
-		Scale.Label: Scale
-		Copy.Label: Copy
+
+		Scale: {
+			Label: Scale
+			Tooltip: ""
+		}
+
+		Copy: {
+			Label: Copy
+			Tooltip: ""
+		}
 	}
 
 	ServerConfig: {
@@ -1671,6 +1773,31 @@ Configs: {
 			Label: Lightning Do T Duration
 			Tooltip: ""
 		}
+
+		LevelVariance: {
+			Tooltip: ""
+			Label: Level Variance
+		}
+
+		PostMoonLordMaxLevel: {
+			Tooltip: ""
+			Label: Post Moon Lord Max Level
+		}
+
+		HardmodeMaxLevel: {
+			Tooltip: ""
+			Label: Hardmode Max Level
+		}
+
+		PreHardmodeMaxLevel: {
+			Tooltip: ""
+			Label: Pre Hardmode Max Level
+		}
+
+		WorldLevelMode: {
+			Tooltip: ""
+			Label: World Level Mode
+		}
 	}
 
 	ItemStatInt: {
@@ -1714,10 +1841,26 @@ Configs: {
 
 	ScalingMode: {
 		Tooltip: ""
-		Legacy.Label: Legacy
-		Cumulative.Label: Cumulative
-		CurrentTierOnly.Label: Current Tier Only
-		AccumulativePerTier.Label: Accumulative Per Tier
+
+		Legacy: {
+			Label: Legacy
+			Tooltip: ""
+		}
+
+		Cumulative: {
+			Label: Cumulative
+			Tooltip: ""
+		}
+
+		CurrentTierOnly: {
+			Label: Current Tier Only
+			Tooltip: ""
+		}
+
+		AccumulativePerTier: {
+			Label: Accumulative Per Tier
+			Tooltip: ""
+		}
 	}
 
 	ScalingTier: {
@@ -1857,19 +2000,71 @@ Configs: {
 
 	LocalNPCImmunityMode: {
 		Tooltip: ""
-		Disabled.Label: Disabled
-		UseLocal.Label: Use Local
-		NoEffectKeepCd.Label: No Effect Keep Cd
-		NoEffect.Label: No Effect
-		HitOnceKeepCd.Label: Hit Once Keep Cd
-		HitOnce.Label: Hit Once
-		Cooldown0KeepCd.Label: Cooldown0 Keep Cd
-		Cooldown0.Label: Cooldown0
-		Cooldown10.Label: Cooldown10
-		Cooldown15.Label: Cooldown15
-		Cooldown20.Label: Cooldown20
-		Cooldown25.Label: Cooldown25
-		Cooldown30.Label: Cooldown30
+
+		Disabled: {
+			Label: Disabled
+			Tooltip: ""
+		}
+
+		UseLocal: {
+			Label: Use Local
+			Tooltip: ""
+		}
+
+		NoEffectKeepCd: {
+			Label: No Effect Keep Cd
+			Tooltip: ""
+		}
+
+		NoEffect: {
+			Label: No Effect
+			Tooltip: ""
+		}
+
+		HitOnceKeepCd: {
+			Label: Hit Once Keep Cd
+			Tooltip: ""
+		}
+
+		HitOnce: {
+			Label: Hit Once
+			Tooltip: ""
+		}
+
+		Cooldown0KeepCd: {
+			Label: Cooldown0 Keep Cd
+			Tooltip: ""
+		}
+
+		Cooldown0: {
+			Label: Cooldown0
+			Tooltip: ""
+		}
+
+		Cooldown10: {
+			Label: Cooldown10
+			Tooltip: ""
+		}
+
+		Cooldown15: {
+			Label: Cooldown15
+			Tooltip: ""
+		}
+
+		Cooldown20: {
+			Label: Cooldown20
+			Tooltip: ""
+		}
+
+		Cooldown25: {
+			Label: Cooldown25
+			Tooltip: ""
+		}
+
+		Cooldown30: {
+			Label: Cooldown30
+			Tooltip: ""
+		}
 	}
 
 	ProjectileLocalFrames: {
@@ -2025,62 +2220,856 @@ Configs: {
 
 	GameEventType: {
 		Tooltip: ""
-		KingSlime.Label: King Slime
-		EyeOfCthulhu.Label: Eye Of Cthulhu
-		EaterOfWorlds.Label: Eater Of Worlds
-		BrainOfCthulhu.Label: Brain Of Cthulhu
-		QueenBee.Label: Queen Bee
-		Skeletron.Label: Skeletron
-		Deerclops.Label: Deerclops
-		WallOfFlesh.Label: Wall Of Flesh
-		QueenSlime.Label: Queen Slime
-		TheTwins.Label: The Twins
-		TheDestroyer.Label: The Destroyer
-		SkeletronPrime.Label: Skeletron Prime
-		Plantera.Label: Plantera
-		Golem.Label: Golem
-		DukeFishron.Label: Duke Fishron
-		EmpressOfLight.Label: Empress Of Light
-		LunaticCultist.Label: Lunatic Cultist
-		MoonLord.Label: Moon Lord
-		BloodMoon.Label: Blood Moon
-		FullMoon.Label: Full Moon
-		NewMoon.Label: New Moon
-		GoblinArmy.Label: Goblin Army
-		FrostLegion.Label: Frost Legion
-		PirateInvasion.Label: Pirate Invasion
-		SolarEclipse.Label: Solar Eclipse
-		PumpkinMoon.Label: Pumpkin Moon
-		FrostMoon.Label: Frost Moon
-		MartianMadness.Label: Martian Madness
-		LunarEvent.Label: Lunar Event
-		Day.Label: Day
-		Night.Label: Night
-		Rain.Label: Rain
-		Sandstorm.Label: Sandstorm
-		Blizzard.Label: Blizzard
-		PartyEvent.Label: Party Event
-		LanternNight.Label: Lantern Night
+
+		KingSlime: {
+			Label: King Slime
+			Tooltip: ""
+		}
+
+		EyeOfCthulhu: {
+			Label: Eye Of Cthulhu
+			Tooltip: ""
+		}
+
+		EaterOfWorlds: {
+			Label: Eater Of Worlds
+			Tooltip: ""
+		}
+
+		BrainOfCthulhu: {
+			Label: Brain Of Cthulhu
+			Tooltip: ""
+		}
+
+		QueenBee: {
+			Label: Queen Bee
+			Tooltip: ""
+		}
+
+		Skeletron: {
+			Label: Skeletron
+			Tooltip: ""
+		}
+
+		Deerclops: {
+			Label: Deerclops
+			Tooltip: ""
+		}
+
+		WallOfFlesh: {
+			Label: Wall Of Flesh
+			Tooltip: ""
+		}
+
+		QueenSlime: {
+			Label: Queen Slime
+			Tooltip: ""
+		}
+
+		TheTwins: {
+			Label: The Twins
+			Tooltip: ""
+		}
+
+		TheDestroyer: {
+			Label: The Destroyer
+			Tooltip: ""
+		}
+
+		SkeletronPrime: {
+			Label: Skeletron Prime
+			Tooltip: ""
+		}
+
+		Plantera: {
+			Label: Plantera
+			Tooltip: ""
+		}
+
+		Golem: {
+			Label: Golem
+			Tooltip: ""
+		}
+
+		DukeFishron: {
+			Label: Duke Fishron
+			Tooltip: ""
+		}
+
+		EmpressOfLight: {
+			Label: Empress Of Light
+			Tooltip: ""
+		}
+
+		LunaticCultist: {
+			Label: Lunatic Cultist
+			Tooltip: ""
+		}
+
+		MoonLord: {
+			Label: Moon Lord
+			Tooltip: ""
+		}
+
+		BloodMoon: {
+			Label: Blood Moon
+			Tooltip: ""
+		}
+
+		FullMoon: {
+			Label: Full Moon
+			Tooltip: ""
+		}
+
+		NewMoon: {
+			Label: New Moon
+			Tooltip: ""
+		}
+
+		GoblinArmy: {
+			Label: Goblin Army
+			Tooltip: ""
+		}
+
+		FrostLegion: {
+			Label: Frost Legion
+			Tooltip: ""
+		}
+
+		PirateInvasion: {
+			Label: Pirate Invasion
+			Tooltip: ""
+		}
+
+		SolarEclipse: {
+			Label: Solar Eclipse
+			Tooltip: ""
+		}
+
+		PumpkinMoon: {
+			Label: Pumpkin Moon
+			Tooltip: ""
+		}
+
+		FrostMoon: {
+			Label: Frost Moon
+			Tooltip: ""
+		}
+
+		MartianMadness: {
+			Label: Martian Madness
+			Tooltip: ""
+		}
+
+		LunarEvent: {
+			Label: Lunar Event
+			Tooltip: ""
+		}
+
+		Day: {
+			Label: Day
+			Tooltip: ""
+		}
+
+		Night: {
+			Label: Night
+			Tooltip: ""
+		}
+
+		Rain: {
+			Label: Rain
+			Tooltip: ""
+		}
+
+		Sandstorm: {
+			Label: Sandstorm
+			Tooltip: ""
+		}
+
+		Blizzard: {
+			Label: Blizzard
+			Tooltip: ""
+		}
+
+		PartyEvent: {
+			Label: Party Event
+			Tooltip: ""
+		}
+
+		LanternNight: {
+			Label: Lantern Night
+			Tooltip: ""
+		}
 	}
 
 	XPMultiplierTier: {
 		Tooltip: ""
-		None.Label: None
-		Low.Label: Low
-		Medium.Label: Medium
-		High.Label: High
-		VeryHigh.Label: Very High
-		Extreme.Label: Extreme
+
+		None: {
+			Label: None
+			Tooltip: ""
+		}
+
+		Low: {
+			Label: Low
+			Tooltip: ""
+		}
+
+		Medium: {
+			Label: Medium
+			Tooltip: ""
+		}
+
+		High: {
+			Label: High
+			Tooltip: ""
+		}
+
+		VeryHigh: {
+			Label: Very High
+			Tooltip: ""
+		}
+
+		Extreme: {
+			Label: Extreme
+			Tooltip: ""
+		}
 	}
 
 	AuraStyle: {
 		Tooltip: ""
-		Magic.Label: Magic
-		Fire.Label: Fire
-		Electric.Label: Electric
-		Rainbow.Label: Rainbow
-		Shadow.Label: Shadow
-		Holy.Label: Holy
+
+		Magic: {
+			Label: Magic
+			Tooltip: ""
+		}
+
+		Fire: {
+			Label: Fire
+			Tooltip: ""
+		}
+
+		Electric: {
+			Label: Electric
+			Tooltip: ""
+		}
+
+		Rainbow: {
+			Label: Rainbow
+			Tooltip: ""
+		}
+
+		Shadow: {
+			Label: Shadow
+			Tooltip: ""
+		}
+
+		Holy: {
+			Label: Holy
+			Tooltip: ""
+		}
+	}
+
+	WorldLevelMode: {
+		Tooltip: ""
+
+		BossProgression: {
+			Label: Boss Progression
+			Tooltip: Level increases when defeating bosses (default)
+		}
+
+		TimeProgression: {
+			Label: Time Progression
+			Tooltip: Level increases +1 per day of gameplay
+		}
+
+		Disabled: {
+			Label: Disabled
+			Tooltip: Leveled enemies system disabled
+		}
+	}
+
+	AdvancedConfig: {
+		DisplayName: Advanced Config
+
+		GlobalItemBlacklist: {
+			Label: Global Item Blacklist
+			Tooltip: ""
+		}
+
+		NPCBlacklist: {
+			Label: N P C Blacklist
+			Tooltip: ""
+		}
+
+		SpecialProjectileMapping: {
+			Label: Special Projectile Mapping
+			Tooltip: ""
+		}
+
+		IndividualMaxLevel: {
+			Label: Individual Max Level
+			Tooltip: ""
+		}
+
+		EnableMultiplayerSync: {
+			Label: Enable Multiplayer Sync
+			Tooltip: ""
+		}
+
+		EnableProjectileStatCaching: {
+			Label: Enable Projectile Stat Caching
+			Tooltip: ""
+		}
+
+		DebugMode: {
+			Label: Debug Mode
+			Tooltip: ""
+		}
+	}
+
+	CombatConfig: {
+		DisplayName: Combat Config
+
+		WeaponDamage: {
+			Label: Weapon Damage
+			Tooltip: ""
+		}
+
+		WeaponCritChance: {
+			Label: Weapon Crit Chance
+			Tooltip: ""
+		}
+
+		WeaponUseTime: {
+			Label: Weapon Use Time
+			Tooltip: ""
+		}
+
+		WeaponUseAnimation: {
+			Label: Weapon Use Animation
+			Tooltip: ""
+		}
+
+		WeaponMeleeSize: {
+			Label: Weapon Melee Size
+			Tooltip: ""
+		}
+
+		WeaponManaCostReduction: {
+			Label: Weapon Mana Cost Reduction
+			Tooltip: ""
+		}
+
+		WeaponAmmoConsumptionReduction: {
+			Label: Weapon Ammo Consumption Reduction
+			Tooltip: ""
+		}
+
+		WeaponProjectileSize: {
+			Label: Weapon Projectile Size
+			Tooltip: ""
+		}
+
+		WeaponProjectileSpeed: {
+			Label: Weapon Projectile Speed
+			Tooltip: ""
+		}
+
+		WeaponProjectileLifeTime: {
+			Label: Weapon Projectile Life Time
+			Tooltip: ""
+		}
+
+		WeaponProjectilePenetration: {
+			Label: Weapon Projectile Penetration
+			Tooltip: ""
+		}
+
+		WeaponAdditionalProjectileChance: {
+			Label: Weapon Additional Projectile Chance
+			Tooltip: ""
+		}
+
+		ArmorDefense: {
+			Label: Armor Defense
+			Tooltip: ""
+		}
+
+		LocalImmunityMode: {
+			Label: Local Immunity Mode
+			Tooltip: ""
+		}
+
+		ProjectileLocalFramesOverride: {
+			Label: Projectile Local Frames Override
+			Tooltip: ""
+		}
+	}
+
+	EventsConfig: {
+		DisplayName: Events Config
+
+		EnableBossPenalty: {
+			Label: Enable Boss Penalty
+			Tooltip: ""
+		}
+
+		EnableInvasionPenalty: {
+			Label: Enable Invasion Penalty
+			Tooltip: ""
+		}
+
+		EnableMoonPenalty: {
+			Label: Enable Moon Penalty
+			Tooltip: ""
+		}
+
+		EnableWeatherPenalty: {
+			Label: Enable Weather Penalty
+			Tooltip: ""
+		}
+
+		EnableTimePenalty: {
+			Label: Enable Time Penalty
+			Tooltip: ""
+		}
+
+		EnableSpecialPenalty: {
+			Label: Enable Special Penalty
+			Tooltip: ""
+		}
+
+		BossEventsPreHardmode: {
+			Label: Boss Events Pre Hardmode
+			Tooltip: ""
+		}
+
+		BossEventsHardmode: {
+			Label: Boss Events Hardmode
+			Tooltip: ""
+		}
+
+		MoonEvents: {
+			Label: Moon Events
+			Tooltip: ""
+		}
+
+		InvasionEvents: {
+			Label: Invasion Events
+			Tooltip: ""
+		}
+
+		TimeEvents: {
+			Label: Time Events
+			Tooltip: ""
+		}
+
+		WeatherEvents: {
+			Label: Weather Events
+			Tooltip: ""
+		}
+
+		SpecialEvents: {
+			Label: Special Events
+			Tooltip: ""
+		}
+	}
+
+	GameplayConfig: {
+		DisplayName: Gameplay Config
+
+		WeaponMaxLevel: {
+			Label: Weapon Max Level
+			Tooltip: ""
+		}
+
+		ArmorMaxLevel: {
+			Label: Armor Max Level
+			Tooltip: ""
+		}
+
+		DamageIncrement: {
+			Label: Damage Increment
+			Tooltip: ""
+		}
+
+		CritIncrement: {
+			Label: Crit Increment
+			Tooltip: ""
+		}
+
+		UseTimeIncrement: {
+			Label: Use Time Increment
+			Tooltip: ""
+		}
+
+		UseAnimationIncrement: {
+			Label: Use Animation Increment
+			Tooltip: ""
+		}
+
+		DefenceIncrement: {
+			Label: Defence Increment
+			Tooltip: ""
+		}
+
+		IncreaseBaseDamage: {
+			Label: Increase Base Damage
+			Tooltip: ""
+		}
+
+		IncreaseFlatDamage: {
+			Label: Increase Flat Damage
+			Tooltip: ""
+		}
+
+		IncreaseMultDamage: {
+			Label: Increase Mult Damage
+			Tooltip: ""
+		}
+
+		ProjectileSizeIncrement: {
+			Label: Projectile Size Increment
+			Tooltip: ""
+		}
+
+		ProjectileSpeedIncrement: {
+			Label: Projectile Speed Increment
+			Tooltip: ""
+		}
+
+		ProjectilePenetrationIncrement: {
+			Label: Projectile Penetration Increment
+			Tooltip: ""
+		}
+
+		ProjectileLifeTimeIncrement: {
+			Label: Projectile Life Time Increment
+			Tooltip: ""
+		}
+
+		AdditionalProjectileChanceIncrement: {
+			Label: Additional Projectile Chance Increment
+			Tooltip: ""
+		}
+
+		MeleeWeaponSizeIncrement: {
+			Label: Melee Weapon Size Increment
+			Tooltip: ""
+		}
+
+		NotUseAmmoChanceIncrement: {
+			Label: Not Use Ammo Chance Increment
+			Tooltip: ""
+		}
+
+		ManaCostReductionIncrement: {
+			Label: Mana Cost Reduction Increment
+			Tooltip: ""
+		}
+
+		AdditionalProjectileMinRad: {
+			Label: Additional Projectile Min Rad
+			Tooltip: ""
+		}
+
+		AdditionalProjectileMaxRad: {
+			Label: Additional Projectile Max Rad
+			Tooltip: ""
+		}
+
+		AdditionalProjectileMinRadMinion: {
+			Label: Additional Projectile Min Rad Minion
+			Tooltip: ""
+		}
+
+		AdditionalProjectileMaxRadMinion: {
+			Label: Additional Projectile Max Rad Minion
+			Tooltip: ""
+		}
+
+		ProjectilesToMaxRad: {
+			Label: Projectiles To Max Rad
+			Tooltip: ""
+		}
+	}
+
+	ProgressionConfig: {
+		DisplayName: Progression Config
+
+		GlobalExpMultiplier: {
+			Label: Global Exp Multiplier
+			Tooltip: ""
+		}
+
+		GlobalExpMultiplierExtra: {
+			Label: Global Exp Multiplier Extra
+			Tooltip: ""
+		}
+
+		WeaponExpMultiplier: {
+			Label: Weapon Exp Multiplier
+			Tooltip: ""
+		}
+
+		ArmorExpMultiplier: {
+			Label: Armor Exp Multiplier
+			Tooltip: ""
+		}
+
+		WeaponBaseXPPerHit: {
+			Label: Weapon Base X P Per Hit
+			Tooltip: ""
+		}
+
+		WeaponBaseXPPerKill: {
+			Label: Weapon Base X P Per Kill
+			Tooltip: ""
+		}
+
+		WeaponXPPerDamageDealt: {
+			Label: Weapon X P Per Damage Dealt
+			Tooltip: ""
+		}
+
+		WeaponXPPerEnemyMaxHP: {
+			Label: Weapon X P Per Enemy Max H P
+			Tooltip: ""
+		}
+
+		ArmorXPPerDamageReceived: {
+			Label: Armor X P Per Damage Received
+			Tooltip: ""
+		}
+
+		ArmorXPIgnoreDefense: {
+			Label: Armor X P Ignore Defense
+			Tooltip: ""
+		}
+
+		ArmorXPPerDamageBlocked: {
+			Label: Armor X P Per Damage Blocked
+			Tooltip: ""
+		}
+
+		ArmorXPPerDodge: {
+			Label: Armor X P Per Dodge
+			Tooltip: ""
+		}
+
+		AllowStatueXP: {
+			Label: Allow Statue X P
+			Tooltip: ""
+		}
+
+		StartPrice: {
+			Label: Start Price
+			Tooltip: ""
+		}
+
+		AditionalPrice: {
+			Label: Aditional Price
+			Tooltip: ""
+		}
+
+		ExtraPrice: {
+			Label: Extra Price
+			Tooltip: ""
+		}
+
+		MultiPrice: {
+			Label: Multi Price
+			Tooltip: ""
+		}
+
+		EnableKillStreakSystem: {
+			Label: Enable Kill Streak System
+			Tooltip: ""
+		}
+
+		EnableStreakXPBonus: {
+			Label: Enable Streak X P Bonus
+			Tooltip: ""
+		}
+
+		StreakXPBonusPerKill: {
+			Label: Streak X P Bonus Per Kill
+			Tooltip: ""
+		}
+
+		StreakXPBonusMax: {
+			Label: Streak X P Bonus Max
+			Tooltip: ""
+		}
+	}
+
+	RuneConfig: {
+		DisplayName: Rune Config
+
+		EnableRuneSystem: {
+			Label: Enable Rune System
+			Tooltip: ""
+		}
+
+		RuneSlot1Level: {
+			Label: Rune Slot1 Level
+			Tooltip: ""
+		}
+
+		RuneSlot2Level: {
+			Label: Rune Slot2 Level
+			Tooltip: ""
+		}
+
+		RuneSlot3Level: {
+			Label: Rune Slot3 Level
+			Tooltip: ""
+		}
+
+		RuneSlot4Level: {
+			Label: Rune Slot4 Level
+			Tooltip: ""
+		}
+
+		RuneSlot5Level: {
+			Label: Rune Slot5 Level
+			Tooltip: ""
+		}
+
+		RuneXPPerHitMultiplier: {
+			Label: Rune X P Per Hit Multiplier
+			Tooltip: ""
+		}
+
+		RuneXPPerKillMultiplier: {
+			Label: Rune X P Per Kill Multiplier
+			Tooltip: ""
+		}
+
+		EnableCurseSystem: {
+			Label: Enable Curse System
+			Tooltip: ""
+		}
+
+		CurseXPBonusPerHit: {
+			Label: Curse X P Bonus Per Hit
+			Tooltip: ""
+		}
+
+		CurseXPBonusPerKill: {
+			Label: Curse X P Bonus Per Kill
+			Tooltip: ""
+		}
+
+		CurseDropChancePerCurse: {
+			Label: Curse Drop Chance Per Curse
+			Tooltip: ""
+		}
+
+		CurseRemovalLevelLossChance: {
+			Label: Curse Removal Level Loss Chance
+			Tooltip: ""
+		}
+
+		CurseRemovalLevelLossFraction: {
+			Label: Curse Removal Level Loss Fraction
+			Tooltip: ""
+		}
+
+		EnableElementalTrailEffects: {
+			Label: Enable Elemental Trail Effects
+			Tooltip: ""
+		}
+
+		EnableElementalDoTEffects: {
+			Label: Enable Elemental Do T Effects
+			Tooltip: ""
+		}
+
+		FireDoTDamagePerLevel: {
+			Label: Fire Do T Damage Per Level
+			Tooltip: ""
+		}
+
+		IceDoTDamagePerLevel: {
+			Label: Ice Do T Damage Per Level
+			Tooltip: ""
+		}
+
+		PoisonDoTDamagePerLevel: {
+			Label: Poison Do T Damage Per Level
+			Tooltip: ""
+		}
+
+		LightningDoTDamagePerLevel: {
+			Label: Lightning Do T Damage Per Level
+			Tooltip: ""
+		}
+
+		FireDoTDuration: {
+			Label: Fire Do T Duration
+			Tooltip: ""
+		}
+
+		IceDoTDuration: {
+			Label: Ice Do T Duration
+			Tooltip: ""
+		}
+
+		PoisonDoTDuration: {
+			Label: Poison Do T Duration
+			Tooltip: ""
+		}
+
+		LightningDoTDuration: {
+			Label: Lightning Do T Duration
+			Tooltip: ""
+		}
+	}
+
+	WorldConfig: {
+		DisplayName: World Config
+
+		EnableLeveledEnemies: {
+			Label: Enable Leveled Enemies
+			Tooltip: ""
+		}
+
+		LeveledEnemySpawnChance: {
+			Label: Leveled Enemy Spawn Chance
+			Tooltip: ""
+		}
+
+		WorldLevelMode: {
+			Label: World Level Mode
+			Tooltip: ""
+		}
+
+		PreHardmodeMaxLevel: {
+			Label: Pre Hardmode Max Level
+			Tooltip: ""
+		}
+
+		HardmodeMaxLevel: {
+			Label: Hardmode Max Level
+			Tooltip: ""
+		}
+
+		PostMoonLordMaxLevel: {
+			Label: Post Moon Lord Max Level
+			Tooltip: ""
+		}
+
+		LevelVariance: {
+			Label: Level Variance
+			Tooltip: ""
+		}
+
+		LeveledEnemyXPBonusPerLevel: {
+			Label: Leveled Enemy X P Bonus Per Level
+			Tooltip: ""
+		}
 	}
 }
 

@@ -14,8 +14,8 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
     /// Projectile de animação épica de ascensão da arma
     /// - Levita suavemente para cima girando devagar
     /// - Acelera o giro gradualmente
-    /// - Explode em partículas verdes do tamanho da zona
-    /// - Dura até o fim da zona (30 minutos)
+    /// - Explode em partículas verdes
+    /// - SEM criar zona radioativa (removido)
     /// </summary>
     public class WeaponAscensionProjectile : ModProjectile
     {
@@ -26,11 +26,9 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
         private Vector2 startPosition;
         private int weaponLevel;
         private int itemType;
-        private bool hasCreatedZone = false;
         private bool hasExploded = false;
         private Texture2D weaponTexture;
         private float zoneRadius;
-        private int totalDuration; // Dura até o fim da zona
         private float currentRotation; // Acumulador para rotação suave
         
         // NÃO precisa de textura própria - usa a textura da arma
@@ -47,10 +45,8 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
             Projectile.ignoreWater = true;
             Projectile.alpha = 0;
             
-            // Dura 10 minutos (mesma duração da zona)
-            var config = ModContent.GetInstance<ServerConfig>();
-            totalDuration = 10 * 60 * 60;
-            Projectile.timeLeft = totalDuration;
+            // Dura apenas a animação (6 segundos)
+            Projectile.timeLeft = ASCENSION_DURATION + DECELERATION_DURATION;
         }
         
         public override void AI()
@@ -62,10 +58,8 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
                 weaponLevel = (int)Projectile.ai[1];
                 itemType = (int)Projectile.ai[2];
                 
-                // Calcula o raio da zona
-                var config = ModContent.GetInstance<ServerConfig>();
-                float baseRadius = (config?.RadioactiveZoneRadius ?? 150);
-                zoneRadius = baseRadius * 2.5f * 16f; // 150% maior = 2.5x, tiles para pixels
+                // Calcula o raio visual da explosão (sem criar zona)
+                zoneRadius = 150f * 2.5f * 16f; // 150 tiles * 2.5 * 16 pixels
                 
                 // Carrega a textura da arma
                 Item tempItem = new Item();
@@ -78,7 +72,7 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
                 Projectile.ai[0] = 1f;
             }
             
-            int elapsedTime = totalDuration - Projectile.timeLeft;
+            int elapsedTime = (ASCENSION_DURATION + DECELERATION_DURATION) - Projectile.timeLeft;
             
             // === FASE 1: ASCENSÃO (0-120 frames / 2 segundos) ===
             if (elapsedTime < ASCENSION_DURATION)
@@ -163,6 +157,7 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
         
         /// <summary>
         /// Fase 2: Desaceleração do giro até parar, com explosão no frame 90 (3.5s)
+        /// SEM criar zona radioativa
         /// </summary>
         private void PhaseDeceleration(int frame)
         {
@@ -193,8 +188,7 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
                     starDust.fadeIn = 2f;
                 }
                 
-                // Cria a zona radioativa
-                CreateRadioactiveZone();
+                // NÃO cria zona radioativa (removido)
             }
             
             // Expansão da explosão (120 frames)
@@ -296,42 +290,12 @@ namespace SignatureEquipmentDeluxe.Content.Projectiles
             float lightIntensity = 0.8f * (1f - progress * 0.5f);
             Lighting.AddLight(Projectile.Center, 0.2f * lightIntensity, 0.8f * lightIntensity, 0.2f * lightIntensity);
         }
+        
         private void DropWeapon()
         {
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
                 Item.NewItem(Projectile.GetSource_FromThis(), Projectile.Center, itemType);
-            }
-        }
-        
-        /// <summary>
-        /// Cria a zona radioativa
-        /// </summary>
-        private void CreateRadioactiveZone()
-        {
-            if (hasCreatedZone) return;
-            hasCreatedZone = true;
-            
-            float baseRadius = 150f; // 150 tiles base
-            float radiusMultiplier = 2.5f;
-            float finalRadius = baseRadius * radiusMultiplier;
-            
-            var zone = new LeveledEnemySystem.RadioactiveZone
-            {
-                Position = Projectile.Center, // Usa posição atual (onde a arma cai após explosão)
-                Radius = finalRadius * 16f, // Converte para pixels
-                MaxEnemyLevel = weaponLevel,
-                TimeLeft = totalDuration // 30 minutos
-            };
-            
-            zone.InitialRadius = zone.Radius; // Salva raio inicial
-            
-            LeveledEnemySystem.radioactiveZones.Add(zone);
-            
-            // Mensagem dramática
-            if (Main.netMode != NetmodeID.Server)
-            {
-                Main.NewText($"A radioactive zone of level {weaponLevel} has been created!", Color.Red);
             }
         }
         

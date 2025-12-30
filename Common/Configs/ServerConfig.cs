@@ -1,128 +1,164 @@
 using System.Collections.Generic;
 using System.ComponentModel;
+using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using SignatureEquipmentDeluxe.Common.Systems;
 using Newtonsoft.Json;
 
 namespace SignatureEquipmentDeluxe.Common.Configs
 {
+    /// <summary>
+    /// LEGACY CONFIG FILE - Mantido apenas para compatibilidade com código antigo
+    /// 
+    /// NOVA ESTRUTURA:
+    /// - GameplayConfig → Toggles e mecânicas gerais
+    /// - ProgressionConfig → XP, níveis e curvas de progressão
+    /// - CombatConfig → Stats de armas/armaduras e immunity
+    /// - WorldConfig → Inimigos com nível e progressão mundial
+    /// - RuneConfig → Runas, maldições e efeitos elementais
+    /// - EventsConfig → Multiplicadores de eventos
+    /// - AdvancedConfig → Blacklists, netcode e debug
+    /// 
+    /// Use ModContent.GetInstance<NomeDoArquivo>() para acessar as novas configs.
+    /// </summary>
     [BackgroundColor(30, 30, 40)]
     public class ServerConfig : ModConfig
     {
         public override ConfigScope Mode => ConfigScope.ServerSide;
 
+        // ==================== ADAPTADORES PARA NOVOS ARQUIVOS ====================
+        // As propriedades abaixo redirecionam para os arquivos especializados
+        
+        private static GameplayConfig Gameplay => ModContent.GetInstance<GameplayConfig>();
+        private static ProgressionConfig Progression => ModContent.GetInstance<ProgressionConfig>();
+        private static CombatConfig Combat => ModContent.GetInstance<CombatConfig>();
+        private static WorldConfig World => ModContent.GetInstance<WorldConfig>();
+        private static RuneConfig Rune => ModContent.GetInstance<RuneConfig>();
+        private static EventsConfig Events => ModContent.GetInstance<EventsConfig>();
+        private static AdvancedConfig Advanced => ModContent.GetInstance<AdvancedConfig>();
+
         // ==================== EVENTOS (MULTIPLICADORES DE XP) ====================
+        // MIGRADO PARA: EventsConfig.cs
         
         [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.EventPenaltyHeader")]
         
+        [JsonIgnore]
         [BackgroundColor(90, 40, 40)]
-        [DefaultValue(true)]
-        public bool EnableBossPenalty { get; set; } = true;
+        public bool EnableBossPenalty
+        {
+            get => Events.EnableBossPenalty;
+            set => Events.EnableBossPenalty = value;
+        }
         
+        [JsonIgnore]
         [BackgroundColor(90, 40, 40)]
-        [DefaultValue(true)]
-        public bool EnableInvasionPenalty { get; set; } = true;
+        public bool EnableInvasionPenalty
+        {
+            get => Events.EnableInvasionPenalty;
+            set => Events.EnableInvasionPenalty = value;
+        }
         
+        [JsonIgnore]
         [BackgroundColor(90, 40, 40)]
-        [DefaultValue(false)]
-        public bool EnableMoonPenalty { get; set; } = false;
+        public bool EnableMoonPenalty
+        {
+            get => Events.EnableMoonPenalty;
+            set => Events.EnableMoonPenalty = value;
+        }
         
+        [JsonIgnore]
         [BackgroundColor(90, 40, 40)]
-        [DefaultValue(false)]
-        public bool EnableWeatherPenalty { get; set; } = false;
+        public bool EnableWeatherPenalty
+        {
+            get => Events.EnableWeatherPenalty;
+            set => Events.EnableWeatherPenalty = value;
+        }
         
+        [JsonIgnore]
         [BackgroundColor(90, 40, 40)]
-        [DefaultValue(false)]
-        public bool EnableTimePenalty { get; set; } = false;
+        public bool EnableTimePenalty
+        {
+            get => Events.EnableTimePenalty;
+            set => Events.EnableTimePenalty = value;
+        }
         
+        [JsonIgnore]
         [BackgroundColor(90, 40, 40)]
-        [DefaultValue(false)]
-        public bool EnableSpecialPenalty { get; set; } = false;
+        public bool EnableSpecialPenalty
+        {
+            get => Events.EnableSpecialPenalty;
+            set => Events.EnableSpecialPenalty = value;
+        }
         
         [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.BossEventsPreHardmodeHeader")]
         
+        [JsonIgnore]
         [BackgroundColor(80, 40, 40)]
-        public List<EventMultiplier> BossEventsPreHardmode { get; set; } = new List<EventMultiplier>
+        public List<EventMultiplier> BossEventsPreHardmode
         {
-            new EventMultiplier { EventType = GameEventType.KingSlime, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.Medium },
-            new EventMultiplier { EventType = GameEventType.EyeOfCthulhu, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.Medium },
-            new EventMultiplier { EventType = GameEventType.EaterOfWorlds, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.High },
-            new EventMultiplier { EventType = GameEventType.BrainOfCthulhu, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.High },
-            new EventMultiplier { EventType = GameEventType.QueenBee, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.High },
-            new EventMultiplier { EventType = GameEventType.Skeletron, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.High },
-            new EventMultiplier { EventType = GameEventType.Deerclops, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.High },
-            new EventMultiplier { EventType = GameEventType.WallOfFlesh, Category = EventCategory.BossPreHardmode, Enabled = true, Tier = XPMultiplierTier.VeryHigh }
-        };
+            get => Events.BossEventsPreHardmode;
+            set => Events.BossEventsPreHardmode = value;
+        }
         
         [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.BossEventsHardmodeHeader")]
         
+        [JsonIgnore]
         [BackgroundColor(100, 40, 40)]
-        public List<EventMultiplier> BossEventsHardmode { get; set; } = new List<EventMultiplier>
+        public List<EventMultiplier> BossEventsHardmode
         {
-            new EventMultiplier { EventType = GameEventType.QueenSlime, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.High },
-            new EventMultiplier { EventType = GameEventType.TheTwins, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
-            new EventMultiplier { EventType = GameEventType.TheDestroyer, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
-            new EventMultiplier { EventType = GameEventType.SkeletronPrime, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
-            new EventMultiplier { EventType = GameEventType.Plantera, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
-            new EventMultiplier { EventType = GameEventType.Golem, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
-            new EventMultiplier { EventType = GameEventType.EmpressOfLight, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.Extreme },
-            new EventMultiplier { EventType = GameEventType.DukeFishron, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.Extreme },
-            new EventMultiplier { EventType = GameEventType.LunaticCultist, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
-            new EventMultiplier { EventType = GameEventType.MoonLord, Category = EventCategory.BossHardmode, Enabled = true, Tier = XPMultiplierTier.Extreme }
-        };
+            get => Events.BossEventsHardmode;
+            set => Events.BossEventsHardmode = value;
+        }
         
         [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.MoonEventsHeader")]
         
+        [JsonIgnore]
         [BackgroundColor(60, 60, 80)]
-        public List<EventMultiplier> MoonEvents { get; set; } = new List<EventMultiplier>
+        public List<EventMultiplier> MoonEvents
         {
-            new EventMultiplier { EventType = GameEventType.BloodMoon, Category = EventCategory.Moon, Enabled = true, Tier = XPMultiplierTier.Medium },
-            new EventMultiplier { EventType = GameEventType.FullMoon, Category = EventCategory.Moon, Enabled = true, Tier = XPMultiplierTier.Low },
-            new EventMultiplier { EventType = GameEventType.NewMoon, Category = EventCategory.Moon, Enabled = false, Tier = XPMultiplierTier.None }
-        };
+            get => Events.MoonEvents;
+            set => Events.MoonEvents = value;
+        }
         
         [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.InvasionEventsHeader")]
         
+        [JsonIgnore]
         [BackgroundColor(80, 40, 60)]
-        public List<EventMultiplier> InvasionEvents { get; set; } = new List<EventMultiplier>
+        public List<EventMultiplier> InvasionEvents
         {
-            new EventMultiplier { EventType = GameEventType.GoblinArmy, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.Medium },
-            new EventMultiplier { EventType = GameEventType.FrostLegion, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.Medium },
-            new EventMultiplier { EventType = GameEventType.PirateInvasion, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.High },
-            new EventMultiplier { EventType = GameEventType.MartianMadness, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.High },
-            new EventMultiplier { EventType = GameEventType.PumpkinMoon, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
-            new EventMultiplier { EventType = GameEventType.FrostMoon, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.VeryHigh },
-            new EventMultiplier { EventType = GameEventType.SolarEclipse, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.High },
-            new EventMultiplier { EventType = GameEventType.LunarEvent, Category = EventCategory.Invasion, Enabled = true, Tier = XPMultiplierTier.Extreme }
-        };
+            get => Events.InvasionEvents;
+            set => Events.InvasionEvents = value;
+        }
         
         [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.TimeEventsHeader")]
         
+        [JsonIgnore]
         [BackgroundColor(60, 60, 60)]
-        public List<EventMultiplier> TimeEvents { get; set; } = new List<EventMultiplier>
+        public List<EventMultiplier> TimeEvents
         {
-            new EventMultiplier { EventType = GameEventType.Day, Category = EventCategory.Time, Enabled = false, Tier = XPMultiplierTier.None },
-            new EventMultiplier { EventType = GameEventType.Night, Category = EventCategory.Time, Enabled = true, Tier = XPMultiplierTier.Low }
-        };
+            get => Events.TimeEvents;
+            set => Events.TimeEvents = value;
+        }
         
         [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.WeatherEventsHeader")]
         
+        [JsonIgnore]
         [BackgroundColor(40, 70, 90)]
-        public List<EventMultiplier> WeatherEvents { get; set; } = new List<EventMultiplier>
+        public List<EventMultiplier> WeatherEvents
         {
-            new EventMultiplier { EventType = GameEventType.Rain, Category = EventCategory.Weather, Enabled = true, Tier = XPMultiplierTier.Low },
-            new EventMultiplier { EventType = GameEventType.Sandstorm, Category = EventCategory.Weather, Enabled = true, Tier = XPMultiplierTier.Low },
-            new EventMultiplier { EventType = GameEventType.Blizzard, Category = EventCategory.Weather, Enabled = true, Tier = XPMultiplierTier.Low }
-        };
+            get => Events.WeatherEvents;
+            set => Events.WeatherEvents = value;
+        }
         
         [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.SpecialEventsHeader")]
         
+        [JsonIgnore]
         [BackgroundColor(70, 50, 70)]
-        public List<EventMultiplier> SpecialEvents { get; set; } = new List<EventMultiplier>
+        public List<EventMultiplier> SpecialEvents
         {
-            new EventMultiplier { EventType = GameEventType.PartyEvent, Category = EventCategory.Special, Enabled = true, Tier = XPMultiplierTier.Medium },
-            new EventMultiplier { EventType = GameEventType.LanternNight, Category = EventCategory.Special, Enabled = true, Tier = XPMultiplierTier.Medium }
-        };
+            get => Events.SpecialEvents;
+            set => Events.SpecialEvents = value;
+        }
         
         // ==================== EXPERIÊNCIA GERAL ====================
         
@@ -781,7 +817,7 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         [Increment(0.025f)]
         public float CurseRemovalLevelLossFraction { get; set; }
         
-        // ==================== LEVELED ENEMY SYSTEM ====================
+        // ==================== LEVELED ENEMY SYSTEM (SEM ZONA RADIOATIVA) ====================
         
         [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.LeveledEnemyHeader")]
         
@@ -789,17 +825,35 @@ namespace SignatureEquipmentDeluxe.Common.Configs
         [DefaultValue(true)]
         public bool EnableLeveledEnemies { get; set; }
         
-        [BackgroundColor(40, 80, 40)]
-        [DefaultValue(150)]
-        [Range(50, 500)]
-        [Slider]
-        public int RadioactiveZoneRadius { get; set; }
+        [Header("$Mods.SignatureEquipmentDeluxe.Config.ServerConfig.WorldProgressionHeader")]
         
-        [BackgroundColor(40, 80, 40)]
-        [DefaultValue(30)]
-        [Range(5, 120)]
+        [BackgroundColor(50, 80, 50)]
+        [DefaultValue(WorldLevelMode.BossProgression)]
+        public WorldLevelMode WorldLevelMode { get; set; }
+        
+        [BackgroundColor(50, 80, 50)]
+        [DefaultValue(50)]
+        [Range(1, 500)]
         [Slider]
-        public int RadioactiveZoneDurationMinutes { get; set; }
+        public int PreHardmodeMaxLevel { get; set; }
+        
+        [BackgroundColor(50, 80, 50)]
+        [DefaultValue(100)]
+        [Range(1, 500)]
+        [Slider]
+        public int HardmodeMaxLevel { get; set; }
+        
+        [BackgroundColor(50, 80, 50)]
+        [DefaultValue(150)]
+        [Range(1, 1000)]
+        [Slider]
+        public int PostMoonLordMaxLevel { get; set; }
+        
+        [BackgroundColor(50, 80, 50)]
+        [DefaultValue(2)]
+        [Range(0, 50)]
+        [Slider]
+        public int LevelVariance { get; set; }
         
         [BackgroundColor(40, 80, 40)]
         [DefaultValue(0.15f)]
