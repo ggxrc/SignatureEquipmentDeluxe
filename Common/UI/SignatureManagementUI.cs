@@ -1,0 +1,2 @@
+namespace SignatureEquipmentDeluxe.Common.UI;
+

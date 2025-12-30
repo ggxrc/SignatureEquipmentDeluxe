@@ -1,0 +1,13 @@
+{
+  "rootNamespace": "SignatureEquipmentDeluxe",
+  "fileMap": {
+    "SignatureConfig.cs": "SignatureEquipmentDeluxe",
+    "obj\\Debug\\net8.0\\SignatureEquipmentDeluxe.AssemblyInfo.cs": "SignatureEquipmentDeluxe.obj.Debug.net8_0",
+    "obj\\Debug\\net8.0\\.NETCoreApp,Version=v8.0.AssemblyAttributes.cs": "SignatureEquipmentDeluxe.obj.Debug.net8_0",
+    "Common\\UI\\SignatureManagementUI.cs": "SignatureEquipmentDeluxe.Common.UI",
+    "Common\\Players\\SignatureInputPlayer.cs": "SignatureEquipmentDeluxe.Common.Players",
+    "Common\\Systems\\SignatureProgressionSystem.cs": "SignatureEquipmentDeluxe.Common.Systems",
+    "Common\\Systems\\SignatureAbilitySystem.cs": "SignatureEquipmentDeluxe.Common.Systems",
+    "Common\\Players\\SignaturePlayerNew.cs": "SignatureEquipmentDeluxe.Common.Players"
+  }
+}
