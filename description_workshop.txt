@@ -1,0 +1,189 @@
+[b]Progression[/b] é um mod inspirado no mod SignatureEquipment, que adiciona um sistema de progressão para equipamento no Terraria. Quer jogar com qualquer arma? Com esse mod é possível!
+
+Com esse mod você poderá jogar só com sua arma favorita sem se preocupar com powercreep, também pode usá-lo para fazer um modpack de RPG, as combinações são muitas, vai da sua imaginação.
+
+[h2]Funcionalidades:[/h2]
+[list]
+[*] Adição de níveis para armas e armaduras
+[*] Melhoria de atributos conforme o nível do equipamento aumenta
+[*] Sistema de experiência para equipamentos
+[*] Tipos diferentes de progressão
+[*] Compatibilidade com mods populares de Terraria (Em progresso)
+[*] Inimigos com nivelamento dinâmico baseado no nível do mundo (Em progresso)
+[*] Sistema de killstreaks para aumentar a experiência ganha (Em progresso)
+[*] Sistema de eventos que afetam o ganho de experiência (Em progresso)
+[*] Outras coisas que serão adicionadas futuramente!
+[/list]
+
+[h2]Roadmap de Versões Planejadas:[/h2]
+
+[h3]v0.1.x (Versão atual):[/h3]
+[list]
+[*] Versão inicial feita por IA para demonstrar o conceito do mod. Espere encontrar bastante bugs.
+[/list]
+
+[h3]v0.2.x:[/h3]
+[list]
+[*] Todas as configurações funcionando como deveriam
+[*] Removido configs redundantes feitas pela IA
+[*] Localização em inglês e português
+[/list]
+
+[h3]v0.3.x:[/h3]
+[list]
+[*] Reestruturação no escalonamento de atributos (dano, custo de mana, etc)
+[*] Nova configuração padrão para uma experiência satisfatória
+[/list]
+
+[h3]v0.4.x:[/h3]
+[list]
+[*] Compatibilidade com as mecânicas do Terraria Overhaul
+[*] Novo modo de progressão baseado em classes (haverá Compatibilidade futura com mods de classes)
+[*] Compatibilidade completa ao Multiplayer (no momento pode ser que funcione, mas nada foi testado)
+[/list]
+
+[h3]v0.5.x:[/h3]
+[list]
+[*] Compatibilidade com classes do Orchid Mod
+[*] Compatibilidade com Demolisher Mod
+[/list]
+
+[h3]v0.6.x:[/h3]
+[list]
+[*] Upgrade no sistema de eventos
+[*] Polimento de UI
+[/list]
+
+[h3]v0.7.x:[/h3]
+[list]
+[*] Escalonamento em status negativos que causam dano (ex: Veneno, Queimadura, etc)
+[*] Compatibilidade com The Stars Above Mod
+[/list]
+
+[h3]v0.8.x:[/h3]
+[list]
+[*] Novas opções de buffs nas armas
+[*] Compatibilidade com Thorium Mod
+[/list]
+
+[h3]v0.9.x:[/h3]
+[list]
+[*] Sistema de progressão de armaduras repaginada
+[*] Novo sistema de buffs para armaduras
+[*] Polimento de UI
+[/list]
+
+[h3]v1.0.x:[/h3]
+[list]
+[*] Primeira versão estável do mod
+[*] Adição de Juice Effects, partículas e sons para melhorar a experiência
+[*] Otimizações de performance
+[*] Outras melhorias e correções de bugs
+[*] Compatibilidade com Starlight River e Calamity
+[*] Criação de ícone 80x80 e 30x30 para a capa do mod
+[/list]
+
+[hr][/hr]
+
+Este é meu primeiro mod, então peço que deixe feedback para que o mod possa melhorar, e eu possa aprender mais sobre modding no Terraria!
+
+Divirta-se!
+
+Mod que foi minha inspiração e base para criar este mod: https://steamcommunity.com/sharedfiles/filedetails/?id=2829442749&searchtext=signature
+
+[hr][/hr]
+
+[h1]ENGLISH VERSION[/h1]
+
+[b]Progression[/b] is a mod inspired by SignatureEquipment, which adds an equipment progression system to Terraria. Want to play with any weapon? With this mod it's possible!
+
+With this mod you can play with only your favorite weapon without worrying about powercreep, you can also use it to make an RPG modpack, the combinations are many, it's up to your imagination.
+
+[h2]Features:[/h2]
+[list]
+[*] Level system for weapons and armors
+[*] Attribute improvements as equipment level increases
+[*] Experience system for equipment
+[*] Different progression types
+[*] Compatibility with popular Terraria mods (In progress)
+[*] Enemies with dynamic leveling based on world level (In progress)
+[*] Killstreak system to increase experience gained (In progress)
+[*] Event system affecting experience gain (In progress)
+[*] More features to be added in the future!
+[/list]
+
+[h2]Planned Version Roadmap:[/h2]
+
+[h3]v0.1.x (Current Version):[/h3]
+[list]
+[*] Initial AI-assisted version to demonstrate the mod concept. Expect to find quite a few bugs.
+[/list]
+
+[h3]v0.2.x:[/h3]
+[list]
+[*] All configurations working as intended
+[*] Removed redundant configs created by AI
+[*] English and Portuguese localization
+[/list]
+
+[h3]v0.3.x:[/h3]
+[list]
+[*] Restructured attribute scaling (damage, mana cost, etc.)
+[*] New default configuration for a satisfying experience
+[/list]
+
+[h3]v0.4.x:[/h3]
+[list]
+[*] Compatibility with Terraria Overhaul mechanics
+[*] New class-based progression mode (future compatibility with class mods)
+[*] Full Multiplayer compatibility (may work now, but nothing has been tested)
+[/list]
+
+[h3]v0.5.x:[/h3]
+[list]
+[*] Compatibility with Orchid Mod classes
+[*] Compatibility with Demolisher Mod
+[/list]
+
+[h3]v0.6.x:[/h3]
+[list]
+[*] Event system upgrade
+[*] UI polish
+[/list]
+
+[h3]v0.7.x:[/h3]
+[list]
+[*] Scaling for damage-dealing debuffs (e.g., Poison, Burning, etc.)
+[*] Compatibility with The Stars Above Mod
+[/list]
+
+[h3]v0.8.x:[/h3]
+[list]
+[*] New weapon buff options
+[*] Compatibility with Thorium Mod
+[/list]
+
+[h3]v0.9.x:[/h3]
+[list]
+[*] Revamped armor progression system
+[*] New buff system for armors
+[*] UI polish
+[/list]
+
+[h3]v1.0.x:[/h3]
+[list]
+[*] First stable version of the mod
+[*] Addition of Juice Effects, particles and sounds to improve experience
+[*] Performance optimizations
+[*] Other improvements and bug fixes
+[*] Compatibility with Starlight River and Calamity
+[*] Creation of 80x80 and 30x30 icons for mod cover
+[/list]
+
+[hr][/hr]
+
+This is my first mod, so please leave feedback so the mod can improve, and I can learn more about Terraria modding!
+
+Have fun!
+
+Mod that was my inspiration and basis for creating this mod: https://steamcommunity.com/sharedfiles/filedetails/?id=2829442749&searchtext=signature

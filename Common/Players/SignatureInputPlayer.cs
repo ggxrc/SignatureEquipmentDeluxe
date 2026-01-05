@@ -1,0 +1,2 @@
+namespace Progression.Common.Players;
+

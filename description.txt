@@ -1,0 +1,140 @@
+Progression é um mod inspirado no mod SignatureEquipment, que adiciona um 
+sistema de progressão para equipamento no Terraria. Quer jogar com qualquer arma? Com esse mod é possível!
+
+as seguintes funcionalidades são:
+- Adição de níveis para armas e armaduras.
+- Melhoria de atributos conforme o nível do equipamento aumenta.
+- Sistema de experiência para equipamentos.
+- Tipos diferentes de progressão.
+- Compatibilidade com mods populares de Terraria (Em progresso).
+- Inimigos com nivelamento dinâmico baseado no nível do mundo (Em progresso).
+- sistema de killstreaks para aumentar a experiência ganha (Em progresso).
+- sistema de eventos que afetam o ganho de experiência (Em progresso).
+- outras coisas que serão adicionadas futuramente!
+
+Confira tudo que planejei para cada versão do mod:
+
+v0.1.x (Versão atual):
+- Versão inicial feita por IA para demonstrar o conceito do mod. Espere encontrar bastante bugs.
+
+v0.2.x:
+- Todas as configurações funcionando como deveriam.
+- Removido configs redundantes feitas pela IA.
+- Localização em inglês e português.
+
+v0.3.x:
+- Reestruturação no escalonamento de atributos (dano, custo de mana, etc).
+- Nova configuração padrão para uma experiência satisfatória.
+
+v0.4.x:
+- Compatibilidade com as mecânicas do Terraria Overhaul.
+- Novo modo de progressão baseado em classes (haverá Compatibilidade futura com mods de classes).
+- Compatibilidade completa ao Multiplayer. (no momento pode ser que funcione, mas nada foi testado).
+
+v0.5.x:
+- Compatibilidade com classes do Orchid Mod.
+- Compatibilidade com Demolisher Mod.
+
+v0.6.x:
+- Upgrade no sistema de eventos.
+- Polimento de UI.
+
+v0.7.x:
+- Escalonamento em status negativos que causam dano (ex: Veneno, Queimadura, etc).
+- Compatibilidade com The Stars Above Mod.
+
+v0.8.x:
+- Novas opções de buffs nas armas
+- Compatibilidade com Thorium Mod.
+
+v0.9.x:
+- Sistema de progressão de armaduras repaginada.
+- Novo sistema de buffs para armaduras.
+- Polimento de UI.
+
+v1.0.x:
+- Primeira versão estável do mod.
+- Adição de Juice Effects, partículas e sons para melhorar a experiência.
+- Otimizações de performance.
+- Outras melhorias e correções de bugs.
+- Compatibilidade com Starlight River e Calamity.
+- Criação de ícone 80x80 e 30x30 para a capa do mod.
+
+
+Este é meu primeiro mod, então peço que deixe feedback para que o mod possa melhorar, e eu possa aprender mais sobre modding no Terraria!
+
+Divirta-se!
+
+Mod que foi minha inspiração e base para criar este mod: https://steamcommunity.com/sharedfiles/filedetails/?id=2829442749&searchtext=signature
+
+================================================================================
+
+ENGLISH VERSION
+
+Progression is a mod inspired by SignatureEquipment, which adds an equipment progression system to Terraria. Want to play with any weapon? With this mod it's possible!
+
+Features:
+- Level system for weapons and armors.
+- Attribute improvements as equipment level increases.
+- Experience system for equipment.
+- Different progression types.
+- Compatibility with popular Terraria mods (In progress).
+- Enemies with dynamic leveling based on world level (In progress).
+- Killstreak system to increase experience gained (In progress).
+- Event system affecting experience gain (In progress).
+- More features to be added in the future!
+
+Planned Version Roadmap:
+
+v0.1.x (Current Version):
+- Initial AI-assisted version to demonstrate the mod concept. Expect to find quite a few bugs.
+
+v0.2.x:
+- All configurations working as intended.
+- Removed redundant configs created by AI.
+- English and Portuguese localization.
+
+v0.3.x:
+- Restructured attribute scaling (damage, mana cost, etc.).
+- New default configuration for a satisfying experience.
+
+v0.4.x:
+- Compatibility with Terraria Overhaul mechanics.
+- New class-based progression mode (future compatibility with class mods).
+- Full Multiplayer compatibility (may work now, but nothing has been tested).
+
+v0.5.x:
+- Compatibility with Orchid Mod classes.
+- Compatibility with Demolisher Mod.
+
+v0.6.x:
+- Event system upgrade.
+- UI polish.
+
+v0.7.x:
+- Scaling for damage-dealing debuffs (e.g., Poison, Burning, etc.).
+- Compatibility with The Stars Above Mod.
+
+v0.8.x:
+- New weapon buff options.
+- Compatibility with Thorium Mod.
+
+v0.9.x:
+- Revamped armor progression system.
+- New buff system for armors.
+- UI polish.
+
+v1.0.x:
+- First stable version of the mod.
+- Addition of Juice Effects, particles and sounds to improve experience.
+- Performance optimizations.
+- Other improvements and bug fixes.
+- Compatibility with Starlight River and Calamity.
+- Creation of 80x80 and 30x30 icons for mod cover.
+
+
+This is my first mod, so please leave feedback so the mod can improve, and I can learn more about Terraria modding!
+
+Have fun!
+
+Mod that was my inspiration and basis for creating this mod: https://steamcommunity.com/sharedfiles/filedetails/?id=2829442749&searchtext=signature
